@@ -336,6 +336,9 @@ def home_view(request):
 
 # ==================== VUES LIVRES ====================
 
+
+
+@login_required
 def livre_list_view(request):
     """Liste des livres avec recherche"""
     form = RechercherLivreForm(request.GET)
