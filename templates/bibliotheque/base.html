@@ -1,7 +1,7 @@
 <!-- templates/bibliotheque/base.html -->
 <!DOCTYPE html>
-{% load static %}
 <html lang="fr">
+{% load static %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,57 +11,94 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% comment %} <!-- Sidebar -->
+    <!-- Sidebar -->
     <nav class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <a href="{% url 'home' %}" class="sidebar-brand">
                 <i class="bi bi-book-fill"></i>
-                <span>Bibliothèque</span>
+                <span>BiblioSmart</span>
             </a>
         </div>
         
         <ul class="sidebar-menu">
+            <!-- Menu Principal -->
             <li>
                 <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                     <i class="bi bi-house-door"></i>
                     <span>Accueil</span>
                 </a>
             </li>
-            
+            <li>
+                <a href="{% url 'auteur_list' %}" class="{% if 'auteur' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>Auteurs</span>
+                </a>
+            </li>
             <li>
                 <a href="{% url 'livre_list' %}" class="{% if 'livre' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-book"></i>
                     <span>Catalogue</span>
                 </a>
             </li>
+            <li>
+                <a href="{% url 'etagere_list' %}" class="{% if 'etagere' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bookshelf"></i>
+                    <span>Étagères</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'compartiment_list' %}" class="{% if 'compartiment' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-th-large"></i>
+                    <span>Compartiments</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'emplacement_list' %}" class="{% if 'emplacement' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Emplacements</span>
+                </a>
+            </li>
             
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
+                    <!-- Section Administration -->
                     <div class="sidebar-divider"></div>
                     <div class="sidebar-heading">Administration</div>
                     
                     <li>
-                        <a href="{% url 'etudiant_list' %}" class="{% if 'etudiant' in request.resolver_match.url_name %}active{% endif %}">
+                        <a href="{% url 'abonnes' %}" class="{% if 'etudiant' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="bi bi-people"></i>
-                            <span>Étudiants</span>
+                            <span>Abonné.e.s</span>
                         </a>
                     </li>
-                    
+                    <li>
+                        <a href="{% url 'abonnement_list' %}" class="{% if 'abonnement' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-card-checklist"></i>
+                            <span>Abonnements</span>
+                        </a>
+                    </li>
                     <li>
                         <a href="{% url 'emprunt_list' %}" class="{% if 'emprunt' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="bi bi-arrow-left-right"></i>
                             <span>Emprunts</span>
                         </a>
                     </li>
-                    
                     <li>
-                        <a href="/admin/" target="_blank">
+                        <a href="{% url 'universite_list' %}" class="{% if 'universite' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-mortarboard"></i>
+                            <span>Universités</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'parametrage_dashboard' %}" class="{% if 'parametrage' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="bi bi-gear"></i>
                             <span>Paramètres</span>
                         </a>
@@ -69,28 +106,29 @@
                 {% endif %}
                 
                 {% if user.etudiant %}
+                    <!-- Section Espace Étudiant -->
                     <div class="sidebar-divider"></div>
                     <div class="sidebar-heading">Mon espace</div>
                     
                     <li>
                         <a href="{% url 'notification_list' %}" class="{% if 'notification' in request.resolver_match.url_name %}active{% endif %}">
                             <i class="bi bi-bell"></i>
-                            <span>Notifications</span> {% endcomment %}
-                            {% comment %} {% if user.etudiant.notifications.filter(lu=False).count > 0 %}
+                            <span>Notifications</span>
+                            {% comment %}
+                            {% if user.etudiant.notifications.filter(lu=False).count > 0 %}
                                 <span class="notification-badge">
                                     {{ user.etudiant.notifications.filter(lu=False).count }}
                                 </span>
-                            {% endif %} {% endcomment %}
-                        {% comment %} </a>
+                            {% endif %}
+                            {% endcomment %}
+                        </a>
                     </li>
-                    
                     <li>
                         <a href="#">
                             <i class="bi bi-bookmark"></i>
                             <span>Mes réservations</span>
                         </a>
                     </li>
-                    
                     <li>
                         <a href="#">
                             <i class="bi bi-clock-history"></i>
@@ -99,6 +137,7 @@
                     </li>
                 {% endif %}
                 
+                <!-- Section Compte -->
                 <div class="sidebar-divider"></div>
                 
                 <li>
@@ -107,7 +146,6 @@
                         <span>Changer mot de passe</span>
                     </a>
                 </li>
-                
                 <li>
                     <a href="{% url 'logout' %}">
                         <i class="bi bi-box-arrow-right"></i>
@@ -115,6 +153,7 @@
                     </a>
                 </li>
             {% else %}
+                <!-- Section Connexion -->
                 <div class="sidebar-divider"></div>
                 
                 <li>
@@ -123,7 +162,6 @@
                         <span>Connexion</span>
                     </a>
                 </li>
-                
                 <li>
                     <a href="{% url 'register' %}">
                         <i class="bi bi-person-plus"></i>
@@ -133,22 +171,23 @@
             {% endif %}
         </ul>
         
+        <!-- User Info -->
         {% if user.is_authenticated %}
         <div class="sidebar-user">
             <div class="sidebar-user-info">
                 <div class="sidebar-user-avatar">
-                    <i class="bi bi-person"></i>
+                    <i class="bi bi-person-circle"></i>
                 </div>
                 <div>
-                    <div style="font-size: 0.875rem; font-weight: 600;">{{ user.username }}</div>
-                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+                    <div class="sidebar-user-name">{{ user.username }}</div>
+                    <div class="sidebar-user-role">
                         {% if user.is_staff %}Administrateur{% else %}Étudiant{% endif %}
                     </div>
                 </div>
             </div>
         </div>
         {% endif %}
-    </nav> {% endcomment %}
+    </nav>
     
     <!-- Overlay pour mobile -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -160,44 +199,57 @@
             <button class="sidebar-toggle" onclick="toggleSidebar()">
                 <i class="bi bi-list"></i>
             </button>
-            <h5 class="mb-0">{% block page_title %}{% endblock %}</h5>
-            <div></div>
+            <h5 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
+            <div class="top-navbar-date">
+                <i class="bi bi-calendar3"></i> 
+                <span id="currentDate"></span>
+            </div>
         </div>
         
-        <!-- Messages -->
-        {% if messages %}
-            <div class="container-fluid mt-3 px-4">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Messages Flash -->
+            {% if messages %}
+                <div class="container-fluid mb-3">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'danger' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
             {% block content %}{% endblock %}
         </main>
 
         <!-- Footer -->
         <footer class="footer">
-        <div class="footer-content">
-            
-            <div class="footer-divider"></div>
-            <p class="mb-0">
-                &copy; 2025 Bibliothèque Universitaire. Tous droits réservés.
-            </p>
-            <p class="mb-0">
-                <small>Système de gestion de bibliothèque</small>
-            </p>
-        </div>
-    </footer>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-0">&copy; 2025 BiblioSmart - Bibliothèque Universitaire</p>
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <p class="mb-0">
+                            <small>Système de gestion de bibliothèque</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
     
     <script>
         // Toggle sidebar pour mobile
@@ -217,6 +269,25 @@
                 }
             });
         });
+        
+        // Afficher la date actuelle
+        function updateDate() {
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('fr-FR', options);
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+            }
+        }
+        
+        // Mettre à jour la date au chargement
+        document.addEventListener('DOMContentLoaded', updateDate);
     </script>
     
     {% block extra_js %}{% endblock %}
