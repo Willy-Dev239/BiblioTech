@@ -1,0 +1,27 @@
+# Django
+Django==5.2.7
+
+# Base de données MySQL
+mysqlclient>=2.2.0
+
+# API REST
+djangorestframework>=3.14.0
+
+# CORS Headers
+django-cors-headers>=4.3.0
+
+# Gestion des images et fichiers
+Pillow>=10.0.0
+
+# Utilitaires pour les variables d'environnement (recommandé pour sécuriser SECRET_KEY)
+python-decouple>=3.8
+
+# Développement
+django-debug-toolbar>=4.2.0
+
+# Production
+gunicorn>=21.2.0
+whitenoise>=6.5.0
+
+# Gestion du temps
+pytz>=2023.3
