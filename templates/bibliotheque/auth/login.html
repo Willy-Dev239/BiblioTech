@@ -1,0 +1,227 @@
+<!-- templates/bibliotheque/auth/login.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Connexion | BiblioTech{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card login-card">
+                    <div class="login-header">
+                        <h2 class="mb-0">BiblioTech</h2>
+                        <i class="bi bi-book-fill"></i>
+                        <p class="mb-0 mt-2"></p>
+                    </div>
+                    
+                    <div class="login-body">
+                        <!-- Messages d'erreur globaux -->
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <i class="bi bi-exclamation-triangle-fill"></i>
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endif %}
+                        
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Champ nom d'utilisateur -->
+                            <div class="mb-3">
+                                <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                                    
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person-fill"></i>
+                                    </span>
+                                    {{ form.username }}
+                                </div>
+                                {% if form.username.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {% for error in form.username.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Champ mot de passe -->
+                            <div class="mb-3">
+                                <label for="{{ form.password.id_for_label }}" class="form-label fw-bold">
+                                    
+                                </label>
+                                <div class="input-group position-relative">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                    {{ form.password }}
+                                    <span class="password-toggle" onclick="togglePassword()">
+                                        <i class="bi bi-eye" id="toggleIcon"></i>
+                                    </span>
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {% for error in form.password.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <!-- Se souvenir de moi -->
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    {{ form.remember_me }}
+                                    <label class="form-check-label" for="{{ form.remember_me.id_for_label }}">
+                                        Se souvenir de moi pendant 2 semaines
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Bouton de connexion -->
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-login">
+                                    <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Lien d'inscription -->
+                        <div class="register-link">
+                            <p class="text-muted mb-2">
+                                <i class="bi bi-info-circle"></i> Vous n'avez pas encore de compte ?
+                            </p>
+                            <a href="{% url 'register' %}" class="btn btn-outline-primary">
+                                <i class="bi bi-person-plus"></i> Créer un compte
+                            </a>
+                        </div>
+                        
+                        <!-- Informations supplémentaires -->
+                        <div class="text-center mt-3">
+                            <small class="text-muted">
+                                <i class="bi bi-shield-check"></i> Connexion sécurisée
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Aide -->
+                <div class="text-center mt-3">
+                    <small class="text-muted">
+                        <i class="bi bi-question-circle"></i> 
+                        Besoin d'aide ? Contactez l'administrateur
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fonction pour afficher/masquer le mot de passe
+    function togglePassword() {
+        const passwordField = document.getElementById('{{ form.password.id_for_label }}');
+        const toggleIcon = document.getElementById('toggleIcon');
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    }
+    
+    // Ajouter une animation au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.login-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+    
+    // Validation côté client
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const username = document.getElementById('{{ form.username.id_for_label }}');
+        const password = document.getElementById('{{ form.password.id_for_label }}');
+        
+        let isValid = true;
+        
+        // Validation du nom d'utilisateur
+        if (!username.value.trim()) {
+            showError(username, 'Le nom d\'utilisateur est requis');
+            isValid = false;
+        } else {
+            removeError(username);
+        }
+        
+        // Validation du mot de passe
+        if (!password.value) {
+            showError(password, 'Le mot de passe est requis');
+            isValid = false;
+        } else {
+            removeError(password);
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+        }
+    });
+    
+    function showError(field, message) {
+        const parent = field.closest('.mb-3');
+        const existing = parent.querySelector('.validation-error');
+        
+        if (existing) {
+            existing.remove();
+        }
+        
+        const error = document.createElement('div');
+        error.className = 'validation-error text-danger small mt-1';
+        error.innerHTML = '<i class="bi bi-exclamation-circle"></i> ' + message;
+        parent.appendChild(error);
+        
+        field.classList.add('is-invalid');
+    }
+    
+    function removeError(field) {
+        const parent = field.closest('.mb-3');
+        const error = parent.querySelector('.validation-error');
+        
+        if (error) {
+            error.remove();
+        }
+        
+        field.classList.remove('is-invalid');
+    }
+    
+    // Supprimer les erreurs quand l'utilisateur tape
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+            removeError(this);
+        });
+    });
+</script>
+{% endblock %}

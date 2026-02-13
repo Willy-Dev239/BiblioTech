@@ -1,0 +1,85 @@
+<!-- parametrage/jour_ferie_list.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Jours Fériés{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'parametrage_dashboard' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-calendar-times text-warning"></i> Jours Fériés</h2>
+                <a href="{% url 'jour_ferie_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau Jour Férié
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-warning">
+            <h5 class="mb-0">Liste des jours fériés <span class="badge bg-dark">{{ jours.count }}</span></h5>
+        </div>
+        <div class="card-body">
+            {% if jours %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Date</th>
+                                <th>Récurrent</th>
+                                <th>Type</th>
+                                <th>Horaires</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for jour in jours %}
+                            <tr>
+                                <td><strong>{{ jour.nom }}</strong></td>
+                                <td>{{ jour.date|date:"d/m/Y" }}</td>
+                                <td>
+                                    {% if jour.recurrent %}
+                                        <span class="badge bg-info">Annuel</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Unique</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if jour.fermeture_totale %}
+                                        <span class="badge bg-danger">Fermé</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Horaires réduits</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if not jour.fermeture_totale %}
+                                        {{ jour.horaire_ouverture|time:"H:i" }} - {{ jour.horaire_fermeture|time:"H:i" }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'jour_ferie_update' jour.pk %}" 
+                                           class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                        <a href="{% url 'jour_ferie_delete' jour.pk %}" 
+                                           class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Aucun jour férié enregistré.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

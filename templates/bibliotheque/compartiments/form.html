@@ -1,0 +1,104 @@
+<!-- compartiments/form.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} un compartiment{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% if compartiment %}{% url 'compartiment_detail' compartiment.pk %}{% else %}{% url 'compartiment_list' %}{% endif %}" 
+               class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-th"></i> {{ action }} un compartiment
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.etagere.id_for_label }}" class="form-label">
+                                <i class="fas fa-warehouse"></i> Étagère *
+                            </label>
+                            {{ form.etagere }}
+                            {% if form.etagere.errors %}
+                                <div class="text-danger small">{{ form.etagere.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.numero.id_for_label }}" class="form-label">
+                                    <i class="fas fa-hashtag"></i> Numéro *
+                                </label>
+                                {{ form.numero }}
+                                {% if form.numero.errors %}
+                                    <div class="text-danger small">{{ form.numero.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.niveau.id_for_label }}" class="form-label">
+                                    <i class="fas fa-layer-group"></i> Niveau *
+                                </label>
+                                {{ form.niveau }}
+                                {% if form.niveau.errors %}
+                                    <div class="text-danger small">{{ form.niveau.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Ex: Haut, Milieu, Bas</small>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.categorie.id_for_label }}" class="form-label">
+                                    <i class="fas fa-tag"></i> Catégorie
+                                </label>
+                                {{ form.categorie }}
+                                {% if form.categorie.errors %}
+                                    <div class="text-danger small">{{ form.categorie.errors }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacite.id_for_label }}" class="form-label">
+                                    <i class="fas fa-box"></i> Capacité *
+                                </label>
+                                {{ form.capacite }}
+                                {% if form.capacite.errors %}
+                                    <div class="text-danger small">{{ form.capacite.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if compartiment %}{% url 'compartiment_detail' compartiment.pk %}{% else %}{% url 'compartiment_list' %}{% endif %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

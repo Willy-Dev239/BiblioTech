@@ -1,0 +1,60 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Liste des Universités{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h2>Universités</h2>
+    <a href="{% url 'universite_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nouvelle université
+    </a>
+</div>
+
+<div class="row">
+    {% for universite in universites %}
+    <div class="col-md-4 mb-3">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ universite.nom }}</h5>
+                <p class="card-text text-muted">
+                    <i class="bi bi-geo-alt"></i> {{ universite.ville }}, {{ universite.pays }}
+                </p>
+                
+                {% if universite.actif %}
+                <span class="badge bg-success mb-2">Actif</span>
+                {% else %}
+                <span class="badge bg-secondary mb-2">Inactif</span>
+                {% endif %}
+                
+                <hr>
+                
+                <p class="mb-1"><strong>Email:</strong> {{ universite.email }}</p>
+                <p class="mb-1"><strong>Téléphone:</strong> {{ universite.telephone }}</p>
+                {% if universite.site_web %}
+                <p class="mb-1">
+                    <strong>Site web:</strong> 
+                    <a href="{{ universite.site_web }}" target="_blank">Visiter</a>
+                </p>
+                {% endif %}
+                <p class="mb-0"><strong>Partenariat:</strong> {{ universite.date_partenariat|date:"d/m/Y" }}</p>
+            </div>
+            <div class="card-footer bg-transparent">
+                <div class="d-flex gap-2">
+                    <a href="{% url 'universite_detail' universite.pk %}" class="btn btn-sm btn-info flex-fill">Détails</a>
+                    <a href="{% url 'universite_update' universite.pk %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    <a href="{% url 'universite_delete' universite.pk %}" class="btn btn-sm btn-danger">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">Aucune université enregistrée</div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

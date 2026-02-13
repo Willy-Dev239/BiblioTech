@@ -1,0 +1,93 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} Abonne.e | BiblioTech{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <h2>{{ action }} un abonnement</h2>
+    
+    <div class="card mt-3">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Abonne.e *</label>
+                        {{ form.etudiant }}
+                        {% if form.etudiant.errors %}
+                        <div class="text-danger">{{ form.etudiant.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Type d'abonnement *</label>
+                        {{ form.type_abonnement }}
+                        {% if form.type_abonnement.errors %}
+                        <div class="text-danger">{{ form.type_abonnement.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Date de début *</label>
+                        {{ form.date_debut }}
+                        {% if form.date_debut.errors %}
+                        <div class="text-danger">{{ form.date_debut.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Date de fin *</label>
+                        {{ form.date_fin }}
+                        {% if form.date_fin.errors %}
+                        <div class="text-danger">{{ form.date_fin.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Montant (FBU) *</label>
+                        {{ form.montant }}
+                        {% if form.montant.errors %}
+                        <div class="text-danger">{{ form.montant.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre d'emprunts maximum</label>
+                        {{ form.nombre_emprunts_max }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Durée d'emprunt (jours)</label>
+                        {{ form.duree_emprunt_jours }}
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ form.actif }}
+                    <label class="form-check-label">Actif</label>
+                </div>
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> {{ action }}
+                    </button>
+                    <a href="{% url 'abonnement_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

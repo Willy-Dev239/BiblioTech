@@ -1,0 +1,49 @@
+<!-- compartiments/delete.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Supprimer le compartiment{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Êtes-vous sûr de vouloir supprimer ce compartiment ?</p>
+                    <div class="card bg-light mb-3">
+                        <div class="card-body">
+                            <strong>Étagère:</strong> {{ compartiment.etagere.code }}<br>
+                            <strong>Numéro:</strong> {{ compartiment.numero }}<br>
+                            <strong>Niveau:</strong> {{ compartiment.niveau }}<br>
+                            <strong>Emplacements:</strong> {{ compartiment.emplacements.count }}
+                        </div>
+                    </div>
+                    
+                    {% if compartiment.emplacements.exists %}
+                        <div class="alert alert-danger">
+                            Ce compartiment contient {{ compartiment.emplacements.count }} emplacement(s) qui seront également supprimés.
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'compartiment_detail' compartiment.pk %}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                Supprimer définitivement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Compartiment {{ compartiment }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'etagere_detail' compartiment.etagere.pk %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour à l'étagère
+            </a>
+            <div class="d-flex justify-content-between align-items-center">
+                <h2>
+                    <i class="fas fa-th text-primary"></i> 
+                    Compartiment {{ compartiment.numero }} - {{ compartiment.niveau }}
+                </h2>
+                <div>
+                    <a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-plus"></i> Ajouter un emplacement
+                    </a>
+                    <a href="{% url 'compartiment_update' compartiment.pk %}" 
+                       class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a href="{% url 'compartiment_delete' compartiment.pk %}" 
+                       class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Informations du compartiment -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong><i class="fas fa-warehouse text-primary"></i> Étagère:</strong>
+                        <p class="mb-0">
+                            <a href="{% url 'etagere_detail' compartiment.etagere.pk %}">
+                                {{ compartiment.etagere.code }}
+                            </a>
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-door-open text-primary"></i> Salle:</strong>
+                        <p class="mb-0"><span class="badge bg-info">{{ compartiment.etagere.salle }}</span></p>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-hashtag text-primary"></i> Numéro:</strong>
+                        <p class="mb-0">{{ compartiment.numero }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-layer-group text-primary"></i> Niveau:</strong>
+                        <p class="mb-0">{{ compartiment.niveau }}</p>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-tag text-primary"></i> Catégorie:</strong>
+                        <p class="mb-0">
+                            {% if compartiment.categorie %}
+                                <span class="badge bg-secondary">{{ compartiment.categorie }}</span>
+                            {% else %}
+                                <span class="text-muted">Non définie</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="mb-3">
+                        <strong><i class="fas fa-box text-primary"></i> Capacité:</strong>
+                        <p class="mb-0">{{ compartiment.capacite }} emplacements</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques -->
+            {% comment %} <div class="card shadow-sm mt-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Emplacements totaux:</span>
+                            <strong>{{ emplacements.count }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Emplacements occupés:</span>
+                            <strong class="text-warning">
+                                {{ compartiment|length|add:"-"|add:compartiment|length }}
+                                {% with occupes=0 %}
+                                    {% for emp in emplacements %}
+                                        {% if not emp.disponible %}
+                                            {% with occupes=occupes|add:1 %}{% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <span>Emplacements disponibles:</span>
+                            <strong class="text-success">
+                                {% with dispo=0 %}
+                                    {% for emp in emplacements %}
+                                        {% if emp.disponible %}
+                                            {% with dispo=dispo|add:1 %}{% endwith %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endwith %}
+                            </strong>
+                        </div>
+                        
+                        <strong>Taux d'occupation:</strong>
+                        <div class="progress mt-2" style="height: 25px;">
+                            <div class="progress-bar 
+                                {% if taux_occupation < 50 %}bg-success
+                                {% elif taux_occupation < 80 %}bg-warning
+                                {% else %}bg-danger{% endif %}"
+                                 style="width: {{ taux_occupation }}%">
+                                {{ taux_occupation }}%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> {% endcomment %}
+
+        <!-- Liste des emplacements -->
+        {% comment %} <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt"></i> Emplacements 
+                        <span class="badge bg-light text-dark">{{ emplacements.count }}</span>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if emplacements %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Code</th>
+                                        <th>Livre</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for emplacement in emplacements %}
+                                    <tr>
+                                        <td><strong>{{ emplacement.position }}</strong></td>
+                                        <td>
+                                            <code>{{ emplacement.code_emplacement }}</code>
+                                        </td>
+                                        <td>
+                                            {% if emplacement.livre %}
+                                                <a href="{% url 'livre_detail' emplacement.livre.pk %}">
+                                                    {{ emplacement.livre.titre|truncatewords:5 }}
+                                                </a>
+                                                <br>
+                                                <small class="text-muted">
+                                                    par {{ emplacement.livre.auteur.nom }}
+                                                </small>
+                                            {% else %}
+                                                <span class="text-muted">Vide</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if emplacement.disponible %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Disponible
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-book"></i> Occupé
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="{% url 'emplacement_detail' emplacement.pk %}" 
+                                                   class="btn btn-info" title="Détails">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{% url 'emplacement_update' emplacement.pk %}" 
+                                                   class="btn btn-warning" title="Modifier">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'emplacement_delete' emplacement.pk %}" 
+                                                   class="btn btn-danger" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> 
+                            Aucun emplacement dans ce compartiment.
+                            <a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}" 
+                               class="alert-link">Créer le premier emplacement</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div> {% endcomment %}
+{% endblock %}

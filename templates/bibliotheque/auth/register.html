@@ -1,0 +1,594 @@
+<!-- templates/bibliotheque/auth/register.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Inscription | BiblioTech{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+    
+    .register-card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        max-width: 900px;
+        width: 100%;
+    }
+    
+    .register-sidebar {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: 3rem 2rem;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .register-sidebar h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .register-sidebar .feature {
+        display: flex;
+        align-items: start;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .register-sidebar .feature i {
+        font-size: 1.5rem;
+        margin-top: 0.25rem;
+    }
+    
+    .register-body {
+        padding: 3rem 2.5rem;
+    }
+    
+    .form-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .form-header h3 {
+        color: #2c3e50;
+        font-weight: 700;
+    }
+    
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .input-group-text {
+        background-color: #f8f9fa;
+        border-right: none;
+    }
+    
+    .form-control {
+        border-left: none;
+    }
+    
+    .form-control:focus + .input-group-text {
+        border-color: #667eea;
+    }
+    
+    .btn-register {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.75rem;
+        font-weight: 600;
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+    
+    .password-strength {
+        height: 5px;
+        border-radius: 3px;
+        margin-top: 0.5rem;
+        background: #e0e0e0;
+        overflow: hidden;
+    }
+    
+    .password-strength-bar {
+        height: 100%;
+        transition: all 0.3s ease;
+        width: 0%;
+    }
+    
+    .password-strength-bar.weak {
+        background: #f44336;
+        width: 33%;
+    }
+    
+    .password-strength-bar.medium {
+        background: #ff9800;
+        width: 66%;
+    }
+    
+    .password-strength-bar.strong {
+        background: #4caf50;
+        width: 100%;
+    }
+    
+    .password-requirements {
+        background: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        font-size: 0.875rem;
+    }
+    
+    .password-requirements li {
+        margin-bottom: 0.25rem;
+        color: #7f8c8d;
+    }
+    
+    .password-requirements li.valid {
+        color: #27ae60;
+    }
+    
+    .password-requirements li i {
+        margin-right: 0.5rem;
+    }
+    
+    .password-toggle {
+        cursor: pointer;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #6c757d;
+        z-index: 10;
+    }
+    
+    .password-toggle:hover {
+        color: #667eea;
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+    
+    .error-message {
+        background: #fee;
+        border-left: 3px solid #e74c3c;
+        padding: 0.75rem;
+        margin-top: 0.5rem;
+        border-radius: 4px;
+        font-size: 0.875rem;
+        color: #c0392b;
+    }
+    
+    .success-animation {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+    }
+    
+    .success-animation i {
+        font-size: 4rem;
+        color: #27ae60;
+        animation: scaleIn 0.5s ease;
+    }
+    
+    @keyframes scaleIn {
+        from {
+            transform: scale(0);
+        }
+        to {
+            transform: scale(1);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .register-sidebar {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="container">
+        <div class="register-card">
+            <div class="row g-0">
+                <!-- Sidebar gauche -->
+                <div class="col-md-5 register-sidebar">
+                    <div>
+                        <div class="text-center mb-4">
+                            <i class="bi bi-book-fill" style="font-size: 4rem;"></i>
+                        </div>
+                        
+                        <h2>Rejoignez notre bibliothèque</h2>
+                        <p class="mb-4">Créez votre compte et accédez à des milliers de livres</p>
+                        
+                        <div class="feature">
+                            <i class="bi bi-book"></i>
+                            <div>
+                                <strong>Catalogue complet</strong>
+                                <p class="mb-0 small">Accédez à notre vaste collection de livres</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="bi bi-bookmark"></i>
+                            <div>
+                                <strong>Réservations en ligne</strong>
+                                <p class="mb-0 small">Réservez vos livres préférés facilement</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="bi bi-bell"></i>
+                            <div>
+                                <strong>Notifications</strong>
+                                <p class="mb-0 small">Recevez des rappels pour vos emprunts</p>
+                            </div>
+                        </div>
+                        
+                        <div class="feature">
+                            <i class="bi bi-clock-history"></i>
+                            <div>
+                                <strong>Historique</strong>
+                                <p class="mb-0 small">Consultez l'historique de vos lectures</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Formulaire d'inscription -->
+                <div class="col-md-7 register-body">
+                    <div class="form-header">
+                        <h3>Créer un compte</h3>
+                        <p class="text-muted">Remplissez le formulaire pour vous inscrire</p>
+                    </div>
+                    
+                    <!-- Messages d'erreur globaux -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+                    
+                    <form method="post" id="registerForm" novalidate>
+                        {% csrf_token %}
+                        
+                        <!-- Nom d'utilisateur -->
+                        <div class="mb-3">
+                            <label for="{{ form.username.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-person"></i> Nom d'utilisateur <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-fill"></i>
+                                </span>
+                                {{ form.username }}
+                            </div>
+                            <small class="text-muted">
+                                Lettres, chiffres et @/./+/-/_ uniquement
+                            </small>
+                            {% if form.username.errors %}
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {% for error in form.username.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-envelope"></i> Adresse email <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-envelope-fill"></i>
+                                </span>
+                                {{ form.email }}
+                            </div>
+                            {% if form.email.errors %}
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Prénom et Nom -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person-badge"></i> Prénom <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    {{ form.first_name }}
+                                </div>
+                                {% if form.first_name.errors %}
+                                    <div class="error-message">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label fw-bold">
+                                    <i class="bi bi-person-badge"></i> Nom <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="bi bi-person"></i>
+                                    </span>
+                                    {{ form.last_name }}
+                                </div>
+                                {% if form.last_name.errors %}
+                                    <div class="error-message">
+                                        <i class="bi bi-exclamation-circle"></i>
+                                        {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Mot de passe -->
+                        <div class="mb-3">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-lock"></i> Mot de passe <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group position-relative">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                {{ form.password1 }}
+                                <span class="password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}', 'toggleIcon1')">
+                                    <i class="bi bi-eye" id="toggleIcon1"></i>
+                                </span>
+                            </div>
+                            
+                            <!-- Indicateur de force du mot de passe -->
+                            <div class="password-strength">
+                                <div class="password-strength-bar" id="strengthBar"></div>
+                            </div>
+                            <small class="text-muted" id="strengthText"></small>
+                            
+                            <!-- Exigences du mot de passe -->
+                            <div class="password-requirements">
+                                <strong>Le mot de passe doit contenir :</strong>
+                                <ul class="mb-0 mt-2" id="passwordChecklist">
+                                    <li id="length"><i class="bi bi-circle"></i> Au moins 8 caractères</li>
+                                    <li id="uppercase"><i class="bi bi-circle"></i> Une lettre majuscule</li>
+                                    <li id="lowercase"><i class="bi bi-circle"></i> Une lettre minuscule</li>
+                                    <li id="number"><i class="bi bi-circle"></i> Un chiffre</li>
+                                </ul>
+                            </div>
+                            
+                            {% if form.password1.errors %}
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Confirmation mot de passe -->
+                        <div class="mb-3">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label fw-bold">
+                                <i class="bi bi-lock-fill"></i> Confirmer le mot de passe <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group position-relative">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock-fill"></i>
+                                </span>
+                                {{ form.password2 }}
+                                <span class="password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}', 'toggleIcon2')">
+                                    <i class="bi bi-eye" id="toggleIcon2"></i>
+                                </span>
+                            </div>
+                            {% if form.password2.errors %}
+                                <div class="error-message">
+                                    <i class="bi bi-exclamation-circle"></i>
+                                    {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Bouton d'inscription -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-register">
+                                <i class="bi bi-person-plus"></i> Créer mon compte
+                            </button>
+                        </div>
+                        
+                        <!-- Lien vers connexion -->
+                        <div class="login-link">
+                            <p class="text-muted mb-0">
+                                <i class="bi bi-info-circle"></i> Vous avez déjà un compte ?
+                            </p>
+                            <a href="{% url 'login' %}" class="btn btn-outline-primary mt-2">
+                                <i class="bi bi-box-arrow-in-right"></i> Se connecter
+                            </a>
+                        </div>
+                    </form>
+                    
+                    <!-- Animation de succès (cachée par défaut) -->
+                    <div class="success-animation" id="successAnimation">
+                        <i class="bi bi-check-circle-fill"></i>
+                        <h4 class="mt-3">Inscription réussie !</h4>
+                        <p class="text-muted">Redirection en cours...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Fonction pour afficher/masquer le mot de passe
+    function togglePassword(fieldId, iconId) {
+        const passwordField = document.getElementById(fieldId);
+        const toggleIcon = document.getElementById(iconId);
+        
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.classList.remove('bi-eye');
+            toggleIcon.classList.add('bi-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.classList.remove('bi-eye-slash');
+            toggleIcon.classList.add('bi-eye');
+        }
+    }
+    
+    // Vérification de la force du mot de passe
+    const password1 = document.getElementById('{{ form.password1.id_for_label }}');
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    const checklist = {
+        length: document.getElementById('length'),
+        uppercase: document.getElementById('uppercase'),
+        lowercase: document.getElementById('lowercase'),
+        number: document.getElementById('number')
+    };
+    
+    password1.addEventListener('input', function() {
+        const value = this.value;
+        let strength = 0;
+        
+        // Vérifier longueur
+        if (value.length >= 8) {
+            checklist.length.classList.add('valid');
+            checklist.length.querySelector('i').classList.replace('bi-circle', 'bi-check-circle-fill');
+            strength++;
+        } else {
+            checklist.length.classList.remove('valid');
+            checklist.length.querySelector('i').classList.replace('bi-check-circle-fill', 'bi-circle');
+        }
+        
+        // Vérifier majuscule
+        if (/[A-Z]/.test(value)) {
+            checklist.uppercase.classList.add('valid');
+            checklist.uppercase.querySelector('i').classList.replace('bi-circle', 'bi-check-circle-fill');
+            strength++;
+        } else {
+            checklist.uppercase.classList.remove('valid');
+            checklist.uppercase.querySelector('i').classList.replace('bi-check-circle-fill', 'bi-circle');
+        }
+        
+        // Vérifier minuscule
+        if (/[a-z]/.test(value)) {
+            checklist.lowercase.classList.add('valid');
+            checklist.lowercase.querySelector('i').classList.replace('bi-circle', 'bi-check-circle-fill');
+            strength++;
+        } else {
+            checklist.lowercase.classList.remove('valid');
+            checklist.lowercase.querySelector('i').classList.replace('bi-check-circle-fill', 'bi-circle');
+        }
+        
+        // Vérifier chiffre
+        if (/[0-9]/.test(value)) {
+            checklist.number.classList.add('valid');
+            checklist.number.querySelector('i').classList.replace('bi-circle', 'bi-check-circle-fill');
+            strength++;
+        } else {
+            checklist.number.classList.remove('valid');
+            checklist.number.querySelector('i').classList.replace('bi-check-circle-fill', 'bi-circle');
+        }
+        
+        // Mettre à jour la barre de force
+        strengthBar.className = 'password-strength-bar';
+        if (strength <= 2) {
+            strengthBar.classList.add('weak');
+            strengthText.textContent = 'Mot de passe faible';
+            strengthText.style.color = '#f44336';
+        } else if (strength === 3) {
+            strengthBar.classList.add('medium');
+            strengthText.textContent = 'Mot de passe moyen';
+            strengthText.style.color = '#ff9800';
+        } else if (strength === 4) {
+            strengthBar.classList.add('strong');
+            strengthText.textContent = 'Mot de passe fort';
+            strengthText.style.color = '#4caf50';
+        }
+    });
+    
+    // Validation du formulaire
+    const form = document.getElementById('registerForm');
+    
+    form.addEventListener('submit', function(e) {
+        let isValid = true;
+        const requiredFields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2'];
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.getElementById('id_' + fieldName);
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            }
+        });
+        
+        // Vérifier que les mots de passe correspondent
+        const pass1 = document.getElementById('{{ form.password1.id_for_label }}');
+        const pass2 = document.getElementById('{{ form.password2.id_for_label }}');
+        
+        if (pass1.value !== pass2.value) {
+            pass2.classList.add('is-invalid');
+            alert('Les mots de passe ne correspondent pas.');
+            isValid = false;
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            // Scroll vers le premier champ invalide
+            const firstInvalid = form.querySelector('.is-invalid');
+            if (firstInvalid) {
+                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+    });
+    
+    // Enlever l'indicateur d'erreur lors de la saisie
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', function() {
+            this.classList.remove('is-invalid');
+        });
+    });
+    
+    // Animation du formulaire au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const card = document.querySelector('.register-card');
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        
+        setTimeout(function() {
+            card.style.transition = 'all 0.5s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100);
+    });
+</script>
+{% endblock %}

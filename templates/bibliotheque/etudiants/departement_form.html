@@ -1,0 +1,124 @@
+{% extends 'bibliotheque/base.html' %}
+{% block title %}{{ titre }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <!-- En-tête -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="bi bi-diagram-3"></i> {{ titre }}</h2>
+                <a href="{% url 'universite_detail' universite.pk %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+            </div>
+
+            <!-- Fil d'Ariane -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'universite_list' %}">Universités</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'universite_detail' universite.pk %}">{{ universite.nom }}</a></li>
+                    <li class="breadcrumb-item">{{ faculte.nom }}</li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ titre }}</li>
+                </ol>
+            </nav>
+
+            <!-- Formulaire -->
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <strong>{{ titre }}</strong>
+                    <small class="d-block mt-1">Faculté: {{ faculte.nom }}</small>
+<div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}                      
+                        <div class="mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">
+                                {{ form.nom.label }} <span class="text-danger">*</span>
+                            </label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                                <div class="text-danger">{{ form.nom.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.sigle.id_for_label }}" class="form-label">
+                                {{ form.sigle.label }}
+                            </label>
+                            {{ form.sigle }}
+                            {% if form.sigle.errors %}
+                                <div class="text-danger">{{ form.sigle.errors.0 }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">Le sigle sera automatiquement converti en majuscules</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                {{ form.description.label }}
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger">{{ form.description.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.chef_departement.id_for_label }}" class="form-label">
+                                    {{ form.chef_departement.label }}
+                                </label>
+                                {{ form.chef_departement }}
+                                {% if form.chef_departement.errors %}
+                                    <div class="text-danger">{{ form.chef_departement.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">
+                                    {{ form.email.label }}
+                                </label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.telephone.id_for_label }}" class="form-label">
+                                {{ form.telephone.label }}
+                            </label>
+                            {{ form.telephone }}
+                            {% if form.telephone.errors %}
+                                <div class="text-danger">{{ form.telephone.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form.actif }}
+                            <label class="form-check-label" for="{{ form.actif.id_for_label }}">
+                                {{ form.actif.label }}
+                            </label>
+                            {% if form.actif.errors %}
+                                <div class="text-danger">{{ form.actif.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save"></i> {{ action }}
+                            </button>
+                            <a href="{% url 'universite_detail' universite.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,107 @@
+<!-- parametrage/categorie_form.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} une catégorie{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% url 'categorie_emprunteur_list' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0">{{ action }} une catégorie d'emprunteur</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nom de la catégorie *</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                                <div class="text-danger small">{{ form.nom.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            {{ form.description }}
+                        </div>
+
+                        <hr>
+                        <h5>Règles d'emprunt</h5>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Durée emprunt (jours) *</label>
+                                {{ form.duree_emprunt }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Emprunts max *</label>
+                                {{ form.nombre_emprunts_max }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Renouvellements *</label>
+                                {{ form.nombre_renouvellements }}
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5>Tarification</h5>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Cotisation annuelle (Fbu) *</label>
+                                {{ form.cotisation_annuelle }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Réduction amendes (%) *</label>
+                                {{ form.reduction_amende }}
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h5>Privilèges</h5>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.priorite_reservation }}
+                                <label class="form-check-label">Priorité sur les réservations</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.acces_ressources_numeriques }}
+                                <label class="form-check-label">Accès aux ressources numériques</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.actif }}
+                                <label class="form-check-label">Catégorie active</label>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'categorie_emprunteur_list' %}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

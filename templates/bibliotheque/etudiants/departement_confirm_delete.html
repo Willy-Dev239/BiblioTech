@@ -1,0 +1,50 @@
+<!-- ========== departement_confirm_delete.html ========== -->
+{% extends 'bibliotheque/base.html' %}
+{% block title %}Confirmer la suppression{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Confirmer la suppression</h5>
+                </div>
+                <div class="card-body">
+                    <p>Êtes-vous sûr de vouloir supprimer le département :</p>
+                    <p class="text-center">
+                        <strong class="fs-5">{{ departement.nom }}</strong>
+                        {% if departement.sigle %}
+                            <span class="text-muted">({{ departement.sigle }})</span>
+                        {% endif %}
+                    </p>
+                    <p class="text-center text-muted">
+                        Faculté: {{ faculte.nom }}
+                    </p>
+                    
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <strong>Attention !</strong> Cette action supprimera également :
+                        <ul class="mb-0 mt-2">
+                            <li>Toutes les classes de ce département</li>
+                            <li>Les liens avec les étudiants</li>
+                        </ul>
+                    </div>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex gap-2 justify-content-center">
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash"></i> Oui, supprimer
+                            </button>
+                            <a href="{% url 'universite_detail' universite.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x"></i> Annuler
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

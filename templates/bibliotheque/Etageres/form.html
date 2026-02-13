@@ -1,0 +1,117 @@
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} une étagère{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% if etagere %}{% url 'etagere_detail' etagere.pk %}{% else %}{% url 'etagere_list' %}{% endif %}" 
+               class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-warehouse"></i> {{ action }} une étagère
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.code.id_for_label }}" class="form-label">
+                                    <i class="fas fa-barcode"></i> Code de l'étagère *
+                                </label>
+                                {{ form.code }}
+                                {% if form.code.errors %}
+                                    <div class="text-danger small">{{ form.code.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Code unique pour identifier l'étagère (ex: A1, B2, C3)
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.salle.id_for_label }}" class="form-label">
+                                    <i class="fas fa-door-open"></i> Salle *
+                                </label>
+                                {{ form.salle }}
+                                {% if form.salle.errors %}
+                                    <div class="text-danger small">{{ form.salle.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Nom ou numéro de la salle
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label">
+                                <i class="fas fa-file-alt"></i> Description *
+                            </label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="text-danger small">{{ form.description.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Description de l'étagère et de son emplacement
+                            </small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.etage.id_for_label }}" class="form-label">
+                                    <i class="fas fa-layer-group"></i> Étage *
+                                </label>
+                                {{ form.etage }}
+                                {% if form.etage.errors %}
+                                    <div class="text-danger small">{{ form.etage.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Numéro de l'étage (0 pour rez-de-chaussée)
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.capacite_max.id_for_label }}" class="form-label">
+                                    <i class="fas fa-box"></i> Capacité maximale *
+                                </label>
+                                {{ form.capacite_max }}
+                                {% if form.capacite_max.errors %}
+                                    <div class="text-danger small">{{ form.capacite_max.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Nombre maximum d'unités que peut contenir l'étagère
+                                </small>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if etagere %}{% url 'etagere_detail' etagere.pk %}{% else %}{% url 'etagere_list' %}{% endif %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

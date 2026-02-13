@@ -1,0 +1,97 @@
+<!-- ========== LISTE MESSAGES SYSTÈME ========== -->
+<!-- parametrage/message_list.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Messages Système{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'parametrage_dashboard' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-comment-alt text-success"></i> Messages Système</h2>
+                <a href="{% url 'message_systeme_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau Message
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">Liste des messages <span class="badge bg-light text-dark">{{ messages_list.count }}</span></h5>
+        </div>
+        <div class="card-body">
+            {% if messages_list %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Titre</th>
+                                <th>Type</th>
+                                <th>Destinataires</th>
+                                <th>Période</th>
+                                <th>Prioritaire</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for msg in messages_list %}
+                            <tr>
+                                <td><strong>{{ msg.titre }}</strong></td>
+                                <td>
+                                    {% if msg.type_message == 'INFO' %}
+                                        <span class="badge bg-info">Info</span>
+                                    {% elif msg.type_message == 'WARNING' %}
+                                        <span class="badge bg-warning">Avertissement</span>
+                                    {% elif msg.type_message == 'ERROR' %}
+                                        <span class="badge bg-danger">Erreur</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Succès</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ msg.get_cible_display }}</td>
+                                <td>
+                                    <small>
+                                        {{ msg.date_debut|date:"d/m/Y" }}<br>
+                                        {{ msg.date_fin|date:"d/m/Y" }}
+                                    </small>
+                                </td>
+                                <td>
+                                    {% if msg.prioritaire %}
+                                        <span class="badge bg-danger">Oui</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Non</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if msg.actif %}
+                                        <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactif</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'message_systeme_update' msg.pk %}" 
+                                           class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                        <a href="{% url 'message_systeme_delete' msg.pk %}" 
+                                           class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Aucun message système.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

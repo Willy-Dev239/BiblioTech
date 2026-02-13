@@ -1,0 +1,85 @@
+<!-- ========== FORMULAIRE MESSAGE ========== -->
+<!-- parametrage/message_form.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} un message{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% url 'message_systeme_list' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">{{ action }} un message système</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Titre *</label>
+                            {{ form.titre }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Message *</label>
+                            {{ form.message }}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Type *</label>
+                                {{ form.type_message }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Destinataires *</label>
+                                {{ form.cible }}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date début *</label>
+                                {{ form.date_debut }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Date fin *</label>
+                                {{ form.date_fin }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.actif }}
+                                <label class="form-check-label">Message actif</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.prioritaire }}
+                                <label class="form-check-label">Message prioritaire (affiché en haut)</label>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'message_systeme_list' %}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,145 @@
+<!-- emplacements/detail.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Emplacement {{ emplacement.code_emplacement }}{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% url 'compartiment_detail' emplacement.compartiment.pk %}" 
+               class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour au compartiment
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">
+                            <i class="fas fa-map-marker-alt"></i> 
+                            Emplacement {{ emplacement.code_emplacement }}
+                        </h4>
+                        <div>
+                            <a href="{% url 'emplacement_update' emplacement.pk %}" 
+                               class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i> Modifier
+                            </a>
+                            <a href="{% url 'emplacement_delete' emplacement.pk %}" 
+                               class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Supprimer
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Localisation -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <h5 class="border-bottom pb-2">
+                                <i class="fas fa-location-arrow text-primary"></i> Localisation
+                            </h5>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Étagère:</strong>
+                            <p>
+                                <a href="{% url 'etagere_detail' emplacement.compartiment.etagere.pk %}">
+                                    {{ emplacement.compartiment.etagere.code }}
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Salle:</strong>
+                            <p>{{ emplacement.compartiment.etagere.salle }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Étage:</strong>
+                            <p>{{ emplacement.compartiment.etagere.etage }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Compartiment:</strong>
+                            <p>
+                                <a href="{% url 'compartiment_detail' emplacement.compartiment.pk %}">
+                                    N° {{ emplacement.compartiment.numero }} - {{ emplacement.compartiment.niveau }}
+                                </a>
+                            </p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Position:</strong>
+                            <p>{{ emplacement.position }}</p>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <strong>Code emplacement:</strong>
+                            <p><code class="fs-5">{{ emplacement.code_emplacement }}</code></p>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Statut et contenu -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <h5 class="border-bottom pb-2">
+                                <i class="fas fa-info-circle text-primary"></i> Statut et Contenu
+                            </h5>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Disponibilité:</strong>
+                            <p>
+                                {% if emplacement.disponible %}
+                                    <span class="badge bg-success fs-6">
+                                        <i class="fas fa-check-circle"></i> Disponible
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning fs-6">
+                                        <i class="fas fa-book"></i> Occupé
+                                    </span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Livre actuel -->
+                    {% if emplacement.livre %}
+                        <div class="card bg-light mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-book"></i> Livre présent
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h5>
+                                            <a href="{% url 'livre_detail' emplacement.livre.pk %}">
+                                                {{ emplacement.livre.titre }}
+                                            </a>
+                                        </h5>
+                                        <p class="mb-2">
+                                            <strong>Auteur:</strong> {{ emplacement.livre.auteur.nom }}<br>
+                                            <strong>ISBN:</strong> {{ emplacement.livre.isbn }}<br>
+                                            <strong>Éditeur:</strong> {{ emplacement.livre.editeur.nom }}<br>
+                                            <strong>Date de publication:</strong> {{ emplacement.livre.date_publication|date:"d/m/Y" }}
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4 text-end">
+                                        <a href="{% url 'livre_detail' emplacement.livre.pk %}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-eye"></i> Voir le livre
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mt-3">
+                            <i class="fas fa-info-circle"></i> 
+                            Cet emplacement est actuellement vide.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,207 @@
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Scolarite | BiblioTech{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1><i class="fas fa-user-graduate"></i> Liste des étudiants</h1>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'ajouter_etudiant' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Ajouter un étudiant
+            </a>
+            <a href="{% url 'sync_etudiants_api' %}" class="btn btn-secondary">
+                <i class="fas fa-sync"></i> Synchroniser
+            </a>
+        </div>
+    </div>
+
+    <!-- Barre de recherche -->
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <form method="GET" action="{% url 'liste_etudiants' %}" class="d-flex">
+                <input 
+                    type="search" 
+                    name="search" 
+                    class="form-control me-2" 
+                    placeholder="Rechercher par nom, prénom ou matricule..." 
+                    value="{{ search }}"
+                >
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-search"></i> Rechercher
+                </button>
+                {% if search %}
+                <a href="{% url 'liste_etudiants' %}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-times"></i> Effacer
+                </a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <span class="text-muted">
+                <strong>{{ etudiants.count }}</strong> étudiant(s) trouvé(s)
+            </span>
+        </div>
+    </div>
+
+    <!-- Messages flash -->
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des étudiants -->
+    {% if etudiants %}
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Matricule</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Email</th>
+                            <th>Téléphone</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for etudiant in etudiants %}
+                        <tr data-searchable>
+                            <td>
+                                <strong>{{ etudiant.matricule }}</strong>
+                            </td>
+                            <td>{{ etudiant.nom }}</td>
+                            <td>{{ etudiant.prenom }}</td>
+                            <td>
+                                <a href="mailto:{{ etudiant.email }}">
+                                    {{ etudiant.email }}
+                                </a>
+                            </td>
+                            <td>
+                                {% if etudiant.telephone %}
+                                    {{ etudiant.telephone }}
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a 
+                                        href="{% url 'etudiant_detail' pk=etudiant.pk %}" 
+                                        class="btn btn-sm btn-info"
+                                        title="Voir les détails"
+                                    >
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a 
+                                        href="{% url 'modifier_etudiant' pk=etudiant.pk %}" 
+                                        class="btn btn-sm btn-warning"
+                                        title="Modifier"
+                                    >
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a 
+                                        href="{% url 'supprimer_etudiant' pk=etudiant.pk %}" 
+                                        class="btn btn-sm btn-danger btn-delete"
+                                        title="Supprimer"
+                                    >
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Message si aucun étudiant -->
+    <div class="alert alert-info text-center">
+        <i class="fas fa-info-circle fa-2x mb-3"></i>
+        <h5>Aucun étudiant trouvé</h5>
+        {% if search %}
+        <p>Aucun résultat pour "{{ search }}"</p>
+        <a href="{% url 'liste_etudiants' %}" class="btn btn-primary">
+            Voir tous les étudiants
+        </a>
+        {% else %}
+        <p>Commencez par ajouter des étudiants à votre bibliothèque</p>
+        <a href="{% url 'ajouter_etudiant' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Ajouter un étudiant
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Style personnalisé -->
+<style>
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa;
+        cursor: pointer;
+    }
+    
+    .btn-group .btn {
+        margin: 0 2px;
+    }
+    
+    .messages {
+        position: relative;
+        z-index: 1050;
+    }
+    
+    .card {
+        border: none;
+        border-radius: 8px;
+    }
+    
+    thead th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+</style>
+
+<!-- Script pour la confirmation de suppression -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Confirmation de suppression
+    const deleteButtons = document.querySelectorAll('.btn-delete');
+    deleteButtons.forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer cet étudiant ?')) {
+                e.preventDefault();
+            }
+        });
+    });
+    
+    // Clic sur la ligne du tableau pour voir les détails
+    const rows = document.querySelectorAll('tbody tr');
+    rows.forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Ne pas déclencher si on clique sur un bouton
+            if (!e.target.closest('.btn-group')) {
+                const detailLink = this.querySelector('.btn-info');
+                if (detailLink) {
+                    window.location.href = detailLink.href;
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

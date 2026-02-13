@@ -1,0 +1,504 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription | Biblioth</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+        .inscription-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 30px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #dee2e6;
+            z-index: -1;
+        }
+        .step:first-child::before {
+            display: none;
+        }
+        .step-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #dee2e6;
+            color: #6c757d;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        .step.active .step-circle {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+        .step.completed .step-circle {
+            background: #28a745;
+            color: white;
+        }
+        .step-label {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        .step.active .step-label {
+            color: #667eea;
+            font-weight: 600;
+        }
+        .form-section {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+        .form-section.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            padding: 12px 30px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        .required-field::after {
+            content: " *";
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="inscription-container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2 class="mb-2">
+                    <i class="bi bi-book-fill"></i>
+                    Inscription à la bibliothèque
+                </h2>
+                <p class="mb-0">Remplissez le formulaire pour créer votre compte</p>
+            </div>
+            <div class="card-body p-4">
+                <!-- Indicateur d'étapes -->
+                <div class="step-indicator mb-4">
+                    <div class="step active" data-step="1">
+                        <div class="step-circle">1</div>
+                        <div class="step-label">Informations personnelles</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-circle">2</div>
+                        <div class="step-label">Parcours académique</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-circle">3</div>
+                        <div class="step-label">Confirmation</div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" id="inscriptionForm">
+                    {% csrf_token %}
+
+                    <!-- Étape 1: Informations personnelles -->
+                    <div class="form-section active" data-section="1">
+                        <h5 class="mb-4">
+                            <i class="bi bi-person-circle"></i>
+                            Informations personnelles
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.nom.id_for_label }}" class="form-label required-field">Nom</label>
+                                {{ form.nom }}
+                                {% if form.nom.errors %}
+                                    <div class="text-danger small">{{ form.nom.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.prenom.id_for_label }}" class="form-label required-field">Prénom</label>
+                                {{ form.prenom }}
+                                {% if form.prenom.errors %}
+                                    <div class="text-danger small">{{ form.prenom.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.email.id_for_label }}" class="form-label required-field">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">Vous recevrez vos notifications sur cet email</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.telephone.id_for_label }}" class="form-label">Téléphone</label>
+                                {{ form.telephone }}
+                                {% if form.telephone.errors %}
+                                    <div class="text-danger small">{{ form.telephone.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="{{ form.sexe.id_for_label }}" class="form-label">Sexe</label>
+                                {{ form.sexe }}
+                                {% if form.sexe.errors %}
+                                    <div class="text-danger small">{{ form.sexe.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.date_naissance.id_for_label }}" class="form-label">Date de naissance</label>
+                                {{ form.date_naissance }}
+                                {% if form.date_naissance.errors %}
+                                    <div class="text-danger small">{{ form.date_naissance.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label for="{{ form.lieu_naissance.id_for_label }}" class="form-label">Lieu de naissance</label>
+                                {{ form.lieu_naissance }}
+                                {% if form.lieu_naissance.errors %}
+                                    <div class="text-danger small">{{ form.lieu_naissance.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.adresse.id_for_label }}" class="form-label">Adresse</label>
+                            {{ form.adresse }}
+                            {% if form.adresse.errors %}
+                                <div class="text-danger small">{{ form.adresse.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="button" class="btn btn-primary" onclick="nextStep(2)">
+                                Suivant <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Étape 2: Parcours académique -->
+                    <div class="form-section" data-section="2">
+                        <h5 class="mb-4">
+                            <i class="bi bi-mortarboard-fill"></i>
+                            Parcours académique
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="{{ form.universite.id_for_label }}" class="form-label required-field">Université</label>
+                            {{ form.universite }}
+                            {% if form.universite.errors %}
+                                <div class="text-danger small">{{ form.universite.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.faculte.id_for_label }}" class="form-label">Faculté</label>
+                            {{ form.faculte }}
+                            {% if form.faculte.errors %}
+                                <div class="text-danger small">{{ form.faculte.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.departement.id_for_label }}" class="form-label">Département</label>
+                            {{ form.departement }}
+                            {% if form.departement.errors %}
+                                <div class="text-danger small">{{ form.departement.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.classe.id_for_label }}" class="form-label">Classe</label>
+                            {{ form.classe }}
+                            {% if form.classe.errors %}
+                                <div class="text-danger small">{{ form.classe.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="{{ form.niveau_etude.id_for_label }}" class="form-label">Niveau d'étude</label>
+                                {{ form.niveau_etude }}
+                                {% if form.niveau_etude.errors %}
+                                    <div class="text-danger small">{{ form.niveau_etude.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.annee_academique.id_for_label }}" class="form-label">Année académique</label>
+                                {{ form.annee_academique }}
+                                {% if form.annee_academique.errors %}
+                                    <div class="text-danger small">{{ form.annee_academique.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="previousStep(1)">
+                                <i class="bi bi-arrow-left"></i> Précédent
+                            </button>
+                            <button type="button" class="btn btn-primary" onclick="nextStep(3)">
+                                Suivant <i class="bi bi-arrow-right"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Étape 3: Confirmation -->
+                    <div class="form-section" data-section="3">
+                        <h5 class="mb-4">
+                            <i class="bi bi-check-circle-fill"></i>
+                            Confirmation
+                        </h5>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i>
+                            <strong>Vérifiez vos informations</strong><br>
+                            Veuillez vérifier que toutes les informations saisies sont correctes avant de soumettre votre inscription.
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Informations personnelles</h6>
+                                <p class="mb-1"><strong>Nom complet:</strong> <span id="recap-nom"></span> <span id="recap-prenom"></span></p>
+                                <p class="mb-1"><strong>Email:</strong> <span id="recap-email"></span></p>
+                                <p class="mb-0"><strong>Téléphone:</strong> <span id="recap-telephone"></span></p>
+                            </div>
+                        </div>
+
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title">Parcours académique</h6>
+                                <p class="mb-1"><strong>Université:</strong> <span id="recap-universite"></span></p>
+                                <p class="mb-1"><strong>Faculté:</strong> <span id="recap-faculte"></span></p>
+                                <p class="mb-0"><strong>Niveau:</strong> <span id="recap-niveau"></span></p>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            {{ form.accepte_conditions }}
+                            <label class="form-check-label" for="{{ form.accepte_conditions.id_for_label }}">
+                                {{ form.accepte_conditions.label }}
+                            </label>
+                            {% if form.accepte_conditions.errors %}
+                                <div class="text-danger small">{{ form.accepte_conditions.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="previousStep(2)">
+                                <i class="bi bi-arrow-left"></i> Précédent
+                            </button>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle"></i> Confirmer l'inscription
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <p class="text-white">
+                <i class="bi bi-shield-check"></i>
+                Vos données sont sécurisées et ne seront pas partagées
+            </p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentStep = 1;
+
+        function nextStep(step) {
+            // Validation basique avant de passer à l'étape suivante
+            if (!validateStep(currentStep)) {
+                return;
+            }
+
+            // Masquer la section actuelle
+            document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+            
+            // Mettre à jour l'indicateur d'étape
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('completed');
+            
+            // Afficher la nouvelle section
+            document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            
+            currentStep = step;
+
+            // Si on arrive à l'étape 3, remplir le récapitulatif
+            if (step === 3) {
+                fillRecap();
+            }
+
+            // Scroll vers le haut
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function previousStep(step) {
+            document.querySelector(`.form-section[data-section="${currentStep}"]`).classList.remove('active');
+            document.querySelector(`.step[data-step="${currentStep}"]`).classList.remove('active');
+            
+            document.querySelector(`.form-section[data-section="${step}"]`).classList.add('active');
+            document.querySelector(`.step[data-step="${step}"]`).classList.remove('completed');
+            document.querySelector(`.step[data-step="${step}"]`).classList.add('active');
+            
+            currentStep = step;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateStep(step) {
+            const section = document.querySelector(`.form-section[data-section="${step}"]`);
+            const requiredFields = section.querySelectorAll('[required]');
+            let isValid = true;
+
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    isValid = false;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            if (!isValid) {
+                alert('Veuillez remplir tous les champs obligatoires');
+            }
+
+            return isValid;
+        }
+
+        function fillRecap() {
+            document.getElementById('recap-nom').textContent = document.getElementById('id_nom').value;
+            document.getElementById('recap-prenom').textContent = document.getElementById('id_prenom').value;
+            document.getElementById('recap-email').textContent = document.getElementById('id_email').value;
+            document.getElementById('recap-telephone').textContent = document.getElementById('id_telephone').value || 'Non renseigné';
+            
+            const universiteSelect = document.getElementById('id_universite');
+            document.getElementById('recap-universite').textContent = universiteSelect.options[universiteSelect.selectedIndex]?.text || 'Non renseigné';
+            
+            const faculteSelect = document.getElementById('id_faculte');
+            document.getElementById('recap-faculte').textContent = faculteSelect.options[faculteSelect.selectedIndex]?.text || 'Non renseignée';
+            
+            document.getElementById('recap-niveau').textContent = document.getElementById('id_niveau_etude').value || 'Non renseigné';
+        }
+
+        // Chargement dynamique des facultés
+        document.getElementById('id_universite').addEventListener('change', function() {
+            const universiteId = this.value;
+            const faculteSelect = document.getElementById('id_faculte');
+            const departementSelect = document.getElementById('id_departement');
+            const classeSelect = document.getElementById('id_classe');
+
+            // Réinitialiser les selects dépendants
+            faculteSelect.innerHTML = '<option value="">Sélectionnez une faculté</option>';
+            departementSelect.innerHTML = '<option value="">Sélectionnez un département</option>';
+            classeSelect.innerHTML = '<option value="">Sélectionnez une classe</option>';
+
+            if (universiteId) {
+                fetch(`/api/facultes/${universiteId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(faculte => {
+                            const option = new Option(faculte.nom, faculte.id);
+                            faculteSelect.add(option);
+                        });
+                    });
+            }
+        });
+
+        // Chargement dynamique des départements
+        document.getElementById('id_faculte').addEventListener('change', function() {
+            const faculteId = this.value;
+            const departementSelect = document.getElementById('id_departement');
+            const classeSelect = document.getElementById('id_classe');
+
+            departementSelect.innerHTML = '<option value="">Sélectionnez un département</option>';
+            classeSelect.innerHTML = '<option value="">Sélectionnez une classe</option>';
+
+            if (faculteId) {
+                fetch(`/api/departements/${faculteId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(dept => {
+                            const option = new Option(dept.nom, dept.id);
+                            departementSelect.add(option);
+                        });
+                    });
+            }
+        });
+
+        // Chargement dynamique des classes
+        document.getElementById('id_departement').addEventListener('change', function() {
+            const departementId = this.value;
+            const classeSelect = document.getElementById('id_classe');
+
+            classeSelect.innerHTML = '<option value="">Sélectionnez une classe</option>';
+
+            if (departementId) {
+                fetch(`/api/classes/${departementId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        data.forEach(classe => {
+                            const option = new Option(classe.nom, classe.id);
+                            classeSelect.add(option);
+                        });
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

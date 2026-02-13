@@ -1,0 +1,99 @@
+<!-- ========== FORMULAIRE JOUR FÉRIÉ ========== -->
+<!-- parametrage/jour_ferie_form.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} un jour férié{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <a href="{% url 'jour_ferie_list' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0">{{ action }} un jour férié</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nom *</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                                <div class="text-danger small">{{ form.nom.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Date *</label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="text-danger small">{{ form.date.errors }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.recurrent }}
+                                <label class="form-check-label">Récurrent chaque année</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.fermeture_totale }}
+                                <label class="form-check-label">Fermeture totale</label>
+                            </div>
+                        </div>
+
+                        <div id="horaires-section" style="display: none;">
+                            <div class="alert alert-info">
+                                <small>Horaires pour ce jour (si non coché ci-dessus)</small>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Heure ouverture</label>
+                                    {{ form.horaire_ouverture }}
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Heure fermeture</label>
+                                    {{ form.horaire_fermeture }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'jour_ferie_list' %}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const fermetureTotale = document.getElementById('id_fermeture_totale');
+    const horairesSection = document.getElementById('horaires-section');
+    
+    function toggleHoraires() {
+        horairesSection.style.display = fermetureTotale.checked ? 'none' : 'block';
+    }
+    
+    fermetureTotale.addEventListener('change', toggleHoraires);
+    toggleHoraires();
+});
+</script>
+{% endblock %}

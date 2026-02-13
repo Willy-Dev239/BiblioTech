@@ -1,0 +1,132 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Liste des emprunts - Bibliothèque{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-arrow-left-right"></i> Liste des emprunts</h1>
+    <a href="{% url 'emprunt_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nouvel emprunt
+    </a>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <select name="statut" class="form-control">
+                    <option value="">Tous les statuts</option>
+                    {% for value, label in statuts %}
+                        <option value="{{ value }}" {% if statut_selectionne == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-filter"></i> Filtrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Liste des emprunts -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Livre</th>
+                        <th>Étudiant</th>
+                        <th>Date emprunt</th>
+                        <th>Retour prévu</th>
+                        <th>Statut</th>
+                        <th>Pénalité</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for emprunt in page_obj %}
+                        <tr class="{% if emprunt.est_en_retard %}table-danger{% endif %}">
+                            <td>
+                                <a href="{% url 'livre_detail' emprunt.livre.pk %}">
+                                    {{ emprunt.livre.titre }}
+                                </a>
+                            </td>
+                            <td>
+                                <a href="{% url 'etudiant_detail' emprunt.etudiant.pk %}">
+                                    {{ emprunt.etudiant.nom }} {{ emprunt.etudiant.prenom }}
+                                </a>
+                            </td>
+                            <td>{{ emprunt.date_emprunt|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                {{ emprunt.date_retour_prevue|date:"d/m/Y" }}
+                                {% if emprunt.est_en_retard %}
+                                    <br><small class="text-danger">
+                                        {{ emprunt.jours_retard }} jour(s) de retard
+                                    </small>
+                                {% endif %}
+                            </td>
+                            <td>
+                               <span class="badge 
+                                    {% if emprunt.statut == 'RETOURNE' %}bg-success
+                                    {% elif emprunt.statut == 'EN_RETARD' %}bg-danger
+                                    {% else %}bg-warning
+                                    {% endif %}">
+                                    {{ emprunt.get_statut_display }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if emprunt.penalite > 0 %}
+                                    <span class="text-danger">{{ emprunt.penalite }} FBu</span>
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if emprunt.statut != 'RETOURNE' and emprunt.statut != 'PERDU' %}
+                                    <a href="{% url 'emprunt_retour' emprunt.pk %}" class="btn btn-sm btn-success">
+                                        <i class="bi bi-check-circle"></i> Retour
+                                    </a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center">Aucun emprunt trouvé.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+    <nav aria-label="Navigation pagination" class="mt-3">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                </li>
+            {% endif %}
+            
+            <li class="page-item active">
+                <span class="page-link">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}
+"""

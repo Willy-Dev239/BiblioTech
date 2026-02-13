@@ -1,0 +1,176 @@
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Liste des Compartiments{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-th text-primary"></i> Gestion des Compartiments</h2>
+                <a href="{% url 'compartiment_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouveau Compartiment
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres et recherche -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Rechercher</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Code étagère, niveau, catégorie..." 
+                           value="{{ search_query }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Étagère</label>
+                    <select name="etagere" class="form-select">
+                        <option value="">Toutes les étagères</option>
+                        {% for etagere in etageres %}
+                            <option value="{{ etagere.pk }}" {% if etagere.pk|stringformat:"s" == etagere_filter %}selected{% endif %}>
+                                {{ etagere.code }} - {{ etagere.salle }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Catégorie</label>
+                    <select name="categorie" class="form-select">
+                        <option value="">Toutes</option>
+                        {% for categorie in categories %}
+                            <option value="{{ categorie }}" {% if categorie == categorie_filter %}selected{% endif %}>
+                                {{ categorie }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste des compartiments -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-list"></i> Liste des compartiments 
+                <span class="badge bg-light text-dark">{{ compartiments.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if compartiments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Étagère</th>
+                                <th>Numéro</th>
+                                <th>Niveau</th>
+                                <th>Catégorie</th>
+                                <th>Capacité</th>
+                                <th>Emplacements</th>
+                                <th>Occupés</th>
+                                <th>Disponibles</th>
+                                <th>Taux</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for compartiment in compartiments %}
+                            <tr>
+                                <td>
+                                    <a href="{% url 'etagere_detail' compartiment.etagere.pk %}">
+                                        <strong>{{ compartiment.etagere.code }}</strong>
+                                    </a>
+                                    <br>
+                                    <small class="text-muted">{{ compartiment.etagere.salle }}</small>
+                                </td>
+                                <td><strong>{{ compartiment.numero }}</strong></td>
+                                <td>{{ compartiment.niveau }}</td>
+                                <td>
+                                    {% if compartiment.categorie %}
+                                        <span class="badge bg-secondary">{{ compartiment.categorie }}</span>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ compartiment.capacite }}</td>
+                                <td>
+                                    <span class="badge bg-primary">{{ compartiment.nb_emplacements }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-warning">{{ compartiment.nb_emplacements_occupes }}</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-success">
+                                        {{ compartiment.nb_emplacements|add:"-"|add:compartiment.nb_emplacements_occupes }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% with taux=compartiment.taux_occupation %}
+                                        <div class="progress" style="width: 80px;">
+                                            <div class="progress-bar 
+                                                {% if taux < 50 %}bg-success
+                                                {% elif taux < 80 %}bg-warning
+                                                {% else %}bg-danger{% endif %}"
+                                                 style="width: {{ taux }}%">
+                                                {{ taux }}%
+                                            </div>
+                                        </div>
+                                    {% endwith %}
+                                </td>
+                                <td>
+
+                                           <a href="{% url 'compartiment_detail' compartiment.pk %}" class="btn btn-sm btn-primary">
+                               <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'compartiment_update' compartiment.pk %}" class="btn btn-sm" style="background-color: #28d17c; color: white;">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                                    {% comment %} <div class="btn-group">
+                                        <a href="{% url 'compartiment_detail' compartiment.pk %}" 
+                                           class="btn btn-info" title="Détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{% url 'compartiment_update' compartiment.pk %}" 
+                                           class="btn btn-warning" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a> {% endcomment %}
+                                        {% comment %} <a href="{% url 'compartiment_delete' compartiment.pk %}" 
+                                           class="btn btn-danger" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </a> {% endcomment %}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> 
+                    Aucun compartiment trouvé.
+                    {% if search_query or etagere_filter or categorie_filter %}
+                        <a href="{% url 'compartiment_list' %}" class="alert-link">Réinitialiser les filtres</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.progress {
+    height: 20px;
+}
+</style>
+{% endblock %}

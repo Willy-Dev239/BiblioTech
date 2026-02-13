@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AccesDroits | BiblioTech</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <div class="container">
+       
+
+        {% if error %}
+        <div class="alert alert-error">
+            ❌ Erreur: {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="stats">
+            <div class="stat-card">
+                <h3>{{ total_users }}</h3>
+                <p>Total des Utilisateurs</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ total_staff }}</h3>
+                <p>Personnel (En Fonction)</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ total_superusers }}</h3>
+                <p>Super Utilisateurs</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ total_active }}</h3>
+                <p>Comptes Actifs</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="🔍 Rechercher par nom d'utilisateur, nom ou email...">
+            </div>  </div>
+            {% comment %} <a href="{% url 'get_users' %}" class="btn btn-primary">Actualiser</a> {% endcomment %}
+            <a href="{% url 'get_users' %}" class="btn btn-primary">Actualiser</a>
+            <a href="{% url 'parametrage_dashboard' %}" class="btn btn-success">Retour</a>
+            
+      
+
+        {% if users %}
+        <div class="table-container">
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom d'utilisateur</th>
+                        <th>Nom Complet</th>
+                        <th>Email</th>
+                        <th>En Fonction</th>
+                        <th>Admin</th>
+                        <th>Actif</th>
+                        <th>Date d'inscription</th>
+                        <th>Dernière connexion</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr class="user-row" data-user-id="{{ user.id }}">
+                        <td><strong>{{ user.id }}</strong></td>
+                        <td>
+                            <strong>{{ user.username }}</strong>
+                            {% if user.is_superuser %}
+                            <span class="badge badge-danger">Admin</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.first_name or user.last_name %}
+                                {{ user.first_name }} {{ user.last_name }}
+                            {% else %}
+                                <span style="color: #999;">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {{ user.email }}
+                        </td>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" 
+                                   name="is_staff" 
+                                   {% if user.is_staff %}checked{% endif %}
+                                   onchange="updatePermission({{ user.id }}, 'is_staff', this.checked)">
+                        </td>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" 
+                                   name="is_superuser" 
+                                   {% if user.is_superuser %}checked{% endif %}
+                                   onchange="updatePermission({{ user.id }}, 'is_superuser', this.checked)">
+                        </td>
+                        <td class="checkbox-cell">
+                            <input type="checkbox" 
+                                   name="is_active" 
+                                   {% if user.is_active %}checked{% endif %}
+                                   onchange="updatePermission({{ user.id }}, 'is_active', this.checked)">
+                        </td>
+                        <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
+                        <td>
+                            {% if user.last_login %}
+                                {{ user.last_login|date:"d/m/Y H:i" }}
+                            {% else %}
+                                <span style="color: #999;">Jamais</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="actions">
+                                <button class="btn btn-success btn-sm" onclick="saveUser({{ user.id }})">
+                                    💾 Enregistrer
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="no-data">
+            <p>Aucun utilisateur trouvé dans la base de données.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        // Stocker les modifications en mémoire
+        const pendingChanges = {};
+
+        // Mettre à jour une permission
+        function updatePermission(userId, field, value) {
+            if (!pendingChanges[userId]) {
+                pendingChanges[userId] = {};
+            }
+            pendingChanges[userId][field] = value;
+            console.log(`Utilisateur ${userId}: ${field} = ${value}`);
+        }
+
+        // Sauvegarder les modifications
+        async function saveUser(userId) {
+            const changes = pendingChanges[userId];
+            
+            if (!changes) {
+                alert('Aucune modification à enregistrer');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/users/${userId}/permissions/`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify(changes)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    alert('✓ Droits mis à jour avec succès!');
+                    delete pendingChanges[userId];
+                    window.location.reload();
+                } else {
+                    alert('❌ Erreur: ' + (result.error || 'Échec de la mise à jour'));
+                }
+            } catch (error) {
+                console.error('Erreur:', error);
+                alert('❌ Erreur de connexion au serveur');
+            }
+        }
+
+        // Recherche en temps réel
+        document.getElementById('searchInput').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('.user-row');
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+
+        // Récupérer le cookie CSRF
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+</html>

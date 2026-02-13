@@ -1,0 +1,105 @@
+<!-- emplacements/form.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}{{ action }} un emplacement{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <a href="{% if emplacement %}{% url 'emplacement_detail' emplacement.pk %}{% else %}{% url 'emplacement_list' %}{% endif %}" 
+               class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-map-marker-alt"></i> {{ action }} un emplacement
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {{ form.non_field_errors }}
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="{{ form.compartiment.id_for_label }}" class="form-label">
+                                <i class="fas fa-th"></i> Compartiment *
+                            </label>
+                            {{ form.compartiment }}
+                            {% if form.compartiment.errors %}
+                                <div class="text-danger small">{{ form.compartiment.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Sélectionnez le compartiment où placer cet emplacement
+                            </small>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.position.id_for_label }}" class="form-label">
+                                    <i class="fas fa-sort-numeric-up"></i> Position *
+                                </label>
+                                {{ form.position }}
+                                {% if form.position.errors %}
+                                    <div class="text-danger small">{{ form.position.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Position dans le compartiment (numéro)
+                                </small>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.code_emplacement.id_for_label }}" class="form-label">
+                                    <i class="fas fa-barcode"></i> Code emplacement *
+                                </label>
+                                {{ form.code_emplacement }}
+                                {% if form.code_emplacement.errors %}
+                                    <div class="text-danger small">{{ form.code_emplacement.errors }}</div>
+                                {% endif %}
+                                <small class="form-text text-muted">
+                                    Code unique d'identification (ex: A1-C1-P1)
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.disponible }}
+                                <label class="form-check-label" for="{{ form.disponible.id_for_label }}">
+                                    <i class="fas fa-check-circle"></i> Emplacement disponible
+                                </label>
+                            </div>
+                            {% if form.disponible.errors %}
+                                <div class="text-danger small">{{ form.disponible.errors }}</div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Cochez si l'emplacement est libre et peut recevoir un livre
+                            </small>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% if emplacement %}{% url 'emplacement_detail' emplacement.pk %}{% else %}{% url 'emplacement_list' %}{% endif %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> {{ action }}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

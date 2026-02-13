@@ -1,0 +1,224 @@
+<!-- templates/bibliotheque/base.html -->
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BiblioTech{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% comment %} <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'home' %}" class="sidebar-brand">
+                <i class="bi bi-book-fill"></i>
+                <span>Bibliothèque</span>
+            </a>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{% url 'livre_list' %}" class="{% if 'livre' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-book"></i>
+                    <span>Catalogue</span>
+                </a>
+            </li>
+            
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-heading">Administration</div>
+                    
+                    <li>
+                        <a href="{% url 'etudiant_list' %}" class="{% if 'etudiant' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-people"></i>
+                            <span>Étudiants</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'emprunt_list' %}" class="{% if 'emprunt' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span>Emprunts</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="/admin/" target="_blank">
+                            <i class="bi bi-gear"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% if user.etudiant %}
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-heading">Mon espace</div>
+                    
+                    <li>
+                        <a href="{% url 'notification_list' %}" class="{% if 'notification' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-bell"></i>
+                            <span>Notifications</span> {% endcomment %}
+                            {% comment %} {% if user.etudiant.notifications.filter(lu=False).count > 0 %}
+                                <span class="notification-badge">
+                                    {{ user.etudiant.notifications.filter(lu=False).count }}
+                                </span>
+                            {% endif %} {% endcomment %}
+                        {% comment %} </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-bookmark"></i>
+                            <span>Mes réservations</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Historique</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <div class="sidebar-divider"></div>
+                
+                <li>
+                    <a href="{% url 'change_password' %}">
+                        <i class="bi bi-key"></i>
+                        <span>Changer mot de passe</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                </li>
+            {% else %}
+                <div class="sidebar-divider"></div>
+                
+                <li>
+                    <a href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Connexion</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{% url 'register' %}">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Inscription</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        
+        {% if user.is_authenticated %}
+        <div class="sidebar-user">
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-avatar">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; font-weight: 600;">{{ user.username }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+                        {% if user.is_staff %}Administrateur{% else %}Étudiant{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </nav> {% endcomment %}
+    
+    <!-- Overlay pour mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Main wrapper -->
+    <div class="main-wrapper">
+        <!-- Top navbar -->
+        <div class="top-navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            <h5 class="mb-0">{% block page_title %}{% endblock %}</h5>
+            <div></div>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+            <div class="container-fluid mt-3 px-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+        <div class="footer-content">
+            
+            <div class="footer-divider"></div>
+            <p class="mb-0">
+                &copy; 2025 Bibliothèque Universitaire. Tous droits réservés.
+            </p>
+            <p class="mb-0">
+                <small>Système de gestion de bibliothèque</small>
+            </p>
+        </div>
+    </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle sidebar pour mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        // Fermer le sidebar quand on clique sur un lien en mobile
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 768) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

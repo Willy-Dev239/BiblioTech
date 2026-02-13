@@ -1,0 +1,105 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Auteurs | BiblioTech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <h2>Auteurs</h2>
+    <a href="{% url 'auteur_create' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle"></i> Nouvel auteur
+    </a>
+</div>
+
+<!-- Recherche -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="q" class="form-control" placeholder="Rechercher un auteur..." value="{{ query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-search"></i> Rechercher
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Prenom</th>
+                        <th>Date de naissance</th>
+                        <th>Nationalité</th>
+                        <th>biographie</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for auteur in auteurs %}
+                    <tr>
+                        <td>
+                          
+                                {{ auteur.nom }}
+                          
+                        </td>
+                          <td>
+                          
+                                {{ auteur.prenom }}
+                          
+                        </td>
+                        <td>{{ auteur.date_naissance|date:"d/m/Y"|default:"N/A" }}</td>
+                        <td>{{ auteur.nationalite|default:"N/A" }}</td>
+                          <td>
+                          
+                                {{ auteur.biographie }}
+                          
+                        </td>
+                        <td>
+                            <a href="{% url 'auteur_update' auteur.pk %}" class="btn btn-sm" style="background-color: #28d17c; color: white;">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'auteur_delete' auteur.pk %}" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">Aucun auteur trouvé</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if auteurs.has_other_pages %}
+        <nav>
+            <ul class="pagination justify-content-center">
+                {% if auteurs.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ auteurs.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Précédent</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">Page {{ auteurs.number }}</span>
+                </li>
+
+                {% if auteurs.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ auteurs.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

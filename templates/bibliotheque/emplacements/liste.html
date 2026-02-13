@@ -1,0 +1,125 @@
+<!-- emplacements/list.html -->
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Liste des Emplacements{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-map-marker-alt text-primary"></i> Gestion des Emplacements</h2>
+                <a href="{% url 'emplacement_create' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvel Emplacement
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Rechercher</label>
+                    <input type="text" name="search" class="form-control" 
+                           placeholder="Code, étagère, livre..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Compartiment</label>
+                    <select name="compartiment" class="form-select">
+                        <option value="">Tous</option>
+                        {% for comp in compartiments %}
+                            <option value="{{ comp.pk }}" {% if comp.pk|stringformat:"s" == compartiment_filter %}selected{% endif %}>
+                                {{ comp.etagere.code }} - C{{ comp.numero }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Disponibilité</label>
+                    <select name="disponible" class="form-select">
+                        <option value="">Tous</option>
+                        <option value="oui" {% if disponible_filter == "oui" %}selected{% endif %}>Disponibles</option>
+                        <option value="non" {% if disponible_filter == "non" %}selected{% endif %}>Occupés</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Liste -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                Liste des emplacements 
+                <span class="badge bg-light text-dark">{{ emplacements.count }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if compartiment %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Étagère</th>
+                                <th>Compartiment</th>
+                                <th>Position</th>
+                                <th>Livre</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in emplacements %}
+                            <tr>
+                                <td><code>{{ emp.code_emplacement }}</code></td>
+                                <td>{{ emp.compartiment.etagere.code }}</td>
+                                <td>C{{ emp.compartiment.numero }} - {{ emp.compartiment.niveau }}</td>
+                                <td>{{ emp.position }}</td>
+                                <td>
+                                    {% if emp.livre %}
+                                        <a href="{% url 'livre_detail' emp.livre.pk %}">
+                                            {{ emp.livre.titre|truncatewords:5 }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">Vide</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if emp.disponible %}
+                                        <span class="badge bg-success">Disponible</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">Occupé</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="{% url 'emplacement_detail' emp.pk %}" 
+                                           class="btn btn-info"><i class="fas fa-eye"></i></a>
+                                        <a href="{% url 'emplacement_update' emp.pk %}" 
+                                           class="btn btn-warning"><i class="fas fa-edit"></i></a>
+                                        <a href="{% url 'emplacement_delete' emp.pk %}" 
+                                           class="btn btn-danger"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    Aucun emplacement trouvé.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

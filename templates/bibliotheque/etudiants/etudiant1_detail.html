@@ -1,0 +1,290 @@
+{% extends 'bibliotheque/base.html' %}
+{% block title %}Détails de l'étudiant - {{ etudiant.nom_complet }}{% endblock %}
+{% block content %}
+<div class="mt-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-person-badge"></i>
+            Profil de l'étudiant
+        </h2>
+        <div>
+            <a href="liste_etudiants/ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Retour
+            </a>
+            {% if etudiant.peut_emprunter %}
+                <a href="{% url 'creer_emprunt_etudiant' etudiant.pk %}" class="btn btn-primary">
+                    <i class="bi bi-book"></i> Créer un emprunt
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Informations principales -->
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Carte informations personnelles -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <strong>Informations personnelles</strong>
+                    <div>
+                        {% if etudiant.sync_depuis_api %}
+                            <span class="badge bg-info" title="Synchronisé depuis l'API">
+                                <i class="bi bi-cloud-check"></i> API
+                            </span>
+                        {% endif %}
+                        {% if etudiant.statut == 'actif' %}
+                            <span class="badge bg-success">Actif</span>
+                        {% elif etudiant.statut == 'inactif' %}
+                            <span class="badge bg-secondary">Inactif</span>
+                        {% elif etudiant.statut == 'suspendu' %}
+                            <span class="badge bg-warning">Suspendu</span>
+                        {% else %}
+                            <span class="badge bg-primary">{{ etudiant.get_statut_display }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Nom complet :</strong> {{ etudiant.nom }} {{ etudiant.prenom }}</p>
+                            <p><strong>Matricule :</strong> {{ etudiant.matricule }}</p>
+                            <p><strong>Email :</strong> <a href="mailto:{{ etudiant.email }}">{{ etudiant.email }}</a></p>
+                            {% if etudiant.telephone %}
+                                <p><strong>Téléphone :</strong> {{ etudiant.telephone }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if etudiant.date_naissance %}
+                                <p><strong>Date de naissance :</strong> {{ etudiant.date_naissance|date:"d/m/Y" }}</p>
+                            {% endif %}
+                            {% if etudiant.lieu_naissance %}
+                                <p><strong>Lieu de naissance :</strong> {{ etudiant.lieu_naissance }}</p>
+                            {% endif %}
+                            {% if etudiant.sexe %}
+                                <p><strong>Sexe :</strong> {{ etudiant.get_sexe_display }}</p>
+                            {% endif %}
+                            {% if etudiant.adresse %}
+                                <p><strong>Adresse :</strong> {{ etudiant.adresse }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte parcours académique -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <strong>Parcours académique</strong>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Hiérarchie complète</h6>
+                        <p class="mb-0">
+                            <i class="bi bi-building"></i> {{ etudiant.parcours_academique }}
+                        </p>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Université :</strong> {{ etudiant.universite.nom }}</p>
+                            {% if etudiant.faculte %}
+                                <p><strong>Faculté :</strong> {{ etudiant.faculte.nom }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if etudiant.departement %}
+                                <p><strong>Département :</strong> {{ etudiant.departement.nom }}</p>
+                            {% endif %}
+                            {% if etudiant.classe %}
+                                <p><strong>Classe :</strong> {{ etudiant.classe.nom }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            {% if etudiant.niveau_etude %}
+                                <p><strong>Niveau d'étude :</strong> {{ etudiant.niveau_etude }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if etudiant.annee_academique %}
+                                <p><strong>Année académique :</strong> {{ etudiant.annee_academique }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emprunts en cours -->
+            {% if emprunts_en_cours %}
+                <div class="card mb-4 border-warning">
+                    <div class="card-header bg-warning text-dark">
+                        <strong>Emprunts en cours</strong>
+                        <span class="badge bg-dark">{{ emprunts_en_cours.count }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Livre</th>
+                                        <th>Date emprunt</th>
+                                        <th>Retour prévu</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for emprunt in emprunts_en_cours %}
+                                        <tr>
+                                            <td>
+                                                <a href="{% url 'livre_detail' emprunt.livre.pk %}">
+                                                    {{ emprunt.livre.titre }}
+                                                </a>
+                                            </td>
+                                            <td>{{ emprunt.date_emprunt|date:"d/m/Y" }}</td>
+                                            <td>{{ emprunt.date_retour_prevue|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'emprunt_detail' emprunt.pk %}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Historique des emprunts -->
+            {% if emprunts_historique %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <strong>Historique des emprunts</strong>
+                        <small class="text-muted">(10 derniers)</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Livre</th>
+                                        <th>Emprunté le</th>
+                                        <th>Retourné le</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for emprunt in emprunts_historique %}
+                                        <tr>
+                                            <td>{{ emprunt.livre.titre }}</td>
+                                            <td>{{ emprunt.date_emprunt|date:"d/m/Y" }}</td>
+                                            <td>{{ emprunt.date_retour_effectif|date:"d/m/Y" }}</td>
+                                            <td>
+                                                <a href="{% url 'emprunt_detail' emprunt.pk %}" 
+                                                   class="btn btn-sm btn-outline-secondary">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Colonne de droite - Statistiques et infos -->
+        <div class="col-md-4">
+            <!-- Carte statistiques -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <strong>Statistiques</strong>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Total emprunts</span>
+                        <strong class="text-primary">{{ total_emprunts }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>Emprunts actifs</span>
+                        <strong class="text-warning">{{ emprunts_actifs }}</strong>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Emprunts retournés</span>
+                        <strong class="text-success"></strong>
+                        {% comment %} {{ total_emprunts|add:"-"|add:emprunts_actifs }} {% endcomment %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Carte synchronisation -->
+            {% if etudiant.sync_depuis_api %}
+                <div class="card mb-4 border-info">
+                    <div class="card-header bg-info text-white">
+                        <strong>Synchronisation API</strong>
+                    </div>
+                    <div class="card-body">
+                        {% if etudiant.api_id %}
+                            <p><strong>ID API :</strong> {{ etudiant.api_id }}</p>
+                        {% endif %}
+                        <p><strong>Dernière sync :</strong><br>
+                            <small>{{ etudiant.derniere_sync|date:"d/m/Y H:i" }}</small>
+                        </p>
+                        <p><strong>Ajouté le :</strong><br>
+                            <small>{{ etudiant.date_creation|date:"d/m/Y H:i" }}</small>
+                        </p>
+                        <p class="mb-0"><strong>Modifié le :</strong><br>
+                            <small>{{ etudiant.date_modification|date:"d/m/Y H:i" }}</small>
+                        </p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <strong>Actions rapides</strong>
+                </div>
+                <div class="card-body">
+                    {% if etudiant.peut_emprunter %}
+                        <a href="{% url 'creer_emprunt_etudiant' etudiant.pk %}" 
+                           class="btn btn-primary w-100 mb-2">
+                            <i class="bi bi-book"></i> Créer un emprunt
+                        </a>
+                    {% else %}
+                        <button class="btn btn-secondary w-100 mb-2" disabled>
+                            <i class="bi bi-x-circle"></i> Ne peut pas emprunter
+                        </button>
+                    {% endif %}
+                    
+                    {% if etudiant.sync_depuis_api %}
+                        <form method="post" action="{% url 'sync_etudiant_manuel' etudiant.pk %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-info w-100 mb-2">
+                                <i class="bi bi-arrow-repeat"></i> Resynchroniser
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% comment %} {% url 'recherche_etudiant' %}?q={{ etudiant.matricule }} {% endcomment %}
+                    <a href="" 
+                       class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-search"></i> Rechercher à nouveau
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

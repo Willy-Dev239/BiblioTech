@@ -1,0 +1,89 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} une université{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <h2>{{ action }} une université</h2>
+    
+    <div class="card mt-3">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="mb-3">
+                    <label class="form-label">Nom de l'université *</label>
+                    {{ form.nom }}
+                    {% if form.nom.errors %}
+                    <div class="text-danger">{{ form.nom.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Adresse</label>
+                    {{ form.adresse }}
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Ville *</label>
+                        {{ form.ville }}
+                        {% if form.ville.errors %}
+                        <div class="text-danger">{{ form.ville.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Pays *</label>
+                        {{ form.pays }}
+                        {% if form.pays.errors %}
+                        <div class="text-danger">{{ form.pays.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="text-danger">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Téléphone</label>
+                        {{ form.telephone }}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Site web</label>
+                        {{ form.site_web }}
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Date de partenariat</label>
+                        {{ form.date_partenariat }}
+                    </div>
+                </div>
+
+                <div class="mb-3 form-check">
+                    {{ form.actif }}
+                    <label class="form-check-label">Actif</label>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> {{ action }}
+                    </button>
+                    <a href="{% url 'universite_list' %}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

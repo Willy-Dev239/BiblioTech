@@ -1,0 +1,163 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}{{ action }} un Abonne.e - Bibliothèque{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}">Accueil</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'abonnes' %}">Abonne.e</a></li>
+        <li class="breadcrumb-item active">{{ action }}</li>
+    </ol>
+</nav>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">{{ action }} un Abonne.e</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <h5 class="mb-3">Informations de base</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.numero_etudiant.id_for_label }}" class="form-label">Numéro Abonne.e *</label>
+                            {{ form.numero_etudiant }}
+                            {% if form.numero_etudiant.errors %}
+                                <div class="text-danger small">{{ form.numero_etudiant.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Email *</label>
+                            {{ form.email }}
+                            {% if form.email.errors %}
+                                <div class="text-danger small">{{ form.email.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.nom.id_for_label }}" class="form-label">Nom *</label>
+                            {{ form.nom }}
+                            {% if form.nom.errors %}
+                                <div class="text-danger small">{{ form.nom.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.prenom.id_for_label }}" class="form-label">Prénom *</label>
+                            {{ form.prenom }}
+                            {% if form.prenom.errors %}
+                                <div class="text-danger small">{{ form.prenom.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label for="{{ form.telephone.id_for_label }}" class="form-label">Téléphone *</label>
+                            {{ form.telephone }}
+                            {% if form.telephone.errors %}
+                                <div class="text-danger small">{{ form.telephone.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.date_naissance.id_for_label }}" class="form-label">Date de naissance *</label>
+                        {{ form.date_naissance }}
+                        {% if form.date_naissance.errors %}
+                            <div class="text-danger small">{{ form.date_naissance.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    <h5 class="mb-3">Informations académiques</h5>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.universite.id_for_label }}" class="form-label">Université *</label>
+                        {{ form.universite }}
+                        {% if form.universite.errors %}
+                            <div class="text-danger small">{{ form.universite.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.faculte.id_for_label }}" class="form-label">Faculté *</label>
+                            {{ form.faculte }}
+                            {% if form.faculte.errors %}
+                                <div class="text-danger small">{{ form.faculte.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.departement.id_for_label }}" class="form-label">Département *</label>
+                            {{ form.departement }}
+                            {% if form.departement.errors %}
+                                <div class="text-danger small">{{ form.departement.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.niveau.id_for_label }}" class="form-label">Niveau *</label>
+                            {{ form.niveau }}
+                            {% if form.niveau.errors %}
+                                <div class="text-danger small">{{ form.niveau.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.annee_inscription.id_for_label }}" class="form-label">Année d'inscription *</label>
+                            {{ form.annee_inscription }}
+                            {% if form.annee_inscription.errors %}
+                                <div class="text-danger small">{{ form.annee_inscription.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.photo.id_for_label }}" class="form-label">Photo</label>
+                            {{ form.photo }}
+                            {% if form.photo.errors %}
+                                <div class="text-danger small">{{ form.photo.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <div class="form-check mt-4">
+                                {{ form.actif }}
+                                <label class="form-check-label" for="{{ form.actif.id_for_label }}">
+                                    Abonne.e actif
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Enregistrer
+                        </button>
+                        <a href="{% url 'abonnes' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle"></i> Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

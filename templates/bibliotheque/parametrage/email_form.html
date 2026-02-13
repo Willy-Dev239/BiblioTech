@@ -1,0 +1,62 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Modifier configuration email{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <a href="{% url 'configuration_email_list' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">Configuration: {{ config.get_type_email_display }}</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Type d'email</label>
+                            {{ form.type_email }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Sujet *</label>
+                            {{ form.sujet }}
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Corps du message *</label>
+                            {{ form.corps_message }}
+                            <small class="text-muted">
+                                Utilisez {nom}, {prenom}, {titre_livre}, etc. pour personnaliser
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check">
+                                {{ form.actif }}
+                                <label class="form-check-label">Email actif</label>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'configuration_email_list' %}" class="btn btn-secondary">
+                                Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

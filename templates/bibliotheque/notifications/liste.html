@@ -1,0 +1,42 @@
+{% extends 'bibliotheque/base.html' %}
+
+{% block title %}Mes notifications - Bibliothèque{% endblock %}
+
+{% block content %}
+<h1 class="mb-4"><i class="bi bi-bell"></i> Mes notifications</h1>
+
+{% if notifications %}
+    <div class="list-group">
+        {% for notification in notifications %}
+            <div class="list-group-item {% if not notification.lu %}list-group-item-primary{% endif %}">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h6 class="mb-1">
+                            {% if notification.type_notification == 'RAPPEL' %}
+                                <i class="bi bi-clock text-info"></i>
+                            {% elif notification.type_notification == 'RETARD' %}
+                                <i class="bi bi-exclamation-triangle text-danger"></i>
+                            {% elif notification.type_notification == 'RESERVATION' %}
+                                <i class="bi bi-bookmark text-success"></i>
+                            {% else %}
+                                <i class="bi bi-info-circle text-primary"></i>
+                            {% endif %}
+                            {{ notification.get_type_notification_display }}
+                        </h6>
+                        <p class="mb-1">{{ notification.message }}</p>
+                        <small class="text-muted">{{ notification.created_at|date:"d/m/Y H:i" }}</small>
+                    </div>
+                    {% if not notification.lu %}
+                        <span class="badge bg-primary">Nouveau</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Vous n'avez aucune notification.
+    </div>
+{% endif %}
+{% endblock %}
+"""

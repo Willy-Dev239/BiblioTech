@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter un Utilisateur</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group label .required {
+            color: #dc3545;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .checkbox-group {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-group h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-weight: normal;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .role-description {
+            font-size: 12px;
+            color: #666;
+            margin-left: 28px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .back-link {
+            display: inline-block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="{% url 'get_users' %}" class="back-link">← Retour</a>
+
+        <div class="header">
+            <h1>➕ Ajouter un Utilisateur</h1>
+            <p>Remplissez les informations ci-dessous</p>
+        </div>
+
+        <div id="successAlert" class="alert alert-success"></div>
+        <div id="errorAlert" class="alert alert-error"></div>
+
+        <form id="addUserForm" method="POST" action="{% url 'create_user_form' %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="username">Nom d'utilisateur <span class="required">*</span></label>
+                <input type="text" id="username" name="username" required>
+            </div>
+
+            <div class="form-group">
+                <label for="first_name">Prénom</label>
+                <input type="text" id="first_name" name="first_name">
+            </div>
+
+            <div class="form-group">
+                <label for="last_name">Nom de famille</label>
+                <input type="text" id="last_name" name="last_name">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Mot de passe <span class="required">*</span></label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <div class="checkbox-group">
+                <h3>Droits d'accès</h3>
+                
+                <div class="checkbox-item">
+                    <input type="checkbox" id="is_active" name="is_active" checked>
+                    <label for="is_active">Compte actif</label>
+                </div>
+                <div class="role-description">
+                    L'utilisateur peut se connecter au système
+                </div>
+
+                <div class="checkbox-item">
+                    <input type="checkbox" id="is_staff" name="is_staff">
+                    <label for="is_staff">Personnel (Staff)</label>
+                </div>
+                <div class="role-description">
+                    Accès à l'interface d'administration
+                </div>
+
+                <div class="checkbox-item">
+                    <input type="checkbox" id="is_superuser" name="is_superuser">
+                    <label for="is_superuser">Super utilisateur</label>
+                </div>
+                <div class="role-description">
+                    Tous les droits d'administration
+                </div>
+            </div>
+
+    
+
+            <button type="submit" class="btn btn-primary">Créer l'utilisateur</button>
+            <a href="{% url 'get_users' %}" class="btn btn-secondary">Annuler</a>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('addUserForm');
+        
+        form.addEventListener('submit', function(e) {
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username || username.length < 3) {
+                e.preventDefault();
+                showAlert('error', 'Le nom d\'utilisateur doit contenir au moins 3 caractères');
+                return false;
+            }
+
+            if (!email || !email.includes('@')) {
+                e.preventDefault();
+                showAlert('error', 'Veuillez entrer une adresse email valide');
+                return false;
+            }
+
+            if (!password || password.length < 8) {
+                e.preventDefault();
+                showAlert('error', 'Le mot de passe doit contenir au moins 8 caractères');
+                return false;
+            }
+        });
+
+        function showAlert(type, message) {
+            const alertDiv = type === 'success' ? 
+                document.getElementById('successAlert') : 
+                document.getElementById('errorAlert');
+            
+            alertDiv.textContent = message;
+            alertDiv.classList.add('show');
+
+            setTimeout(() => {
+                alertDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Message d'erreur depuis le serveur
+        {% if error %}
+        showAlert('error', '{{ error }}');
+        {% endif %}
+    </script>
+</body>
+</html>

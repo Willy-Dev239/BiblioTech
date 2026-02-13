@@ -1,0 +1,494 @@
+<!-- templates/bibliotheque/base.html -->
+<!DOCTYPE html>
+<html lang="fr">
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BiblioTech{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+   <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="{% url 'home' %}" class="sidebar-brand">
+                <i class="bi bi-book-fill"></i>
+                <span>Bibliothèque</span>
+            </a>
+        </div>
+        
+        <ul class="sidebar-menu">
+            <li>
+                <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                    <i class="bi bi-house-door"></i>
+                    <span>Accueil</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'auteur_list' %}" class="{% if 'auteurs' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-person-lines-fill"></i>
+                    <span>Auteurs</span>
+                </a>
+            </li>
+            
+            <li>
+                <a href="{% url 'livre_list' %}" class="{% if 'livre' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-book"></i>
+                    <span>Catalogue</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'etagere_list' %}" class="{% if 'etagere' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-bookshelf"></i>
+                    <span>Etagere</span>
+                </a>
+            </li>
+
+            <li>
+                <a href="{% url 'compartiment_list' %}" class="{% if 'compartiment' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-th-large"></i>
+                    <span>Compartiment</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'emplacement_list' %}" class="{% if 'emplacement' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    <span>Emplacement</span>
+                </a>
+            </li>
+            
+            {% if user.is_authenticated %}
+                {% if user.is_staff %}
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-heading">Administration</div>
+                    
+                    <li>
+                        <a href="{% url 'abonnes' %}" class="{% if 'etudiant' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-people"></i>
+                            <span>Abonne.es</span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'abonnement_list' %}" class="{% if 'abonnements' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-people"></i>
+                            <span>Abonnement</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="{% url 'emprunt_list' %}" class="{% if 'emprunt' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-arrow-left-right"></i>
+                            <span>Emprunts</span>
+                        </a>
+                    </li>
+                
+
+                     <li>
+                        <a href="{% url 'universite_list' %}">
+                            <i class="bi bi-mortarboard fs-1"></i>
+                            <span>Universites</span>
+                        </a>
+                    </li>
+
+
+                        
+                    <li>
+                        <a href="{% url 'parametrage_dashboard' %}">
+                            <i class="bi bi-gear"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% if user.etudiant %}
+                    <div class="sidebar-divider"></div>
+                    <div class="sidebar-heading">Mon espace</div>
+                    
+                    <li>
+                        <a href="{% url 'notification_list' %}" class="{% if 'notification' in request.resolver_match.url_name %}active{% endif %}">
+                            <i class="bi bi-bell"></i>
+                            <span>Notifications</span>
+                         {% comment %} {% if user.etudiant.notifications.filter(lu=False).count > 0 %}
+                                <span class="notification-badge">
+                                    {{ user.etudiant.notifications.filter(lu=False).count }}
+                                </span>
+                            {% endif %}  {% endcomment %}
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-bookmark"></i>
+                            <span>Mes réservations</span>
+                        </a>
+                    </li>
+                    
+                    <li>
+                        <a href="#">
+                            <i class="bi bi-clock-history"></i>
+                            <span>Historique</span>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                <div class="sidebar-divider"></div>
+                
+                <li>
+                    <a href="{% url 'change_password' %}">
+                        <i class="bi bi-key"></i>
+                        <span>Changer mot de passe</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{% url 'logout' %}">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Déconnexion</span>
+                    </a>
+                </li>
+            {% else %}
+                <div class="sidebar-divider"></div>
+                
+                <li>
+                    <a href="{% url 'login' %}">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        <span>Connexion</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a href="{% url 'register' %}">
+                        <i class="bi bi-person-plus"></i>
+                        <span>Inscription</span>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+        
+        {% if user.is_authenticated %}
+        <div class="sidebar-user">
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-avatar">
+                    <i class="bi bi-person"></i>
+                </div>
+                <div>
+                    <div style="font-size: 0.875rem; font-weight: 600;">{{ user.username }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.6);">
+                        {% if user.is_staff %}Administrateur{% else %}Etudiant{% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </nav>
+    
+    <!-- Overlay pour mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Main wrapper -->
+    <div class="main-wrapper">
+        <!-- Top navbar -->
+        <div class="top-navbar">
+            <button class="sidebar-toggle" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            <h5 class="mb-0">{% block page_title %}
+                
+                <main class="main-content p-4">
+    <!-- Dashboard Header -->
+  {% comment %} <div style="
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-weight: bold;
+  background-color: rgba(255, 255, 255, 0.6);
+  padding: 6px 12px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.1);
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.7);  /* texte noir légèrement transparent */
+">
+  <i class="bi bi-calendar3"></i> {{ today|date:"l, d F Y" }}
+</div> {% endcomment %}
+
+      
+        <!-- Messages -->
+        {% if messages %}
+            <div class="container-fluid mt-3 px-4">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    <div class="dashboard-header">
+       <div style="background-color: #00d9ffff; padding: 20px; margin: -20px -20px 20px -20px;">
+    <h1 style="font-weight: bold; margin: 0; color: white; text-align: center ">BiblioSmart </h1>
+</div>
+    </div>
+
+    <!-- Cards statistiques -->
+    <div class="cardBox">
+        <div class="card" onclick="window.location.href='{% url 'abonnes' %}'">
+            <div>
+                <div class="numbers">{{ total_etudiants|default:0 }}</div>
+                <div class="cardname">Abonne.es</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="people-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card" onclick="window.location.href='{% url 'abonnement_list' %}'">
+            <div>
+                <div class="numbers">{{ total_abonnements|default:0 }}</div>
+                <div class="cardname">Abonnements</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="card-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="numbers">{{ total_livres  | default:0 }}</div>
+                <div class="cardname">Livres</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="book-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="numbers">{{ emprunts_actifs|default:0 }}</div>
+                <div class="cardname">Emprunts Actifs</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="trending-up-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card" onclick="window.location.href='{% url 'universite_list' %}'">
+            <div>
+                <div class="numbers">{{ total_universites|default:0 }}</div>
+                <div class="cardname">Universités</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="school-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card" onclick="window.location.href='{% url 'auteur_list' %}'">
+            <div>
+                <div class="numbers">{{ total_auteurs|default:0 }}</div>
+                <div class="cardname">Auteurs</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="person-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="numbers">{{ emprunts_retard|default:0 }}</div>
+                <div class="cardname">Retards</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="warning-outline"></ion-icon>
+            </div>
+        </div>
+
+        <div class="card">
+            <div>
+                <div class="numbers">{{ revenus_mois|default:0 }} BIF</div>
+                <div class="cardname">Revenus du Mois</div>
+            </div>
+            <div class="iconBx">
+                <ion-icon name="cash-outline"></ion-icon>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Graphiques -->
+    {% comment %} <div class="charts-section">
+        <div class="chart-card">
+            <h3><i class="bi bi-bar-chart-fill"></i> Statistiques Mensuelles</h3>
+            <canvas id="monthlyChart" height="200"></canvas>
+        </div> {% endcomment %}
+
+        {% comment %} <div class="chart-card">
+            <h3><i class="bi bi-pie-chart-fill"></i> Répartition par Niveau</h3>
+            <canvas id="levelChart" height="200"></canvas>
+        </div>
+    </div> {% endcomment %}
+
+    
+
+    <!-- Tableau des dernières activités -->
+    <div class="tabular--wrapper">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="main--title"><i class="bi bi-activity"></i> Activités Récentes</h3>
+            <a href="{% url 'abonnes' %}" class="btn btn-primary btn-sm">Voir Tout</a>
+        </div>
+        
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Abonne.e</th>
+                        <th>Livre</th>
+                        <th>Université</th>
+                        <th>Statut</th>
+                        <th>Date Retour</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for activite in activites_recentes %}
+                    <tr>
+                        <td>{{ activite.annee_inscription|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if activite.type == 'emprunt' %}
+                            <i class="bi bi-arrow-up-circle text-success"></i> Emprunt
+                            {% elif activite.type == 'retour' %}
+                            <i class="bi bi-arrow-down-circle text-info"></i> Retour
+                            {% else %}
+                            <i class="bi bi-person-plus text-primary"></i> Inscription
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% comment %} <a href="{% url 'etudiant_detail' activite.etudiant.pk %}"> {% endcomment %}
+                                {{ activite.etudiant.nom }}  {{ activite.etudiant.prenom }}
+                            {% comment %} </a> {% endcomment %}
+                        </td>
+                        <td>{{ activite.livre|default:"N/A" }}</td>
+                        <td>{{ activite.etudiant.universite.nom }}</td>
+                        <td>
+                            {% if activite.statut == 'actif' %}
+                            <span class="status-badge status-actif">Actif</span>
+                            {% elif activite.statut == 'retard' %}
+                            <span class="status-badge status-inactif">Retard</span>
+                            {% else %}
+                            <span class="status-badge status-pending">En attente</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ activite.date_retour|date:"d/m/Y"|default:"—" }}</td>
+                        <td>
+                            <button class="btn-action btn-view" title="Voir">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                            <button class="btn-action btn-edit" title="Modifier">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn-action btn-delete" title="Supprimer">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4">
+                            <i class="bi bi-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="text-muted mt-2">Aucune activité récente</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Section Alertes -->
+    {% if emprunts_retard > 0 %}
+    <div class="alert alert-warning mt-4" role="alert">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        <strong>Attention!</strong> Vous avez {{ emprunts_retard }} emprunt(s) en retard.
+        <a href="#" class="alert-link">Voir les détails</a>
+    </div>
+    {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+
+                {% endblock %}</h5>
+            <div></div>
+        </div>
+       
+        
+    </div>
+    <!--_======SCRIPTS=====-->
+    <script src="static/js/main.js"></script>
+    <!---ionicons-->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>
+</div>
+
+</div>
+<!--_======SCRIPTS=====-->
+<script src="static/js/main.js"></script>
+<!---ionicons-->
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="mb-0">&copy; 2025 Bibliothèque Universitaire. Tous droits réservés.</p>
+            <p class="mb-0">
+                <small>Système de gestion de bibliothèque</small>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Toggle sidebar pour mobile
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+        }
+        
+        // Fermer le sidebar quand on clique sur un lien en mobile
+        document.querySelectorAll('.sidebar-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth <= 7) {
+                    toggleSidebar();
+                }
+            });
+        });
+    </script>
+    
+</body>
+</html>

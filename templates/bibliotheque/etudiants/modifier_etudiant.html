@@ -1,0 +1,379 @@
+{% extends 'bibliotheque/base.html' %}
+{% block title %}Modifier l'étudiant - {{ etudiant.nom_complet }}{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>
+            <i class="bi bi-pencil-square"></i>
+            Modifier l'étudiant
+        </h2>
+        <a href="{% url 'etudiant_detail' etudiant.pk %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Retour
+        </a>
+    </div>
+
+    <!-- Alerte si étudiant synchronisé depuis API -->
+    {% if etudiant.sync_depuis_api %}
+        <div class="alert alert-warning" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Attention !</strong> Cet étudiant est synchronisé depuis l'API. 
+            Les modifications pourraient être écrasées lors de la prochaine synchronisation.
+        </div>
+    {% endif %}
+
+    <!-- Formulaire de modification -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <strong>Informations de l'étudiant</strong>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <!-- Informations personnelles -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-person"></i> Informations personnelles
+                        </h5>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_nom" class="form-label">Nom <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control {% if form.nom.errors %}is-invalid{% endif %}" 
+                                       id="id_nom" 
+                                       name="nom" 
+                                       value="{{ form.nom.value|default:etudiant.nom }}" 
+                                       required>
+                                {% if form.nom.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.nom.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control {% if form.prenom.errors %}is-invalid{% endif %}" 
+                                       id="id_prenom" 
+                                       name="prenom" 
+                                       value="{{ form.prenom.value|default:etudiant.prenom }}" 
+                                       required>
+                                {% if form.prenom.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.prenom.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_matricule" class="form-label">Matricule <span class="text-danger">*</span></label>
+                                <input type="text" 
+                                       class="form-control {% if form.matricule.errors %}is-invalid{% endif %}" 
+                                       id="id_matricule" 
+                                       name="matricule" 
+                                       value="" 
+                                       required>
+                                {% if form.matricule.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.matricule.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" 
+                                       class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                                       id="id_email" 
+                                       name="email" 
+                                       value="{{ form.email.value|default:etudiant.email }}" 
+                                       required>
+                                {% if form.email.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.email.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_telephone" class="form-label">Téléphone</label>
+                                <input type="text" 
+                                       class="form-control {% if form.telephone.errors %}is-invalid{% endif %}" 
+                                       id="id_telephone" 
+                                       name="telephone" 
+                                       value="{{ form.telephone.value|default:etudiant.telephone|default:'' }}">
+                                {% if form.telephone.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.telephone.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_sexe" class="form-label">Sexe</label>
+                                <select class="form-select {% if form.sexe.errors %}is-invalid{% endif %}" 
+                                        id="id_sexe" 
+                                        name="sexe">
+                                    <option value="">---------</option>
+                                    <option value="M" {% if form.sexe.value == 'M' or etudiant.sexe == 'M' %}selected{% endif %}>Masculin</option>
+                                    <option value="F" {% if form.sexe.value == 'F' or etudiant.sexe == 'F' %}selected{% endif %}>Féminin</option>
+                                </select>
+                                {% if form.sexe.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.sexe.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_date_naissance" class="form-label">Date de naissance</label>
+                                <input type="date" 
+                                       class="form-control {% if form.date_naissance.errors %}is-invalid{% endif %}" 
+                                       id="id_date_naissance" 
+                                       name="date_naissance" 
+                                       value="{{ form.date_naissance.value|default:etudiant.date_naissance|date:'Y-m-d'|default:'' }}">
+                                {% if form.date_naissance.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.date_naissance.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_lieu_naissance" class="form-label">Lieu de naissance</label>
+                                <input type="text" 
+                                       class="form-control {% if form.lieu_naissance.errors %}is-invalid{% endif %}" 
+                                       id="id_lieu_naissance" 
+                                       name="lieu_naissance" 
+                                       value="">
+                                {% if form.lieu_naissance.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.lieu_naissance.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_adresse" class="form-label">Adresse</label>
+                            <textarea class="form-control {% if form.adresse.errors %}is-invalid{% endif %}" 
+                                      id="id_adresse" 
+                                      name="adresse" 
+                                      rows="2"></textarea>
+                            {% if form.adresse.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.adresse.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Parcours académique -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-building"></i> Parcours académique
+                        </h5>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_universite" class="form-label">Université <span class="text-danger">*</span></label>
+                                <select class="form-select {% if form.universite.errors %}is-invalid{% endif %}" 
+                                        id="id_universite" 
+                                        name="universite" 
+                                        required>
+                                    <option value="">Sélectionnez une université</option>
+                                    {% for universite in universites %}
+                                        <option value="{{ universite.id }}" 
+                                                {% if form.universite.value == universite.id|stringformat:"s" or etudiant.universite.id == universite.id %}selected{% endif %}>
+                                            {{ universite.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.universite.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.universite.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_faculte" class="form-label">Faculté</label>
+                                <select class="form-select {% if form.faculte.errors %}is-invalid{% endif %}" 
+                                        id="id_faculte" 
+                                        name="faculte">
+                                    <option value="">Sélectionnez une faculté</option>
+                                    {% for faculte in facultes %}
+                                        <option value="{{ faculte.id }}" 
+                                                {% if form.faculte.value == faculte.id|stringformat:"s" or etudiant.faculte.id == faculte.id %}selected{% endif %}>
+                                            {{ faculte.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.faculte.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.faculte.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_departement" class="form-label">Département</label>
+                                <select class="form-select {% if form.departement.errors %}is-invalid{% endif %}" 
+                                        id="id_departement" 
+                                        name="departement">
+                                    <option value="">Sélectionnez un département</option>
+                                    {% for departement in departements %}
+                                        <option value="{{ departement.id }}" 
+                                                {% if form.departement.value == departement.id|stringformat:"s" or etudiant.departement.id == departement.id %}selected{% endif %}>
+                                            {{ departement.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.departement.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.departement.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_classe" class="form-label">Classe</label>
+                                <select class="form-select {% if form.classe.errors %}is-invalid{% endif %}" 
+                                        id="id_classe" 
+                                        name="classe">
+                                    <option value="">Sélectionnez une classe</option>
+                                    {% for classe in classes %}
+                                        <option value="{{ classe.id }}" 
+                                                {% if form.classe.value == classe.id|stringformat:"s" or etudiant.classe.id == classe.id %}selected{% endif %}>
+                                            {{ classe.nom }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                {% if form.classe.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.classe.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="id_niveau_etude" class="form-label">Niveau d'étude</label>
+                                <input type="text" 
+                                       class="form-control {% if form.niveau_etude.errors %}is-invalid{% endif %}" 
+                                       id="id_niveau_etude" 
+                                       name="niveau_etude" 
+                                       value=""
+                                       placeholder="Ex: L1, L2, M1, etc.">
+                                {% if form.niveau_etude.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.niveau_etude.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="id_annee_academique" class="form-label">Année académique</label>
+                                <input type="text" 
+                                       class="form-control {% if form.annee_academique.errors %}is-invalid{% endif %}" 
+                                       id="id_annee_academique" 
+                                       name="annee_academique" 
+                                       value=""
+                                       placeholder="Ex: 2024-2025">
+                                {% if form.annee_academique.errors %}
+                                    <div class="invalid-feedback">
+                                        {{ form.annee_academique.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Statut -->
+                        <h5 class="mb-3">
+                            <i class="bi bi-gear"></i> Statut
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="id_statut" class="form-label">Statut de l'étudiant <span class="text-danger">*</span></label>
+                            <select class="form-select {% if form.statut.errors %}is-invalid{% endif %}" 
+                                    id="id_statut" 
+                                    name="statut" 
+                                    required>
+                                <option value="actif" {% if form.statut.value == 'actif' or etudiant.statut == 'actif' %}selected{% endif %}>Actif</option>
+                                <option value="inactif" {% if form.statut.value == 'inactif' or etudiant.statut == 'inactif' %}selected{% endif %}>Inactif</option>
+                                <option value="suspendu" {% if form.statut.value == 'suspendu' or etudiant.statut == 'suspendu' %}selected{% endif %}>Suspendu</option>
+                                <option value="diplome" {% if form.statut.value == 'diplome' or etudiant.statut == 'diplome' %}selected{% endif %}>Diplômé</option>
+                            </select>
+                            {% if form.statut.errors %}
+                                <div class="invalid-feedback">
+                                    {{ form.statut.errors.0 }}
+                                </div>
+                            {% endif %}
+                            <small class="form-text text-muted">
+                                Seuls les étudiants avec le statut "Actif" peuvent emprunter des livres.
+                            </small>
+                        </div>
+
+                        <!-- Boutons d'action -->
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{% url 'etudiant_detail' etudiant.pk %}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Enregistrer les modifications
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Colonne de droite - Informations -->
+        <div class="col-md-4">
+            <!-- Carte d'informations -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <strong>Informations</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Créé le :</strong><br>
+                        <small>{{ etudiant.date_creation|date:"d/m/Y H:i" }}</small>
+                    </p>
+                    <p class="mb-0"><strong>Dernière modification :</strong><br>
+                        <small>{{ etudiant.date_modification|date:"d/m/Y H:i" }}</small>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Aide -->
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <i class="bi bi-info-circle"></i> Aide
+                </div>
+                <div class="card-body">
+                    <p><small>
+                        <strong>Champs obligatoires :</strong> Les champs marqués d'un 
+                        <span class="text-danger">*</span> sont obligatoires.
+                    </small></p>
+                    <p><small>
+                        <strong>Parcours académique :</strong> Remplissez au moins l'université. 
+                        Les autres champs sont optionnels.
+                    </small></p>
+                    <p class="mb-0"><small>
+                        <strong>Matricule :</strong> Le matricule doit être unique dans le système.
+                    </small></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

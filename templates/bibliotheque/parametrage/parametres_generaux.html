@@ -1,0 +1,224 @@
+<!-- parametrage/parametres_generaux.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Paramètres Généraux{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <a href="{% url 'parametrage_dashboard' %}" class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+            <h2><i class="fas fa-sliders-h text-primary"></i> Paramètres Généraux</h2>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <!-- Informations de base -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations de la Bibliothèque</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nom de la bibliothèque *</label>
+                        {{ form.nom_bibliotheque }}
+                        {% if form.nom_bibliotheque.errors %}
+                            <div class="text-danger small">{{ form.nom_bibliotheque.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Téléphone *</label>
+                        {{ form.telephone }}
+                        {% if form.telephone.errors %}
+                            <div class="text-danger small">{{ form.telephone.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email *</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <div class="text-danger small">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Site web</label>
+                        {{ form.site_web }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Adresse *</label>
+                    {{ form.adresse }}
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Logo</label>
+                    {{ form.logo }}
+                    {% if params.logo %}
+                        <div class="mt-2">
+                            <img src="{{ params.logo.url }}" alt="Logo" style="max-height: 100px;">
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Horaires -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-clock"></i> Horaires d'Ouverture</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Heure d'ouverture *</label>
+                        {{ form.horaire_ouverture }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Heure de fermeture *</label>
+                        {{ form.horaire_fermeture }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Jours de fermeture</label>
+                        {{ form.jours_fermeture }}
+                        <small class="text-muted">Séparer par des virgules</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Paramètres d'emprunt -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0"><i class="fas fa-book"></i> Règles d'Emprunt</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Durée d'emprunt (jours) *</label>
+                        {{ form.duree_emprunt_defaut }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Emprunts max simultanés *</label>
+                        {{ form.nombre_emprunts_max }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Renouvellements max *</label>
+                        {{ form.nombre_renouvellements_max }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Amendes -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-euro-sign"></i> Pénalités et Amendes</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Amende par jour (Fbu) *</label>
+                        {{ form.amende_par_jour }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Amende maximum (Fbu) *</label>
+                        {{ form.amende_maximum }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Délai suspension (jours) *</label>
+                        {{ form.delai_suspension_apres_retard }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Réservations -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-bookmark"></i> Réservations</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Durée validité réservation (jours) *</label>
+                        {{ form.duree_reservation_jours }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Réservations max simultanées *</label>
+                        {{ form.nombre_reservations_max }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-bell"></i> Notifications et Rappels</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Rappel avant échéance (jours) *</label>
+                        {{ form.rappel_avant_echeance }}
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Rappel après retard (jours) *</label>
+                        {{ form.rappel_apres_retard }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.activer_notifications_email }}
+                            <label class="form-check-label">Activer notifications email</label>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="form-check">
+                            {{ form.activer_notifications_sms }}
+                            <label class="form-check-label">Activer notifications SMS</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carte de membre -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-dark text-white">
+                <h5 class="mb-0"><i class="fas fa-id-card"></i> Carte de Membre</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Durée validité (jours) *</label>
+                        {{ form.duree_validite_carte }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Prix carte (Fbu) *</label>
+                        {{ form.prix_carte }}
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Âge minimum *</label>
+                        {{ form.age_minimum }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-end">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save"></i> Enregistrer les modifications
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

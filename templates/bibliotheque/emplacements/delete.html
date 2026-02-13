@@ -1,0 +1,73 @@
+<!-- emplacements/delete.html -->
+{% extends 'bibliotheque/base.html' %}
+{% load static %}
+
+{% block title %}Supprimer l'emplacement{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <a href="{% url 'emplacement_detail' emplacement.pk %}" 
+               class="btn btn-outline-secondary mb-3">
+                <i class="fas fa-arrow-left"></i> Retour
+            </a>
+
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Confirmer la suppression
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <strong>Attention !</strong> Cette action est irréversible.
+                    </div>
+
+                    <p class="lead">Êtes-vous sûr de vouloir supprimer cet emplacement ?</p>
+
+                    <div class="card bg-light mb-4">
+                        <div class="card-body">
+                            <h6 class="card-title">{{ emplacement.code_emplacement }}</h6>
+                            <p class="card-text mb-0">
+                                <strong>Étagère:</strong> {{ emplacement.compartiment.etagere.code }}<br>
+                                <strong>Compartiment:</strong> N° {{ emplacement.compartiment.numero }}<br>
+                                <strong>Position:</strong> {{ emplacement.position }}<br>
+                                <strong>Statut:</strong> 
+                                {% if emplacement.disponible %}
+                                    <span class="badge bg-success">Disponible</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Occupé</span>
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+
+                    {% if emplacement.livre %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <strong>Attention !</strong> Cet emplacement contient actuellement le livre 
+                            "<strong>{{ emplacement.livre.titre }}</strong>". 
+                            Assurez-vous de déplacer le livre avant de supprimer l'emplacement.
+                        </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'emplacement_detail' emplacement.pk %}" 
+                               class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Annuler
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="fas fa-trash"></i> Oui, supprimer définitivement
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
