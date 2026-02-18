@@ -1,492 +1,796 @@
-<!-- templates/bibliotheque/livres/liste.html -->
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}Catalogue des livres - Bibliothèque{% endblock %}
-
-{% block page_title %}Catalogue des livres{% endblock %}
+{% block title %}Catalogue | BiblioSmart{% endblock %}
+{% block page_title %}Catalogue{% endblock %}
 
 {% block extra_css %}
 <style>
-    .search-header {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 2rem;
-    }
-    
-    .stats-cards {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-    }
-    
-    .stat-icon.primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-    }
-    
-    .stat-icon.success {
-        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-        color: white;
-    }
-    
-    .stat-icon.warning {
-        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        color: white;
-    }
-    
-    .book-card {
-        background: white;
-        border-radius: 10px;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .book-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-    
-    .book-cover {
-        width: 100%;
-        height: 250px;
-        object-fit: cover;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    }
-    
-    .book-cover-placeholder {
-        width: 100%;
-        height: 250px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-    }
-    
-    .book-body {
-        padding: 1rem;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-    }
-    
-    .book-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-        min-height: 2.5rem;
-    }
-    
-    .book-authors {
-        font-size: 0.875rem;
-        color: #7f8c8d;
-        margin-bottom: 0.5rem;
-    }
-    
-    .book-meta {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.25rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .book-actions {
-        margin-top: auto;
-    }
-    
-    .filter-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        margin-right: 0.5rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .filter-badge .remove {
-        cursor: pointer;
-        font-weight: bold;
-    }
-    
-    .view-toggle {
-        display: flex;
-        gap: 0.5rem;
-        background: white;
-        padding: 0.25rem;
-        border-radius: 8px;
-    }
-    
-    .view-toggle button {
-        padding: 0.5rem 1rem;
-        border: none;
-        background: transparent;
-        cursor: pointer;
-        border-radius: 6px;
-        transition: all 0.3s ease;
-    }
-    
-    .view-toggle button.active {
-        background: #3498db;
-        color: white;
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        background: white;
-        border-radius: 10px;
-    }
-    
-    .empty-state i {
-        font-size: 4rem;
-        color: #bdc3c7;
-        margin-bottom: 1rem;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #2c3e6b;
+    --sepia-light: #6b8cba;
+    --sepia-pale: #e0e8f4;
+    --accent: #b04030;
+    --blue: #4a6fa5;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 0% 30%, rgba(139,111,71,.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 70%, rgba(176,64,48,.04) 0%, transparent 45%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Page Header ── */
+  .page-header {
+    background: var(--ink);
+    padding: 2.5rem 3rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::before {
+    content: '📚';
+    position: absolute;
+    right: 2rem; top: 50%;
+    transform: translateY(-50%);
+    font-size: 8rem;
+    opacity: .04;
+    pointer-events: none;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+  .header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+  .header-left .subtitle {
+    font-size: .7rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    margin-bottom: .4rem;
+  }
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: #fff;
+    font-weight: 400;
+    line-height: 1.1;
+  }
+  .header-left h1 em { font-style: italic; color: var(--sepia-light); }
+  .header-count {
+    font-size: .78rem;
+    color: rgba(255,255,255,.4);
+    margin-top: .4rem;
+    letter-spacing: .05em;
+  }
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--accent);
+    color: #fff;
+    padding: .75rem 1.6rem;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 1px;
+    transition: all .2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-add:hover { background: #c04538; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(176,64,48,.35); color: #fff; }
+
+  /* ── Search Bar ── */
+  .search-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 1.2rem 3rem;
+  }
+  .search-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .search-row {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+  .search-field { display: flex; flex-direction: column; gap: .3rem; flex: 2; min-width: 180px; }
+  .filter-field { display: flex; flex-direction: column; gap: .3rem; flex: 1; min-width: 130px; }
+  .search-field label,
+  .filter-field label {
+    font-size: .65rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+  }
+
+  .search-input-wrap { position: relative; }
+  .search-input-wrap .s-icon {
+    position: absolute;
+    left: .8rem; top: 50%;
+    transform: translateY(-50%);
+    color: var(--sepia-light);
+    pointer-events: none;
+    font-size: .9rem;
+  }
+  .search-input-wrap input {
+    width: 100%;
+    padding: .65rem 1rem .65rem 2.4rem;
+  }
+
+  .search-bar input,
+  .search-bar select {
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: .65rem 1rem;
+    font-family: 'Lato', sans-serif;
+    font-size: .88rem;
+    color: var(--ink);
+    background: var(--parchment);
+    outline: none;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-bar input:focus,
+  .search-bar select:focus {
+    border-color: var(--sepia);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(139,111,71,.1);
+  }
+
+  .check-disponible {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .65rem 0;
+    white-space: nowrap;
+  }
+  .check-disponible input[type="checkbox"] {
+    width: 16px; height: 16px;
+    accent-color: var(--ink);
+    cursor: pointer;
+  }
+  .check-disponible label {
+    font-size: .82rem;
+    color: var(--sepia);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .btn-search {
+    padding: .65rem 1.4rem;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    border-radius: 1px;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+    align-self: flex-end;
+  }
+  .btn-search:hover { background: var(--accent); }
+
+  /* Active filters */
+  .active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .5rem;
+    margin-top: 1rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--sepia-pale);
+  }
+  .active-filters .lbl {
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+  }
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: .2rem .7rem;
+    font-size: .75rem;
+    color: var(--sepia);
+  }
+  .filter-chip .rm {
+    cursor: pointer;
+    color: var(--accent);
+    font-weight: 700;
+    font-size: .8rem;
+    line-height: 1;
+  }
+  .filter-chip .rm:hover { color: #c04538; }
+  .btn-clear {
+    font-size: .72rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    border: 1px solid #f0ccc8;
+    border-radius: 20px;
+    padding: .2rem .8rem;
+    transition: all .15s;
+  }
+  .btn-clear:hover { background: #fef5f4; color: var(--accent); }
+
+  /* ── Stats row ── */
+  .stats-row {
+    max-width: 1200px;
+    margin: 1.8rem auto 0;
+    padding: 0 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+  .stat-box {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.1rem 1.4rem;
+    box-shadow: 0 2px 10px var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .stat-box .s-icon {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .s-icon.ink   { background: var(--ink); color: var(--sepia-light); }
+  .s-icon.amber { background: #fff8e1; color: #f57f17; }
+  .s-icon.teal  { background: #e0f2f1; color: #00897b; }
+  .stat-box .s-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-box .s-lbl {
+    font-size: .68rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia);
+    margin-top: .15rem;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    max-width: 1200px;
+    margin: 1.5rem auto .75rem;
+    padding: 0 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: .5rem;
+  }
+  .toolbar .info-text {
+    font-size: .82rem;
+    color: var(--sepia);
+  }
+  .toolbar .info-text strong { color: var(--ink); }
+
+  /* ── Books Grid ── */
+  .books-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* ── Book Card ── */
+  .book-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 4px 16px var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s, box-shadow .2s;
+    opacity: 0;
+    transform: translateY(16px);
+    animation: fadeUp .4s ease forwards;
+  }
+  .book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(26,18,9,.16);
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .book-cover {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+  }
+  .book-cover-placeholder {
+    width: 100%;
+    height: 220px;
+    background: linear-gradient(160deg, var(--ink) 0%, #3d2f1e 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: .5rem;
+    color: var(--sepia-light);
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: .75rem;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .book-cover-placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid rgba(196,168,130,.2);
+    pointer-events: none;
+  }
+  .book-cover-placeholder .cover-icon { font-size: 2.2rem; opacity: .6; }
+  .book-cover-placeholder .cover-title {
+    font-size: .8rem;
+    color: rgba(196,168,130,.8);
+    line-height: 1.3;
+    max-height: 2.6em;
+    overflow: hidden;
+  }
+
+  /* Dispo ribbon */
+  .cover-wrap { position: relative; }
+  .dispo-ribbon {
+    position: absolute;
+    top: .6rem; right: -.1rem;
+    font-size: .62rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    padding: .2rem .6rem;
+    border-radius: 2px 0 0 2px;
+  }
+  .ribbon-on  { background: #4caf50; color: #fff; }
+  .ribbon-off { background: var(--accent); color: #fff; }
+
+  .book-body {
+    padding: 1rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .book-author {
+    font-size: .78rem;
+    color: var(--sepia);
+    font-style: italic;
+  }
+  .book-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3rem;
+    margin-top: .2rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .18rem .55rem;
+    font-size: .64rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-radius: 20px;
+  }
+  .badge-cat    { background: #f0e8de; color: var(--sepia); }
+  .badge-lang   { background: #e8eaf6; color: #3949ab; }
+  .book-info {
+    font-size: .73rem;
+    color: var(--sepia-light);
+    margin-top: auto;
+    padding-top: .4rem;
+    border-top: 1px solid var(--sepia-pale);
+  }
+  .btn-detail {
+    display: block;
+    text-align: center;
+    margin-top: .75rem;
+    padding: .55rem;
+    background: var(--ink);
+    color: #fff;
+    text-decoration: none;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    border-radius: 1px;
+    transition: background .2s;
+  }
+  .btn-detail:hover { background: var(--accent); color: #fff; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1.5rem 4rem;
+  }
+  .empty-inner {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 5rem 2rem;
+    text-align: center;
+  }
+  .empty-inner .e-icon { font-size: 3.5rem; opacity: .25; margin-bottom: 1rem; }
+  .empty-inner h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 400;
+    color: var(--sepia);
+    margin-bottom: .5rem;
+  }
+  .empty-inner p { font-size: .88rem; color: var(--sepia-light); }
+  .btn-reset {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    margin-top: 1.2rem;
+    padding: .65rem 1.4rem;
+    background: var(--ink);
+    color: #fff;
+    text-decoration: none;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 1px;
+    transition: background .2s;
+  }
+  .btn-reset:hover { background: var(--accent); color: #fff; }
+
+  /* ── Pagination ── */
+  .pagination-wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .3rem;
+    flex-wrap: wrap;
+  }
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px; height: 36px;
+    padding: 0 .6rem;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-size: .82rem;
+    color: var(--sepia);
+    text-decoration: none;
+    background: #fff;
+    transition: all .15s;
+  }
+  .page-link:hover, .page-link.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .page-link.disabled { pointer-events: none; opacity: .3; }
+  .page-info {
+    text-align: center;
+    font-size: .75rem;
+    color: var(--sepia-light);
+    margin-top: .75rem;
+  }
+
+  @media (max-width: 768px) {
+    .page-header { padding: 1.5rem; }
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .search-bar { padding: 1rem; }
+    .search-row { flex-direction: column; }
+    .stats-row { grid-template-columns: 1fr; padding: 0 1rem; }
+    .books-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); padding: 0 1rem 3rem; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- En-tête avec recherche -->
-<div class="search-header">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4 class="mb-0">
-            <i class="bi bi-search"></i> Rechercher des livres
-        </h4>
-        {% if user.is_staff %}
-            <a href="{% url 'livre_create' %}" class="btn btn-primary">
-                <i class="bi bi-plus-circle"></i> Ajouter un livre
-            </a>
-        {% endif %}
+
+<!-- Header -->
+<div class="page-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="subtitle">Bibliothèque — Catalogue</div>
+      <h1><em>Les</em> Livres</h1>
+      <div class="header-count">{{ total_livres }} livre{{ total_livres|pluralize }} dans la collection</div>
     </div>
-    
-    <!-- Formulaire de recherche -->
-    <form method="get" id="searchForm">
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label class="form-label small text-muted">Recherche générale</label>
-                {{ form.recherche }}
-            </div>
-            <div class="col-md-3">
-                <label class="form-label small text-muted">Catégorie</label>
-                {{ form.categorie }}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small text-muted">Langue</label>
-                {{ form.langue }}
-            </div>
-            <div class="col-md-2">
-                <label class="form-label small text-muted">Disponibilité</label>
-                <div class="form-check mt-2">
-                    {{ form.disponible }}
-                    <label class="form-check-label" for="{{ form.disponible.id_for_label }}">
-                        Disponibles seulement
-                    </label>
-                </div>
-            </div>
-            <div class="col-md-1">
-                <label class="form-label small text-muted">&nbsp;</label>
-                <button type="submit" class="btn btn-primary w-100">
-                    <i class="bi bi-search"></i>
-                </button>
-            </div>
-        </div>
-    </form>
-    
-    <!-- Filtres actifs -->
-    {% if request.GET %}
-        <div class="mt-3">
-            <div class="d-flex align-items-center flex-wrap">
-                <small class="text-muted me-2">Filtres actifs:</small>
-                {% if request.GET.recherche %}
-                    <span class="filter-badge">
-                        Recherche: "{{ request.GET.recherche }}"
-                        <span class="remove" onclick="removeFilter('recherche')">×</span>
-                    </span>
-                {% endif %}
-                {% if request.GET.categorie %}
-                    <span class="filter-badge">
-                        Catégorie: "{{ request.GET.categorie }}"
-                        <span class="remove" onclick="removeFilter('categorie')">×</span>
-                    </span>
-                {% endif %}
-                {% if request.GET.langue %}
-                    <span class="filter-badge">
-                        Langue: {{ request.GET.langue }}
-                        <span class="remove" onclick="removeFilter('langue')">×</span>
-                    </span>
-                {% endif %}
-                {% if request.GET.disponible %}
-                    <span class="filter-badge">
-                        Disponibles uniquement
-                        <span class="remove" onclick="removeFilter('disponible')">×</span>
-                    </span>
-                {% endif %}
-                <a href="{% url 'livre_list' %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bi bi-x-circle"></i> Effacer tous
-                </a>
-            </div>
-        </div>
+    {% if user.is_staff %}
+      <a href="{% url 'livre_create' %}" class="btn-add">+ Ajouter un livre</a>
     {% endif %}
+  </div>
 </div>
 
-<!-- Statistiques -->
-<div class="stats-cards">
-    <div class="stat-card">
-        <div class="stat-icon primary">
-            <i class="bi bi-book"></i>
+<!-- Search -->
+<div class="search-bar">
+  <div class="search-inner">
+    <form method="get" id="searchForm">
+      <div class="search-row">
+
+        <div class="search-field">
+          <label for="{{ form.recherche.id_for_label }}">Recherche</label>
+          <div class="search-input-wrap">
+            <span class="s-icon">🔍</span>
+            {{ form.recherche }}
+          </div>
         </div>
-        <div>
-            <div class="h4 mb-0">{{ total_livres }}</div>
-            <small class="text-muted">Total des livres</small>
+
+        <div class="filter-field">
+          <label for="{{ form.categorie.id_for_label }}">Catégorie</label>
+          {{ form.categorie }}
         </div>
+
+        <div class="filter-field">
+          <label for="{{ form.langue.id_for_label }}">Langue</label>
+          {{ form.langue }}
+        </div>
+
+        <div class="check-disponible">
+          {{ form.disponible }}
+          <label for="{{ form.disponible.id_for_label }}">Disponibles</label>
+        </div>
+
+        <button type="submit" class="btn-search">Filtrer →</button>
+      </div>
+    </form>
+
+    {% if request.GET %}
+    <div class="active-filters">
+      <span class="lbl">Filtres actifs :</span>
+      {% if request.GET.recherche %}
+        <span class="filter-chip">
+          « {{ request.GET.recherche }} »
+          <span class="rm" onclick="removeFilter('recherche')">✕</span>
+        </span>
+      {% endif %}
+      {% if request.GET.categorie %}
+        <span class="filter-chip">
+          {{ request.GET.categorie }}
+          <span class="rm" onclick="removeFilter('categorie')">✕</span>
+        </span>
+      {% endif %}
+      {% if request.GET.langue %}
+        <span class="filter-chip">
+          {{ request.GET.langue }}
+          <span class="rm" onclick="removeFilter('langue')">✕</span>
+        </span>
+      {% endif %}
+      {% if request.GET.disponible %}
+        <span class="filter-chip">
+          Disponibles uniquement
+          <span class="rm" onclick="removeFilter('disponible')">✕</span>
+        </span>
+      {% endif %}
+      <a href="{% url 'livre_list' %}" class="btn-clear">✕ Tout effacer</a>
     </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon success">
-            <i class="bi bi-check-circle"></i>
-        </div>
-        <div>
-            <div class="h4 mb-0">{{ page_obj.object_list|length }}</div>
-            <small class="text-muted">Sur cette page</small>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon warning">
-            <i class="bi bi-grid"></i>
-        </div>
-        <div>
-            <div class="h4 mb-0">{{ page_obj.paginator.num_pages }}</div>
-            <small class="text-muted">Pages totales</small>
-        </div>
-    </div>
+    {% endif %}
+  </div>
 </div>
 
-<!-- Barre d'outils -->
-<div class="d-flex justify-content-between align-items-center mb-3">
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-box">
+    <div class="s-icon ink">📚</div>
     <div>
-        <p class="mb-0 text-muted">
-            <i class="bi bi-info-circle"></i>
-            Affichage de 
-            <strong>{{ page_obj.start_index }}</strong> à 
-            <strong>{{ page_obj.end_index }}</strong> 
-            sur <strong>{{ total_livres }}</strong> livre(s)
-        </p>
+      <div class="s-num">{{ total_livres }}</div>
+      <div class="s-lbl">Total des livres</div>
     </div>
+  </div>
+  <div class="stat-box">
+    <div class="s-icon teal">✓</div>
+    <div>
+      <div class="s-num">{{ page_obj.object_list|length }}</div>
+      <div class="s-lbl">Sur cette page</div>
+    </div>
+  </div>
+  <div class="stat-box">
+    <div class="s-icon amber">≡</div>
+    <div>
+      <div class="s-num">{{ page_obj.paginator.num_pages }}</div>
+      <div class="s-lbl">Pages totales</div>
+    </div>
+  </div>
 </div>
 
-<!-- Grille des livres -->
+<!-- Toolbar -->
+<div class="toolbar">
+  <p class="info-text">
+    Affichage de <strong>{{ page_obj.start_index }}</strong> à
+    <strong>{{ page_obj.end_index }}</strong>
+    sur <strong>{{ total_livres }}</strong> livre{{ total_livres|pluralize }}
+  </p>
+</div>
+
+<!-- Grid -->
 {% if page_obj %}
-    <div class="row g-4" id="booksGrid">
-        {% for livre in page_obj %}
-            <div class="col-lg-3 col-md-4 col-sm-6">
-                <div class="book-card">
-                    {% if livre.couverture %}
-                        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}" class="book-cover">
-                    {% else %}
-                        <div class="book-cover-placeholder">
-                            <i class="bi bi-book"></i>
-                        </div>
-                    {% endif %}
-                    
-                    <div class="book-body">
-                        <h6 class="book-title">{{ livre.titre }}</h6>
-                        
-                        <p class="book-authors">
-                            <i class="bi bi-person"></i> {{ livre.auteurs_liste|truncatewords:3 }}
-                        </p>
-                        
-                        <div class="book-meta">
-                            <span class="badge bg-secondary">
-                                <i class="bi bi-translate"></i> {{ livre.get_langue_display }}
-                            </span>
-                            <span class="badge bg-info text-dark">
-                                <i class="bi bi-tag"></i> {{ livre.categorie|truncatewords:2 }}
-                            </span>
-                            {% if livre.disponible %}
-                                <span class="badge bg-success">
-                                    <i class="bi bi-check-circle"></i> Disponible
-                                </span>
-                            {% else %}
-                                <span class="badge bg-danger">
-                                    <i class="bi bi-x-circle"></i> Emprunté
-                                </span>
-                            {% endif %}
-                        </div>
-                        
-                        <div class="small text-muted mb-2">
-                            <i class="bi bi-calendar3"></i> {{ livre.annee_publication }} • 
-                            <i class="bi bi-file-text"></i> {{ livre.nombre_pages }} pages
-                        </div>
-                        
-                        <div class="small text-muted mb-3">
-                            <i class="bi bi-building"></i> {{ livre.editeur|truncatewords:3 }}
-                        </div>
-                        
-                        <div class="book-actions">
-                            <a href="{% url 'livre_detail' livre.pk %}" class="btn btn-sm btn-primary w-100">
-                                <i class="bi bi-eye"></i> Voir détails
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        {% endfor %}
+<div class="books-grid" id="booksGrid">
+  {% for livre in page_obj %}
+  <div class="book-card" style="animation-delay: {{ forloop.counter0 }}0ms">
+    <div class="cover-wrap">
+      {% if livre.couverture %}
+        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}" class="book-cover">
+      {% else %}
+        <div class="book-cover-placeholder">
+          <span class="cover-icon">📖</span>
+          <span class="cover-title">{{ livre.titre }}</span>
+        </div>
+      {% endif %}
+      {% if livre.disponible %}
+        <span class="dispo-ribbon ribbon-on">Disponible</span>
+      {% else %}
+        <span class="dispo-ribbon ribbon-off">Emprunté</span>
+      {% endif %}
     </div>
+
+    <div class="book-body">
+      <div class="book-title">{{ livre.titre }}</div>
+      <div class="book-author">{{ livre.auteurs_liste|truncatewords:4 }}</div>
+
+      <div class="book-meta">
+        <span class="badge badge-lang">{{ livre.get_langue_display }}</span>
+        <span class="badge badge-cat">{{ livre.categorie|truncatewords:2 }}</span>
+      </div>
+
+      <div class="book-info">
+        {{ livre.annee_publication }} · {{ livre.nombre_pages }} p. · {{ livre.editeur|truncatewords:2 }}
+      </div>
+
+      <a href="{% url 'livre_detail' livre.pk %}" class="btn-detail">Voir le détail →</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
 {% else %}
-    <div class="empty-state">
-        <i class="bi bi-inbox"></i>
-        <h4>Aucun livre trouvé</h4>
-        <p class="text-muted">
-            {% if request.GET %}
-                Aucun livre ne correspond à vos critères de recherche.
-                <br>
-                <a href="{% url 'livre_list' %}" class="btn btn-primary mt-3">
-                    <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser la recherche
-                </a>
-            {% else %}
-                La bibliothèque ne contient aucun livre pour le moment.
-            {% endif %}
-        </p>
-    </div>
+<div class="empty-state">
+  <div class="empty-inner">
+    <div class="e-icon">📭</div>
+    <h3>Aucun livre trouvé</h3>
+    {% if request.GET %}
+      <p>Aucun livre ne correspond à vos critères de recherche.</p>
+      <a href="{% url 'livre_list' %}" class="btn-reset">↺ Réinitialiser</a>
+    {% else %}
+      <p>La bibliothèque ne contient aucun livre pour le moment.</p>
+    {% endif %}
+  </div>
+</div>
 {% endif %}
 
 <!-- Pagination -->
 {% if page_obj.has_other_pages %}
-    <nav aria-label="Navigation pagination" class="mt-4">
-        <ul class="pagination justify-content-center">
-            {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page=1">
-                        <i class="bi bi-chevron-double-left"></i> Première
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.previous_page_number }}">
-                        <i class="bi bi-chevron-left"></i> Précédent
-                    </a>
-                </li>
-            {% endif %}
-            
-            {% for num in page_obj.paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a class="page-link" href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ num }}">
-                            {{ num }}
-                        </a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-            
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.next_page_number }}">
-                        Suivant <i class="bi bi-chevron-right"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.paginator.num_pages }}">
-                        Dernière <i class="bi bi-chevron-double-right"></i>
-                    </a>
-                </li>
-            {% endif %}
-        </ul>
-    </nav>
-    
-    <!-- Info pagination -->
-    <div class="text-center text-muted small">
-        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
-    </div>
+<div class="pagination-wrap">
+  <div class="pagination">
+
+    {% if page_obj.has_previous %}
+      <a href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page=1" class="page-link">«</a>
+      <a href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.previous_page_number }}" class="page-link">‹</a>
+    {% else %}
+      <span class="page-link disabled">«</span>
+      <span class="page-link disabled">‹</span>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span class="page-link active">{{ num }}</span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ num }}" class="page-link">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <a href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.next_page_number }}" class="page-link">›</a>
+      <a href="?{% if request.GET.recherche %}recherche={{ request.GET.recherche }}&{% endif %}{% if request.GET.categorie %}categorie={{ request.GET.categorie }}&{% endif %}{% if request.GET.langue %}langue={{ request.GET.langue }}&{% endif %}{% if request.GET.disponible %}disponible=on&{% endif %}page={{ page_obj.paginator.num_pages }}" class="page-link">»</a>
+    {% else %}
+      <span class="page-link disabled">›</span>
+      <span class="page-link disabled">»</span>
+    {% endif %}
+
+  </div>
+  <div class="page-info">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}</div>
+</div>
 {% endif %}
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Fonction pour retirer un filtre
-    function removeFilter(filterName) {
-        const url = new URL(window.location);
-        url.searchParams.delete(filterName);
-        window.location.href = url.toString();
-    }
-    
-    // Soumission automatique du formulaire lors du changement de langue
-    document.getElementById('{{ form.langue.id_for_label }}').addEventListener('change', function() {
-        document.getElementById('searchForm').submit();
+  // Retrait d'un filtre
+  function removeFilter(name) {
+    const url = new URL(window.location);
+    url.searchParams.delete(name);
+    window.location.href = url.toString();
+  }
+
+  // Auto-submit sur changement de langue
+  const langueSelect = document.getElementById('{{ form.langue.id_for_label }}');
+  if (langueSelect) {
+    langueSelect.addEventListener('change', () => document.getElementById('searchForm').submit());
+  }
+
+  // Animation décalée des cartes
+  document.querySelectorAll('.book-card').forEach((card, i) => {
+    card.style.animationDelay = (i * 40) + 'ms';
+  });
+
+  // Recherche avec debounce
+  let timer;
+  const searchInput = document.getElementById('{{ form.recherche.id_for_label }}');
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => document.getElementById('searchForm').submit(), 900);
     });
-    
-    // Animation au chargement
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.book-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'all 0.5s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 50);
-        });
-    });
-    
-    // Recherche en temps réel (debounce)
-    let searchTimeout;
-    const searchInput = document.getElementById('{{ form.recherche.id_for_label }}');
-    
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            
-            // Afficher un indicateur de chargement
-            const button = document.querySelector('button[type="submit"]');
-            const originalContent = button.innerHTML;
-            
-            searchTimeout = setTimeout(() => {
-                button.innerHTML = '<i class="bi bi-hourglass-split"></i>';
-                document.getElementById('searchForm').submit();
-            }, 1000); // Attendre 1 seconde après la dernière frappe
-        });
-    }
+  }
 </script>
 {% endblock %}

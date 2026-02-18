@@ -233,4 +233,4 @@ window.bibliotheque = {
     fetchData,
     showNotification,
     validateForm
-};tt
+};

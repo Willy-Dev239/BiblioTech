@@ -9,7 +9,7 @@ from .models import (
     Universite, Auteur, Etagere, Compartiment, EmplacementLivre,
     Livre, Personnel, Etudiant, Abonnement, Emprunt, Reservation, Notification
 )
-from .models import Etudiant1, Emprunt, Livre
+from .models import Etudiant1, Faculte1, Departement, Classe, Emprunt, Livre, Auteur
 from .models import (
     ParametreBibliotheque,
     CategorieEmprunteur,
@@ -142,20 +142,158 @@ class UniversiteForm(forms.ModelForm):
         }
 
 
+
+GENRE_LITTERAIRE_CHOICES = [
+    ('', '-- Choisir un genre --'),
+    ('roman', 'Roman'),
+    ('poesie', 'Poésie'),
+    ('science_fiction', 'Science-Fiction'),
+    ('fantasy', 'Fantasy'),
+    ('thriller', 'Thriller'),
+    ('policier', 'Policier'),
+    ('biographie', 'Biographie'),
+    ('essai', 'Essai'),
+    ('conte', 'Conte'),
+    ('nouvelle', 'Nouvelle'),
+    ('theatre', 'Théâtre'),
+    ('autre', 'Autre'),
+]
+
+
 class AuteurForm(forms.ModelForm):
-    """Formulaire pour les auteurs"""
+
+    genre_litteraire = forms.ChoiceField(
+        choices=GENRE_LITTERAIRE_CHOICES,
+        required=False,
+        widget=forms.Select(attrs={
+            'class': 'form-select',
+        })
+    )
+
     class Meta:
         model = Auteur
-        fields = ['nom', 'prenom', 'date_naissance', 'nationalite', 'biographie']
+        exclude = ['created_at', 'updated_at']
+
         widgets = {
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
-            'prenom': forms.TextInput(attrs={'class': 'form-control'}),
-            'date_naissance': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'nationalite': forms.TextInput(attrs={'class': 'form-control'}),
-            'biographie': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            # Informations personnelles
+            'nom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom de famille',
+            }),
+            'prenom': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Prénom',
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'exemple@email.com',
+            }),
+            'date_naissance': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'date_deces': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'nationalite': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Française, Canadienne...',
+            }),
+            'pays_origine': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Pays d\'origine',
+            }),
+            'pseudonyme': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nom de plume (si applicable)',
+            }),
+            'biographie': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': 'Biographie de l\'auteur...',
+            }),
+
+            # Informations professionnelles
+            'prix_litteraires': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Ex: Prix Goncourt 2010, Prix Nobel 2015...',
+            }),
+            'nb_livres_publies': forms.NumberInput(attrs={
+                'class': 'form-control',
+                'min': 0,
+            }),
+            'premier_livre': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date',
+            }),
+            'maison_edition_principale': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Gallimard, Hachette...',
+            }),
+
+            # Statut
+            'est_actif': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
+            'est_verifie': forms.CheckboxInput(attrs={
+                'class': 'form-check-input',
+            }),
         }
 
+        labels = {
+            'nom': 'Nom',
+            'prenom': 'Prénom',
+            'email': 'Adresse email',
+            'date_naissance': 'Date de naissance',
+            'nationalite': 'Nationalité',
+            'pays_origine': 'Pays d\'origine',
+            'pseudonyme': 'Pseudonyme',
+            'biographie': 'Biographie',
+            'genre_litteraire': 'Genre littéraire',
+            'prix_litteraires': 'Prix littéraires',
+            'nb_livres_publies': 'Nombre de livres publiés',
+            'premier_livre': 'Date du premier livre',
+            'maison_edition_principale': 'Maison d\'édition principale',
+            'est_actif': 'Auteur actif',
+            'est_verifie': 'Profil vérifié',
+        }
 
+        help_texts = {
+            'pseudonyme': 'Laissez vide si l\'auteur écrit sous son vrai nom.',
+            'prix_litteraires': 'Listez les prix séparés par des virgules.',
+            'est_verifie': 'Cochez si le profil a été vérifié par un administrateur.',
+        }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        date_naissance = cleaned_data.get('date_naissance')
+        premier_livre = cleaned_data.get('premier_livre')
+
+        # Vérifier que la date du premier livre est après la naissance
+        if date_naissance and premier_livre:
+            if premier_livre <= date_naissance:
+                raise forms.ValidationError(
+                    "La date du premier livre doit être postérieure à la date de naissance."
+                )
+
+        return cleaned_data
+
+    def clean_nb_livres_publies(self):
+        nb = self.cleaned_data.get('nb_livres_publies')
+        if nb is not None and nb < 0:
+            raise forms.ValidationError("Le nombre de livres ne peut pas être négatif.")
+        return nb
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if email and Auteur.objects.filter(email=email).exclude(pk=self.instance.pk).exists():
+            raise forms.ValidationError("Un auteur avec cet email existe déjà.")
+        return email
+    
+    
+    
 class EtagereForm(forms.ModelForm):
     """Formulaire pour les étagères"""
     class Meta:
@@ -197,8 +335,14 @@ class EmplacementLivreForm(forms.ModelForm):
         }
 
 
+from django import forms
+from django.core.exceptions import ValidationError
+from .models import Livre
+
+
 class LivreForm(forms.ModelForm):
     """Formulaire pour les livres"""
+
     class Meta:
         model = Livre
         fields = [
@@ -208,22 +352,76 @@ class LivreForm(forms.ModelForm):
             'emplacement', 'disponible', 'version_numerique'
         ]
         widgets = {
-            'isbn': forms.TextInput(attrs={'class': 'form-control'}),
-            'titre': forms.TextInput(attrs={'class': 'form-control'}),
-            'sous_titre': forms.TextInput(attrs={'class': 'form-control'}),
-            'auteurs': forms.SelectMultiple(attrs={'class': 'form-control'}),
-            'editeur': forms.TextInput(attrs={'class': 'form-control'}),
-            'annee_publication': forms.NumberInput(attrs={'class': 'form-control'}),
-            'nombre_pages': forms.NumberInput(attrs={'class': 'form-control'}),
-            'langue': forms.Select(attrs={'class': 'form-control'}),
-            'categorie': forms.TextInput(attrs={'class': 'form-control'}),
-            'resume': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
-            'couverture': forms.FileInput(attrs={'class': 'form-control'}),
-            'nombre_exemplaires': forms.NumberInput(attrs={'class': 'form-control'}),
-            'etat': forms.Select(attrs={'class': 'form-control'}),
-            'emplacement': forms.Select(attrs={'class': 'form-control'}),
-            'disponible': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'version_numerique': forms.FileInput(attrs={'class': 'form-control'}),
+            'isbn': forms.TextInput(attrs={
+                'placeholder': 'Ex : 9782070360024',
+            }),
+            'titre': forms.TextInput(attrs={
+                'placeholder': 'Titre complet du livre',
+                'maxlength': 300,
+            }),
+            'sous_titre': forms.TextInput(attrs={
+                'placeholder': 'Sous-titre (optionnel)',
+            }),
+            'auteurs': forms.SelectMultiple(attrs={
+                'size': 5,
+            }),
+            'editeur': forms.TextInput(attrs={
+                'placeholder': 'Ex : Gallimard, Hachette…',
+            }),
+            'annee_publication': forms.NumberInput(attrs={
+                'placeholder': 'Ex : 2024',
+                'min': 1000,
+                'max': 2100,
+            }),
+            'nombre_pages': forms.NumberInput(attrs={
+                'placeholder': 'Ex : 320',
+                'min': 1,
+            }),
+            'langue': forms.Select(),
+            'categorie': forms.TextInput(attrs={
+                'placeholder': 'Ex : Roman, Informatique, Histoire…',
+            }),
+            'resume': forms.Textarea(attrs={
+                'rows': 4,
+                'placeholder': 'Résumé ou description du livre…',
+            }),
+            'couverture': forms.FileInput(),
+            'nombre_exemplaires': forms.NumberInput(attrs={
+                'placeholder': 'Ex : 3',
+                'min': 0,
+            }),
+            'etat': forms.Select(),
+            'emplacement': forms.Select(),
+            'disponible': forms.CheckboxInput(),
+            'version_numerique': forms.FileInput(),
+        }
+
+        labels = {
+            'isbn': 'ISBN',
+            'titre': 'Titre du livre',
+            'sous_titre': 'Sous-titre',
+            'auteurs': 'Auteur(s)',
+            'editeur': 'Éditeur',
+            'annee_publication': 'Année de publication',
+            'nombre_pages': 'Nombre de pages',
+            'langue': 'Langue',
+            'categorie': 'Catégorie',
+            'resume': 'Résumé',
+            'couverture': 'Image de couverture',
+            'nombre_exemplaires': 'Nombre d\'exemplaires',
+            'etat': 'État du livre',
+            'emplacement': 'Emplacement physique',
+            'disponible': 'Disponible à l\'emprunt',
+            'version_numerique': 'Version numérique (PDF)',
+        }
+
+        help_texts = {
+            'isbn': 'Code à 13 chiffres uniquement.',
+            'auteurs': 'Maintenez Ctrl (Windows) ou Cmd (Mac) pour sélectionner plusieurs auteurs.',
+            'couverture': 'Formats JPG / PNG — Max 5 Mo.',
+            'version_numerique': 'Format PDF uniquement — Max 50 Mo.',
+            'disponible': 'Cochez si le livre peut être emprunté par les membres.',
+            'emplacement': 'Localisation physique dans la bibliothèque.',
         }
 
     def clean_isbn(self):
@@ -232,8 +430,29 @@ class LivreForm(forms.ModelForm):
             raise ValidationError("L'ISBN doit contenir uniquement des chiffres.")
         if isbn and len(isbn) != 13:
             raise ValidationError("L'ISBN doit contenir exactement 13 chiffres.")
+        # Vérifier l'unicité en excluant l'instance en cours de modification
+        if isbn and Livre.objects.filter(isbn=isbn).exclude(pk=self.instance.pk).exists():
+            raise ValidationError("Un livre avec cet ISBN existe déjà.")
         return isbn
 
+    def clean_annee_publication(self):
+        annee = self.cleaned_data.get('annee_publication')
+        from datetime import date
+        if annee and (annee < 1000 or annee > date.today().year):
+            raise ValidationError(f"L'année doit être comprise entre 1000 et {date.today().year}.")
+        return annee
+
+    def clean_nombre_pages(self):
+        pages = self.cleaned_data.get('nombre_pages')
+        if pages is not None and pages <= 0:
+            raise ValidationError("Le nombre de pages doit être supérieur à 0.")
+        return pages
+
+    def clean_nombre_exemplaires(self):
+        nb = self.cleaned_data.get('nombre_exemplaires')
+        if nb is not None and nb < 0:
+            raise ValidationError("Le nombre d'exemplaires ne peut pas être négatif.")
+        return nb
 
 class PersonnelForm(forms.ModelForm):
     """Formulaire pour le personnel"""
@@ -590,10 +809,10 @@ class EmpruntForm(forms.ModelForm):
                 'class': 'form-select',
                 'required': True
             }),
-            # 'date_emprunt': forms.DateInput(attrs={
-            #     'class': 'form-control',
-            #     'type': 'date'
-            # }),
+            'date_emprunt': forms.DateInput(attrs={
+                'class': 'form-control',
+                'type': 'date'
+            }),
             'date_retour_prevue': forms.DateInput(attrs={
                 'class': 'form-control',
                 'type': 'date'
@@ -609,7 +828,7 @@ class EmpruntForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         # Filtrer uniquement les livres disponibles
         self.fields['livre'].queryset = Livre.objects.filter(
-            nombre_exemplaires_disponibles__gt=0
+            nombre_exemplaires__gt=0
         )
         
         # Rendre les remarques optionnelles
@@ -683,12 +902,6 @@ class ImporterEtudiantAPIForm(forms.Form):
 
      
 
-
-
-
-
-from django import forms
-from .models import Etudiant, Universite, Faculte1, Departement, Classe
 
 
 class EtudiantForm(forms.ModelForm):

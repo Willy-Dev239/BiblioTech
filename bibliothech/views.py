@@ -452,6 +452,260 @@ def livre_delete_view(request, pk):
 
 # ==================== VUES ÉTUDIANTS ====================
 
+
+@login_required
+def abonnes(request):
+    """
+    Vue pour lister tous les abonnés (étudiants)
+    """
+    # Récupérer tous les étudiants avec leurs relations
+    etudiants = Etudiant.objects.all().select_related('universite').order_by('nom', 'prenom')
+    
+    # Recherche
+    search = request.GET.get('search')
+    if search:
+        etudiants = etudiants.filter(
+            Q(nom__icontains=search) |
+            Q(prenom__icontains=search) |
+            Q(email__icontains=search) |
+            Q(telephone__icontains=search)
+        )
+    
+    # Filtre par université
+    universite_id = request.GET.get('universite')
+    if universite_id:
+        etudiants = etudiants.filter(universite_id=universite_id)
+    
+    # Annoter avec le nombre d'emprunts actifs
+    etudiants = etudiants.annotate(
+        emprunts_actifs=Count('emprunts', filter=Q(emprunts__date_retour_effective__isnull=True))
+    )
+    
+    # Liste des universités pour le filtre
+    universites = Universite.objects.all()
+    
+    context = {
+        'etudiants': etudiants,
+        'universites': universites,
+        'search': search,
+        'universite_filtre': universite_id,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonnement_list.html', context)
+
+
+
+
+@login_required
+def abonne_detail(request, pk):
+    """
+    Vue pour afficher les détails d'un abonné
+    """
+    etudiant = get_object_or_404(Etudiant, pk=pk)
+    
+    # Récupérer les emprunts de l'étudiant
+    emprunts_actifs = Emprunt.objects.filter(
+        etudiant=etudiant,
+        date_retour_effective__isnull=True
+    ).select_related('livre', 'livre__auteur').order_by('-date_emprunt')
+    
+    emprunts_historique = Emprunt.objects.filter(
+        etudiant=etudiant,
+        date_retour_effective__isnull=False
+    ).select_related('livre', 'livre__auteur').order_by('-date_retour_effective')[:10]
+    
+    # Récupérer les abonnements
+    abonnements = Abonnement.objects.filter(etudiant=etudiant).order_by('-annee_inscription')
+    
+    # Calculer les statistiques
+    total_emprunts = Emprunt.objects.filter(etudiant=etudiant).count()
+    emprunts_en_cours = emprunts_actifs.count()
+    
+    # Emprunts en retard
+    aujourd_hui = timezone.now().date()
+    emprunts_retard = emprunts_actifs.filter(date_retour_prevue__lt=aujourd_hui).count()
+    
+    # Calculer les pénalités
+    penalites_total = 0
+    for emprunt in emprunts_actifs:
+        if emprunt.date_retour_prevue < aujourd_hui:
+            jours_retard = (aujourd_hui - emprunt.date_retour_prevue).days
+            penalites_total += jours_retard * 500  # 500 BIF par jour
+    
+    context = {
+        'etudiant': etudiant,
+        'emprunts_actifs': emprunts_actifs,
+        'emprunts_historique': emprunts_historique,
+        'abonnements': abonnements,
+        'total_emprunts': total_emprunts,
+        'emprunts_en_cours': emprunts_en_cours,
+        'emprunts_retard': emprunts_retard,
+        'penalites_total': penalites_total,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonne_detail.html', context)
+
+@login_required
+def abonne_create(request):
+    """
+    Vue pour créer un nouvel abonné
+    """
+    if request.method == 'POST':
+        nom = request.POST.get('nom')
+        prenom = request.POST.get('prenom')
+        email = request.POST.get('email')
+        telephone = request.POST.get('telephone')
+        adresse = request.POST.get('adresse')
+        universite_id = request.POST.get('universite')
+        date_naissance = request.POST.get('date_naissance')
+        
+        try:
+            universite = Universite.objects.get(pk=universite_id)
+            
+            # Créer l'étudiant
+            etudiant = Etudiant.objects.create(
+                nom=nom,
+                prenom=prenom,
+                email=email,
+                telephone=telephone,
+                adresse=adresse,
+                universite=universite,
+                date_naissance=date_naissance if date_naissance else None
+            )
+            
+            messages.success(request, f'Abonné {nom} {prenom} créé avec succès.')
+            return redirect('abonne_detail', pk=etudiant.pk)
+            
+        except Universite.DoesNotExist:
+            messages.error(request, 'Université introuvable.')
+            return redirect('abonne_create')
+        except Exception as e:
+            messages.error(request, f'Erreur lors de la création: {str(e)}')
+            return redirect('abonne_create')
+    
+    # GET request
+    universites = Universite.objects.all().order_by('nom')
+    
+    context = {
+        'universites': universites,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonne_create.html', context)
+
+@login_required
+def abonne_edit(request, pk):
+    """
+    Vue pour modifier un abonné existant
+    """
+    etudiant = get_object_or_404(Etudiant, pk=pk)
+    
+    if request.method == 'POST':
+        etudiant.nom = request.POST.get('nom')
+        etudiant.prenom = request.POST.get('prenom')
+        etudiant.email = request.POST.get('email')
+        etudiant.telephone = request.POST.get('telephone')
+        etudiant.adresse = request.POST.get('adresse')
+        
+        universite_id = request.POST.get('universite')
+        date_naissance = request.POST.get('date_naissance')
+        
+        try:
+            if universite_id:
+                etudiant.universite = Universite.objects.get(pk=universite_id)
+            
+            if date_naissance:
+                etudiant.date_naissance = date_naissance
+            
+            etudiant.save()
+            
+            messages.success(request, f'Abonné {etudiant.nom} {etudiant.prenom} modifié avec succès.')
+            return redirect('abonne_detail', pk=etudiant.pk)
+            
+        except Universite.DoesNotExist:
+            messages.error(request, 'Université introuvable.')
+        except Exception as e:
+            messages.error(request, f'Erreur lors de la modification: {str(e)}')
+    
+    # GET request
+    universites = Universite.objects.all().order_by('nom')
+    
+    context = {
+        'etudiant': etudiant,
+        'universites': universites,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonne_edit.html', context)
+
+@login_required
+def abonne_delete(request, pk):
+    """
+    Vue pour supprimer un abonné
+    """
+    etudiant = get_object_or_404(Etudiant, pk=pk)
+    
+    # Vérifier s'il y a des emprunts actifs
+    emprunts_actifs = Emprunt.objects.filter(
+        etudiant=etudiant,
+        date_retour_effective__isnull=True
+    ).count()
+    
+    if request.method == 'POST':
+        if emprunts_actifs > 0:
+            messages.error(
+                request, 
+                f'Impossible de supprimer {etudiant.nom} {etudiant.prenom}. '
+                f'Il/Elle a {emprunts_actifs} emprunt(s) actif(s).'
+            )
+            return redirect('abonne_detail', pk=pk)
+        
+        nom_complet = f"{etudiant.nom} {etudiant.prenom}"
+        etudiant.delete()
+        
+        messages.success(request, f'Abonné {nom_complet} supprimé avec succès.')
+        return redirect('abonnes')
+    
+    context = {
+        'etudiant': etudiant,
+        'emprunts_actifs': emprunts_actifs,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonne_delete.html', context)
+
+@login_required
+def abonne_emprunts(request, pk):
+    """
+    Vue pour afficher tous les emprunts d'un abonné
+    """
+    etudiant = get_object_or_404(Etudiant, pk=pk)
+    
+    # Filtrer par statut
+    statut = request.GET.get('statut', 'tous')
+    
+    emprunts = Emprunt.objects.filter(etudiant=etudiant).select_related('livre', 'livre__auteur')
+    
+    if statut == 'actif':
+        emprunts = emprunts.filter(date_retour_effective__isnull=True)
+    elif statut == 'retourne':
+        emprunts = emprunts.filter(date_retour_effective__isnull=False)
+    elif statut == 'retard':
+        aujourd_hui = timezone.now().date()
+        emprunts = emprunts.filter(
+            date_retour_prevue__lt=aujourd_hui,
+            date_retour_effective__isnull=True
+        )
+    
+    emprunts = emprunts.order_by('-date_emprunt')
+    
+    context = {
+        'etudiant': etudiant,
+        'emprunts': emprunts,
+        'statut_filtre': statut,
+    }
+    
+    return render(request, 'bibliotheque/abonnements/abonne_emprunts.html', context)
+
+
+
 @login_required
 def etudiant_list_view(request):
     """Liste des étudiants avec recherche"""
@@ -549,6 +803,45 @@ def etudiant_update_view(request, pk):
 
 
 # ==================== VUES EMPRUNTS ====================
+
+
+@login_required
+def emprunt_detail(request, pk):
+    """
+    Vue pour afficher les détails d'un emprunt
+    """
+    emprunt = get_object_or_404(Emprunt, pk=pk)
+    
+    # Calculer les informations supplémentaires
+    jours_restants = None
+    est_en_retard = False
+    jours_retard = 0
+    
+    if emprunt.date_retour_prevue:
+        aujourd_hui = timezone.now().date()
+        difference = (emprunt.date_retour_prevue - aujourd_hui).days
+        
+        if difference < 0:
+            est_en_retard = True
+            jours_retard = abs(difference)
+        else:
+            jours_restants = difference
+    
+    # Calculer les pénalités si en retard
+    penalite = 0
+    if est_en_retard and jours_retard > 0:
+        # Exemple : 500 BIF par jour de retard
+        penalite = jours_retard * 500
+    
+    context = {
+        'emprunt': emprunt,
+        'jours_restants': jours_restants,
+        'est_en_retard': est_en_retard,
+        'jours_retard': jours_retard,
+        'penalite': penalite,
+    }
+    
+    return render(request, 'bibliotheque/emprunts/emprunt_detail.html', context)
 
 @login_required
 def emprunt_list_view(request):

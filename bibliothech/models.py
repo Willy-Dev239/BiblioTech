@@ -434,25 +434,45 @@ class Auteur(models.Model):
     """Auteurs de livres"""
     nom = models.CharField(max_length=100)
     prenom = models.CharField(max_length=100)
+    email = models.EmailField(blank=True, null=True)
     date_naissance = models.DateField(null=True, blank=True)
+    date_deces = models.DateField(null=True, blank=True)  # pour les auteurs décédés
     nationalite = models.CharField(max_length=100, blank=True)
     biographie = models.TextField(blank=True)
+    pays_origine = models.CharField(max_length=100, blank=True, null=True)
+    pseudonyme = models.CharField(max_length=100, blank=True)
+    genre_litteraire = models.CharField(max_length=200, blank=True)  # ex: roman, poésie, SF
+    prix_litteraires = models.TextField(blank=True)  # prix remportés
+    nb_livres_publies = models.PositiveIntegerField(default=0)
+    premier_livre = models.DateField(null=True, blank=True)
+    maison_edition_principale = models.CharField(max_length=200, blank=True)
+    
+    # Statut
+    est_actif = models.BooleanField(default=True)
+    est_verifie = models.BooleanField(default=False)  # profil vérifié par l'admin
+    
     # photo = models.ImageField(upload_to='auteurs/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
+        ordering = ['nom', 'prenom']
         verbose_name = "Auteur"
         verbose_name_plural = "Auteurs"
-        ordering = ['nom', 'prenom']
-        unique_together = ['nom', 'prenom']
 
     def __str__(self):
-        return f"{self.nom} {self.prenom}"
-
-    @property
-    def nom_complet(self):
         return f"{self.prenom} {self.nom}"
+
+    def age(self):
+        """Calcule l'âge de l'auteur"""
+        from datetime import date
+        if self.date_naissance:
+            today = date.today()
+            fin = self.date_deces if self.date_deces else today
+            return fin.year - self.date_naissance.year - (
+                (fin.month, fin.day) < (self.date_naissance.month, self.date_naissance.day)
+            )
+        return None
 
 
 class Etagere(models.Model):

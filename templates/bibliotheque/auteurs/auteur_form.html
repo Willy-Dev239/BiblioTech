@@ -1,58 +1,436 @@
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}{{ action }} un auteur | BiblioTech{% endblock %}
+{% block title %}{{ form.instance.pk|yesno:"Modifier,Ajouter" }} un Auteur{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #8b6f47;
+    --sepia-light: #c4a882;
+    --sepia-pale: #ede5d4;
+    --accent: #b04030;
+    --accent-light: #d4604e;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(139, 111, 71, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(176, 64, 48, 0.04) 0%, transparent 50%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: var(--ink);
+    padding: 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+  .page-header .breadcrumb {
+    font-size: .75rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    margin-bottom: .75rem;
+  }
+  .page-header .breadcrumb a { color: var(--sepia-light); text-decoration: none; }
+  .page-header .breadcrumb a:hover { color: #fff; }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: #fff;
+    font-weight: 400;
+    font-style: italic;
+  }
+  .page-header h1 span { color: var(--sepia-light); font-style: normal; }
+
+  /* ── Layout ── */
+  .form-container {
+    max-width: 900px;
+    margin: 3rem auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ── Card ── */
+  .form-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 8px 40px var(--shadow), 0 2px 8px rgba(0,0,0,.06);
+    overflow: hidden;
+  }
+
+  /* ── Section headers ── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.6rem 2.5rem;
+    border-bottom: 1px solid var(--sepia-pale);
+    background: var(--parchment);
+  }
+  .section-header .section-num {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-family: 'Playfair Display', serif;
+    font-size: .9rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--ink);
+    letter-spacing: .02em;
+  }
+  .section-header p {
+    font-size: .78rem;
+    color: var(--sepia);
+    margin-top: .15rem;
+  }
+
+  /* ── Fields grid ── */
+  .section-body {
+    padding: 2rem 2.5rem;
+    border-bottom: 1px solid var(--sepia-pale);
+  }
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem 2rem;
+  }
+  .fields-grid .full { grid-column: 1 / -1; }
+
+  /* ── Field ── */
+  .field-group { display: flex; flex-direction: column; gap: .45rem; }
+  .field-group label {
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia);
+  }
+  .field-group label .required { color: var(--accent); margin-left: 2px; }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: .7rem 1rem;
+    font-family: 'Lato', sans-serif;
+    font-size: .9rem;
+    color: var(--ink);
+    background: #fdfcfa;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    outline: none;
+    width: 100%;
+  }
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    border-color: var(--sepia);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(139, 111, 71, .1);
+  }
+  .field-group input.is-invalid,
+  .field-group select.is-invalid,
+  .field-group textarea.is-invalid {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(176, 64, 48, .1);
+  }
+  .field-group textarea { resize: vertical; min-height: 100px; line-height: 1.6; }
+  .field-group .help-text { font-size: .75rem; color: var(--sepia); font-style: italic; }
+  .field-group .error-text { font-size: .75rem; color: var(--accent); }
+
+  /* ── Checkbox row ── */
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .6rem 0;
+  }
+  .check-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 2px;
+    appearance: none;
+    background: #fdfcfa;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all .15s;
+    position: relative;
+  }
+  .check-row input[type="checkbox"]:checked {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .check-row input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+  }
+  .check-row .check-label { display: flex; flex-direction: column; gap: .2rem; }
+  .check-row .check-label strong { font-size: .85rem; font-weight: 700; color: var(--ink); }
+  .check-row .check-label span { font-size: .75rem; color: var(--sepia); font-style: italic; }
+
+  /* ── Actions bar ── */
+  .form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.6rem 2.5rem;
+    background: var(--parchment);
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .75rem 1.8rem;
+    font-family: 'Lato', sans-serif;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .2s;
+  }
+  .btn-primary {
+    background: var(--ink);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--accent); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(176,64,48,.3); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--sepia);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { border-color: var(--sepia); color: var(--ink); }
+
+  /* ── Alerts ── */
+  .alert-errors {
+    margin: 1.5rem 2.5rem 0;
+    padding: 1rem 1.2rem;
+    background: #fef5f4;
+    border-left: 3px solid var(--accent);
+    border-radius: 1px;
+    font-size: .85rem;
+    color: var(--accent);
+  }
+
+  /* ── Ornament ── */
+  .ornament {
+    text-align: center;
+    padding: 1.5rem 0 .5rem;
+    color: var(--border);
+    font-size: 1.2rem;
+    letter-spacing: .5em;
+  }
+
+  @media (max-width: 640px) {
+    .fields-grid { grid-template-columns: 1fr; }
+    .section-body { padding: 1.5rem; }
+    .form-actions { flex-direction: column; gap: 1rem; }
+    .page-header { padding: 1.5rem; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mt-4">
-    <h2>{{ action }} un auteur</h2>
-    
-    <div class="card mt-3">
-        <div class="card-body">
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Nom *</label>
-                        {{ form.nom }}
-                        {% if form.nom.errors %}
-                        <div class="text-danger">{{ form.nom.errors }}</div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Prénom</label>
-                        {{ form.prenom }}
-                    </div>
-                </div>
+<header class="page-header">
+  <div class="breadcrumb">
+    <a href="{% url 'auteur_list' %}">Auteurs</a> &nbsp;›&nbsp;
+    {% if form.instance.pk %}Modifier — {{ form.instance }}{% else %}Nouvel auteur{% endif %}
+  </div>
+  <h1>
+    {% if form.instance.pk %}
+      Modifier <span>{{ form.instance.prenom }} {{ form.instance.nom }}</span>
+    {% else %}
+      <span>Enregistrer</span> un nouvel auteur
+    {% endif %}
+  </h1>
+</header>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Date de naissance</label>
-                        {{ form.date_naissance }}
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Nationalité</label>
-                        {{ form.nationalite }}
-                    </div>
-                </div>
+<div class="form-container">
+  <form method="post" novalidate>
+    {% csrf_token %}
 
-                <div class="mb-3">
-                    <label class="form-label">Biographie</label>
-                    {{ form.biographie }}
-                </div>
+    <div class="form-card">
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle"></i> {{ action }}
-                    </button>
-                    <a href="{% url 'auteur_list' %}" class="btn btn-secondary">
-                        <i class="bi bi-x-circle"></i> Annuler
-                    </a>
-                </div>
-            </form>
+      {% if form.non_field_errors %}
+      <div class="alert-errors">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- ① Identité -->
+      <div class="section-header">
+        <div class="section-num">I</div>
+        <div>
+          <h2>Identité</h2>
+          <p>Informations personnelles de l'auteur</p>
         </div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+
+          <div class="field-group">
+            <label for="{{ form.nom.id_for_label }}">Nom <span class="required">*</span></label>
+            {{ form.nom }}
+            {% if form.nom.errors %}<span class="error-text">{{ form.nom.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.prenom.id_for_label }}">Prénom <span class="required">*</span></label>
+            {{ form.prenom }}
+            {% if form.prenom.errors %}<span class="error-text">{{ form.prenom.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.pseudonyme.id_for_label }}">Pseudonyme</label>
+            {{ form.pseudonyme }}
+            <span class="help-text">{{ form.pseudonyme.help_text }}</span>
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.email.id_for_label }}">Adresse email</label>
+            {{ form.email }}
+            {% if form.email.errors %}<span class="error-text">{{ form.email.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.date_naissance.id_for_label }}">Date de naissance</label>
+            {{ form.date_naissance }}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.nationalite.id_for_label }}">Nationalité</label>
+            {{ form.nationalite }}
+          </div>
+
+          <div class="field-group full">
+            <label for="{{ form.pays_origine.id_for_label }}">Pays d'origine</label>
+            {{ form.pays_origine }}
+          </div>
+
+          <div class="field-group full">
+            <label for="{{ form.biographie.id_for_label }}">Biographie</label>
+            {{ form.biographie }}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ② Carrière littéraire -->
+      <div class="section-header">
+        <div class="section-num">II</div>
+        <div>
+          <h2>Carrière littéraire</h2>
+          <p>Œuvres, genre et distinctions</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+
+          <div class="field-group">
+            <label for="{{ form.genre_litteraire.id_for_label }}">Genre littéraire</label>
+            {{ form.genre_litteraire }}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.maison_edition_principale.id_for_label }}">Maison d'édition principale</label>
+            {{ form.maison_edition_principale }}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.nb_livres_publies.id_for_label }}">Livres publiés</label>
+            {{ form.nb_livres_publies }}
+            {% if form.nb_livres_publies.errors %}<span class="error-text">{{ form.nb_livres_publies.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.premier_livre.id_for_label }}">Date du premier livre</label>
+            {{ form.premier_livre }}
+            {% if form.premier_livre.errors %}<span class="error-text">{{ form.premier_livre.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group full">
+            <label for="{{ form.prix_litteraires.id_for_label }}">Prix littéraires</label>
+            {{ form.prix_litteraires }}
+            <span class="help-text">{{ form.prix_litteraires.help_text }}</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ③ Statut -->
+      <div class="section-header">
+        <div class="section-num">III</div>
+        <div>
+          <h2>Statut du profil</h2>
+          <p>Visibilité et vérification</p>
+        </div>
+      </div>
+      <div class="section-body" style="border-bottom: none;">
+        <div class="check-row">
+          {{ form.est_actif }}
+          <div class="check-label">
+            <strong>Auteur actif</strong>
+            <span>Le profil est visible dans les listes et résultats de recherche.</span>
+          </div>
+        </div>
+        <div class="check-row">
+          {{ form.est_verifie }}
+          <div class="check-label">
+            <strong>Profil vérifié</strong>
+            <span>{{ form.est_verifie.help_text }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="ornament">✦ ✦ ✦</div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a href="{% url 'auteur_list' %}" class="btn btn-secondary">
+          ← Annuler
+        </a>
+        <button type="submit" class="btn btn-primary">
+          {% if form.instance.pk %}Enregistrer les modifications{% else %}Créer l'auteur{% endif %} →
+        </button>
+      </div>
+
     </div>
+  </form>
 </div>
 {% endblock %}

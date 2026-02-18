@@ -1,105 +1,558 @@
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}Auteurs | BiblioTech{% endblock %}
+{% block title %}Auteurs | BiblioSmart{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #8b6f47;
+    --sepia-light: #c4a882;
+    --sepia-pale: #ede5d4;
+    --accent: #b04030;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 0% 40%, rgba(139,111,71,.07) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 80%, rgba(176,64,48,.04) 0%, transparent 45%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: var(--ink);
+    padding: 2.5rem 3rem 2rem;
+    position: relative;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+  .header-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .header-left .subtitle {
+    font-size: .7rem;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    margin-bottom: .5rem;
+  }
+  .header-left h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    color: #fff;
+    font-weight: 400;
+  }
+  .header-left h1 em {
+    font-style: italic;
+    color: var(--sepia-light);
+  }
+  .header-count {
+    font-size: .78rem;
+    color: rgba(255,255,255,.4);
+    margin-top: .4rem;
+    letter-spacing: .05em;
+  }
+
+  .btn-add {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    background: var(--accent);
+    color: #fff;
+    padding: .75rem 1.6rem;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 1px;
+    transition: all .2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .btn-add:hover { background: #c04538; transform: translateY(-1px); box-shadow: 0 4px 16px rgba(176,64,48,.35); }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: .9rem 3rem;
+  }
+  .toolbar-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .search-box {
+    position: relative;
+    flex: 1;
+    min-width: 200px;
+  }
+  .search-box input {
+    width: 100%;
+    padding: .6rem 1rem .6rem 2.5rem;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-family: 'Lato', sans-serif;
+    font-size: .88rem;
+    color: var(--ink);
+    background: var(--parchment);
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .search-box input:focus {
+    border-color: var(--sepia);
+    box-shadow: 0 0 0 3px rgba(139,111,71,.1);
+    background: #fff;
+  }
+  .search-box .icon {
+    position: absolute;
+    left: .75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--sepia-light);
+    font-size: .9rem;
+    pointer-events: none;
+  }
+
+  .filter-select {
+    padding: .6rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-family: 'Lato', sans-serif;
+    font-size: .85rem;
+    color: var(--sepia);
+    background: var(--parchment);
+    outline: none;
+    cursor: pointer;
+    min-width: 150px;
+  }
+  .filter-select:focus { border-color: var(--sepia); }
+
+  /* ── Content ── */
+  .page-content {
+    max-width: 1100px;
+    margin: 2rem auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ── Table ── */
+  .table-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px var(--shadow);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  thead {
+    background: var(--ink);
+  }
+  thead th {
+    padding: 1rem 1.4rem;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    text-align: left;
+    white-space: nowrap;
+  }
+  thead th:last-child { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid var(--sepia-pale);
+    transition: background .15s;
+  }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fdfcfa; }
+
+  td {
+    padding: 1rem 1.4rem;
+    vertical-align: middle;
+    font-size: .88rem;
+  }
+
+  /* Author name cell */
+  .td-author {
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+  }
+  .mini-avatar {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sepia) 0%, var(--accent) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: .85rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .author-info .name {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: .92rem;
+  }
+  .author-info .pseudo {
+    font-size: .75rem;
+    color: var(--sepia-light);
+    font-style: italic;
+    margin-top: .1rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .6rem;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-radius: 20px;
+  }
+  .badge-genre { background: #f0e8de; color: var(--sepia); }
+  .badge-on    { background: #e8f5e9; color: #388e3c; }
+  .badge-off   { background: #f5f5f5; color: #999; }
+  .badge-check { background: #fff8e1; color: #f57f17; }
+
+  .td-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: .4rem;
+  }
+  .action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 1px;
+    text-decoration: none;
+    font-size: .75rem;
+    transition: all .15s;
+  }
+  .action-btn.view  { background: var(--sepia-pale); color: var(--sepia); }
+  .action-btn.view:hover { background: var(--sepia); color: #fff; }
+  .action-btn.edit  { background: #eef2ff; color: #4a6fa5; }
+  .action-btn.edit:hover  { background: #4a6fa5; color: #fff; }
+  .action-btn.del   { background: #fef5f4; color: var(--accent); }
+  .action-btn.del:hover   { background: var(--accent); color: #fff; }
+
+  /* ── Empty state ── */
+  .empty-state {
+    padding: 5rem 2rem;
+    text-align: center;
+  }
+  .empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: .3;
+  }
+  .empty-state h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: var(--sepia);
+    margin-bottom: .5rem;
+  }
+  .empty-state p { font-size: .88rem; color: var(--sepia-light); }
+
+  /* ── Pagination ── */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: .4rem;
+    padding: 1.4rem;
+    border-top: 1px solid var(--sepia-pale);
+    background: var(--parchment);
+  }
+  .page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px; height: 34px;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-size: .82rem;
+    color: var(--sepia);
+    text-decoration: none;
+    transition: all .15s;
+    background: #fff;
+  }
+  .page-link:hover, .page-link.active {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: #fff;
+  }
+  .page-link.disabled { pointer-events: none; opacity: .35; }
+
+  /* ── Summary stats ── */
+  .summary-bar {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .summary-item {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: 1rem 1.4rem;
+    box-shadow: 0 2px 8px var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+    flex: 1;
+    min-width: 140px;
+  }
+  .summary-item .s-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .summary-item .s-lbl {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia);
+  }
+
+  @media (max-width: 768px) {
+    .header-inner { flex-direction: column; align-items: flex-start; }
+    .page-header { padding: 1.5rem; }
+    .toolbar { padding: .9rem 1rem; }
+    table { display: block; overflow-x: auto; }
+    .page-content { padding: 0 .75rem 3rem; }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
-    <h2>Auteurs</h2>
-    <a href="{% url 'auteur_create' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle"></i> Nouvel auteur
-    </a>
-</div>
 
-<!-- Recherche -->
-<div class="card mb-3">
-    <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-10">
-                <input type="text" name="q" class="form-control" placeholder="Rechercher un auteur..." value="{{ query }}">
-            </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-secondary w-100">
-                    <i class="bi bi-search"></i> Rechercher
-                </button>
-            </div>
-        </form>
+<!-- Header -->
+<div class="page-header">
+  <div class="header-inner">
+    <div class="header-left">
+      <div class="subtitle">Gestion de la bibliothèque</div>
+      <h1><em>Les</em> Auteurs</h1>
+      <div class="header-count">{{ auteurs.count }} auteur{{ auteurs.count|pluralize }} enregistré{{ auteurs.count|pluralize }}</div>
     </div>
+    <a href="{% url 'auteur_create' %}" class="btn-add">+ Ajouter un auteur</a>
+  </div>
 </div>
 
-<div class="card">
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Nom</th>
-                        <th>Prenom</th>
-                        <th>Date de naissance</th>
-                        <th>Nationalité</th>
-                        <th>biographie</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for auteur in auteurs %}
-                    <tr>
-                        <td>
-                          
-                                {{ auteur.nom }}
-                          
-                        </td>
-                          <td>
-                          
-                                {{ auteur.prenom }}
-                          
-                        </td>
-                        <td>{{ auteur.date_naissance|date:"d/m/Y"|default:"N/A" }}</td>
-                        <td>{{ auteur.nationalite|default:"N/A" }}</td>
-                          <td>
-                          
-                                {{ auteur.biographie }}
-                          
-                        </td>
-                        <td>
-                            <a href="{% url 'auteur_update' auteur.pk %}" class="btn btn-sm" style="background-color: #28d17c; color: white;">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="{% url 'auteur_delete' auteur.pk %}" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="text-center">Aucun auteur trouvé</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="toolbar-inner">
+    <div class="search-box">
+      <span class="icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="Rechercher par nom, prénom, genre...">
+    </div>
+    <select class="filter-select" id="filterStatut">
+      <option value="">Tous les statuts</option>
+      <option value="actif">Actifs</option>
+      <option value="inactif">Inactifs</option>
+    </select>
+    <select class="filter-select" id="filterVerifie">
+      <option value="">Vérification</option>
+      <option value="verifie">Vérifiés</option>
+      <option value="non-verifie">Non vérifiés</option>
+    </select>
+  </div>
+</div>
 
-        <!-- Pagination -->
-        {% if auteurs.has_other_pages %}
-        <nav>
-            <ul class="pagination justify-content-center">
-                {% if auteurs.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ auteurs.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">Précédent</a>
-                </li>
-                {% endif %}
-                
-                <li class="page-item active">
-                    <span class="page-link">Page {{ auteurs.number }}</span>
-                </li>
+<!-- Content -->
+<div class="page-content">
 
-                {% if auteurs.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?page={{ auteurs.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Suivant</a>
-                </li>
+  <!-- Summary -->
+  <div class="summary-bar">
+    <div class="summary-item">
+      <div>
+        <div class="s-num">{{ auteurs.count }}</div>
+        <div class="s-lbl">Total</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div>
+        <div class="s-num">{{ auteurs_actifs }}</div>
+        <div class="s-lbl">Actifs</div>
+      </div>
+    </div>
+    <div class="summary-item">
+      <div>
+        <div class="s-num">{{ auteurs_verifies }}</div>
+        <div class="s-lbl">Vérifiés</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    {% if auteurs %}
+    <table id="auteursTable">
+      <thead>
+        <tr>
+          <th>Auteur</th>
+          <th>Nationalité</th>
+          <th>Genre littéraire</th>
+          <th>Livres</th>
+          <th>Statut</th>
+          <th style="text-align:right;">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for auteur in auteurs %}
+        <tr data-statut="{% if auteur.est_actif %}actif{% else %}inactif{% endif %}"
+            data-verifie="{% if auteur.est_verifie %}verifie{% else %}non-verifie{% endif %}">
+
+          <td>
+            <div class="td-author">
+              <div class="mini-avatar">{{ auteur.prenom|first|upper }}{{ auteur.nom|first|upper }}</div>
+              <div class="author-info">
+                <div class="name">{{ auteur.prenom }} {{ auteur.nom }}</div>
+                {% if auteur.pseudonyme %}
+                  <div class="pseudo">« {{ auteur.pseudonyme }} »</div>
                 {% endif %}
-            </ul>
-        </nav>
+              </div>
+            </div>
+          </td>
+
+          <td>{{ auteur.nationalite|default:"–" }}</td>
+
+          <td>
+            {% if auteur.genre_litteraire %}
+              <span class="badge badge-genre">{{ auteur.genre_litteraire }}</span>
+            {% else %}–{% endif %}
+          </td>
+
+          <td>
+            <strong>{{ auteur.nb_livres_publies }}</strong>
+          </td>
+
+          <td>
+            {% if auteur.est_actif %}
+              <span class="badge badge-on">Actif</span>
+            {% else %}
+              <span class="badge badge-off">Inactif</span>
+            {% endif %}
+            {% if auteur.est_verifie %}
+              <span class="badge badge-check" style="margin-left:.3rem;">✓ Vérifié</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <div class="td-actions">
+              <a href="{% url 'auteur_detail' auteur.pk %}" class="action-btn view" title="Voir le profil">👁</a>
+              <a href="{% url 'auteur_update' auteur.pk %}" class="action-btn edit" title="Modifier">✎</a>
+              <a href="{% url 'auteur_delete' auteur.pk %}" class="action-btn del" title="Supprimer">✕</a>
+            </div>
+          </td>
+
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="page-link">‹</a>
+      {% else %}
+        <span class="page-link disabled">‹</span>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <span class="page-link active">{{ num }}</span>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <a href="?page={{ num }}" class="page-link">{{ num }}</a>
         {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="page-link">›</a>
+      {% else %}
+        <span class="page-link disabled">›</span>
+      {% endif %}
     </div>
+    {% endif %}
+
+    {% else %}
+    <!-- État vide -->
+    <div class="empty-state">
+      <div class="empty-icon">📚</div>
+      <h3>Aucun auteur enregistré</h3>
+      <p>Commencez par ajouter votre premier auteur à la bibliothèque.</p>
+    </div>
+    {% endif %}
+  </div>
+
 </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Recherche + filtres côté client
+  const searchInput   = document.getElementById('searchInput');
+  const filterStatut  = document.getElementById('filterStatut');
+  const filterVerifie = document.getElementById('filterVerifie');
+  const rows = document.querySelectorAll('#auteursTable tbody tr');
+
+  function filterTable() {
+    const q       = searchInput.value.toLowerCase().trim();
+    const statut  = filterStatut.value;
+    const verifie = filterVerifie.value;
+
+    rows.forEach(row => {
+      const text      = row.textContent.toLowerCase();
+      const rowStatut = row.dataset.statut;
+      const rowVerif  = row.dataset.verifie;
+
+      const matchQ = q === '' || text.includes(q);
+      const matchS = statut === '' || rowStatut === statut;
+      const matchV = verifie === '' || rowVerif === verifie;
+
+      row.style.display = (matchQ && matchS && matchV) ? '' : 'none';
+    });
+  }
+
+  searchInput.addEventListener('input', filterTable);
+  filterStatut.addEventListener('change', filterTable);
+  filterVerifie.addEventListener('change', filterTable);
+</script>
 {% endblock %}

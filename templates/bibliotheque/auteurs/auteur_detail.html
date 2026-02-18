@@ -1,45 +1,498 @@
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}Détails - {{ auteur.nom }} | BiblioTech{% endblock %}
+{% block title %}Détail— Auteur{% endblock %}
+
+{% block extra_css %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #8b6f47;
+    --sepia-light: #c4a882;
+    --sepia-pale: #ede5d4;
+    --accent: #b04030;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image: radial-gradient(ellipse at 15% 60%, rgba(139,111,71,.07) 0%, transparent 55%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--ink);
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '"';
+    position: absolute;
+    top: -1rem; right: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 14rem;
+    color: rgba(255,255,255,.03);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+
+  .hero-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 2.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .avatar {
+    width: 90px; height: 90px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--sepia) 0%, var(--accent) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #fff;
+    flex-shrink: 0;
+    border: 3px solid rgba(255,255,255,.1);
+  }
+
+  .hero-meta { flex: 1; }
+  .hero-breadcrumb {
+    font-size: .7rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    margin-bottom: .6rem;
+  }
+  .hero-breadcrumb a { color: var(--sepia-light); text-decoration: none; }
+  .hero-breadcrumb a:hover { color: #fff; }
+
+  .hero-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.6rem;
+    color: #fff;
+    font-weight: 400;
+    line-height: 1.1;
+    margin-bottom: .5rem;
+  }
+  .hero-name em { font-style: italic; color: var(--sepia-light); }
+
+  .hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: .9rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .25rem .75rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 20px;
+  }
+  .badge-sepia   { background: rgba(196,168,130,.18); color: var(--sepia-light); }
+  .badge-accent  { background: rgba(176,64,48,.25); color: #e8907f; }
+  .badge-green   { background: rgba(80,150,80,.2); color: #7ecb7e; }
+  .badge-muted   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.5); }
+
+  /* ── Actions strip ── */
+  .actions-strip {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: .9rem 3rem;
+  }
+  .actions-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    gap: .75rem;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .4rem;
+    padding: .55rem 1.2rem;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    border-radius: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1px solid transparent;
+    transition: all .18s;
+  }
+  .btn-dark   { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-dark:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-outline { background: transparent; color: var(--sepia); border-color: var(--border); }
+  .btn-outline:hover { border-color: var(--sepia); color: var(--ink); }
+  .btn-danger { background: transparent; color: var(--accent); border-color: #f0ccc8; }
+  .btn-danger:hover { background: #fef5f4; }
+  .sep { flex: 1; }
+
+  /* ── Main layout ── */
+  .page-body {
+    max-width: 960px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem 4rem;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px var(--shadow);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .card-header {
+    padding: 1.1rem 1.6rem;
+    border-bottom: 1px solid var(--sepia-pale);
+    background: var(--parchment);
+    display: flex;
+    align-items: center;
+    gap: .7rem;
+  }
+  .card-header .icon {
+    width: 28px; height: 28px;
+    background: var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .65rem;
+    color: var(--sepia-light);
+  }
+  .card-header h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .card-body { padding: 1.6rem; }
+
+  /* ── Biography ── */
+  .bio-text {
+    font-size: .93rem;
+    line-height: 1.85;
+    color: #3d2f1e;
+    font-weight: 300;
+  }
+  .bio-text p + p { margin-top: 1em; }
+  .bio-empty {
+    font-style: italic;
+    color: var(--sepia-light);
+    font-size: .88rem;
+  }
+
+  /* ── Data rows ── */
+  .data-list { display: flex; flex-direction: column; gap: 0; }
+  .data-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: .75rem 0;
+    border-bottom: 1px solid var(--sepia-pale);
+    gap: 1rem;
+  }
+  .data-row:last-child { border-bottom: none; }
+  .data-label {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .data-value {
+    font-size: .88rem;
+    color: var(--ink);
+    text-align: right;
+    font-weight: 400;
+  }
+  .data-value.muted { color: var(--sepia-light); font-style: italic; }
+
+  /* ── Stats row ── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+  }
+  .stat-cell {
+    background: #fff;
+    padding: 1.3rem 1rem;
+    text-align: center;
+  }
+  .stat-cell .stat-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1;
+  }
+  .stat-cell .stat-lbl {
+    font-size: .65rem;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia);
+    margin-top: .3rem;
+  }
+
+  /* ── Prix section ── */
+  .prix-list { list-style: none; }
+  .prix-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: .6rem;
+    padding: .5rem 0;
+    font-size: .88rem;
+    border-bottom: 1px solid var(--sepia-pale);
+  }
+  .prix-list li:last-child { border-bottom: none; }
+  .prix-list li::before {
+    content: '✦';
+    color: var(--accent);
+    font-size: .6rem;
+    margin-top: .2rem;
+    flex-shrink: 0;
+  }
+
+  /* ── Status indicators ── */
+  .status-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: .4rem;
+  }
+  .dot-green { background: #4caf50; }
+  .dot-gray  { background: #bbb; }
+  .dot-gold  { background: #d4a017; }
+
+  @media (max-width: 700px) {
+    .page-body { grid-template-columns: 1fr; }
+    .hero-inner { flex-direction: column; gap: 1rem; }
+    .hero { padding: 1.5rem; }
+    .actions-strip { padding: .9rem 1rem; }
+    .stat-grid { grid-template-columns: repeat(3,1fr); }
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>{{ auteur.get_full_name }}</h2>
-        <div>
-            <a href="{% url 'auteur_update' auteur.pk %}" class="btn btn-warning">
-                <i class="bi bi-pencil"></i> Modifier
-            </a>
-            <a href="{% url 'auteur_delete' auteur.pk %}" class="btn btn-danger">
-                <i class="bi bi-trash"></i> Supprimer
-            </a>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="avatar">
+      {{ auteur.prenom|first|upper }}{{ auteur.nom|first|upper }}
+    </div>
+    <div class="hero-meta">
+      <div class="hero-breadcrumb">
+        <a href="{% url 'auteur_list' %}">Bibliothèque</a> &nbsp;›&nbsp; Auteurs
+      </div>
+      <h1 class="hero-name">
+        {{ auteur.prenom }}
+        {% if auteur.pseudonyme %}<em>«&nbsp;{{ auteur.pseudonyme }}&nbsp;»</em>{% endif %}
+        <br>{{ auteur.nom }}
+      </h1>
+      <div class="hero-tags">
+        {% if auteur.nationalite %}
+          <span class="badge badge-sepia">🌍 {{ auteur.nationalite }}</span>
+        {% endif %}
+        {% if auteur.genre_litteraire %}
+          <span class="badge badge-accent">{{ auteur.genre_litteraire }}</span>
+        {% endif %}
+        {% if auteur.est_actif %}
+          <span class="badge badge-green">● Actif</span>
+        {% else %}
+          <span class="badge badge-muted">○ Inactif</span>
+        {% endif %}
+        {% if auteur.est_verifie %}
+          <span class="badge badge-sepia">✓ Vérifié</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions -->
+<div class="actions-strip">
+  <div class="actions-inner">
+    <a href="{% url 'auteur_list' %}" class="btn btn-outline">← Retour</a>
+    <a href="{% url 'auteur_update' auteur.pk %}" class="btn btn-dark">✎ Modifier</a>
+    <span class="sep"></span>
+    <a href="{% url 'auteur_delete' auteur.pk %}" class="btn btn-danger">✕ Supprimer</a>
+  </div>
+</div>
+
+<!-- Body -->
+<div class="page-body">
+
+  <!-- Colonne principale -->
+  <div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-num">{{ auteur.nb_livres_publies }}</div>
+        <div class="stat-lbl">Livres publiés</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">
+          {% if auteur.date_naissance %}{{ auteur.age|default:"–" }}{% else %}–{% endif %}
         </div>
+        <div class="stat-lbl">Ans</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-num">
+          {% if auteur.premier_livre %}{{ auteur.premier_livre|date:"Y" }}{% else %}–{% endif %}
+        </div>
+        <div class="stat-lbl">Premier livre</div>
+      </div>
     </div>
 
+    <!-- Biographie -->
     <div class="card">
-        <div class="card-body">
-            <h4>Informations</h4>
-            <hr>
-            <table class="table table-borderless">
-                <tr>
-                    <th width="200">Nom complet:</th>
-                    <td>{{ auteur.get_full_name }}</td>
-                </tr>
-                <tr>
-                    <th>Date de naissance:</th>
-                    <td>{{ auteur.date_naissance|date:"d/m/Y"|default:"Non renseignée" }}</td>
-                </tr>
-                <tr>
-                    <th>Nationalité:</th>
-                    <td>{{ auteur.nationalite|default:"Non renseignée" }}</td>
-                </tr>
-            </table>
-
-            {% if auteur.biographie %}
-            <h5 class="mt-4">Biographie</h5>
-            <p>{{ auteur.biographie|linebreaks }}</p>
-            {% endif %}
-        </div>
+      <div class="card-header">
+        <div class="icon">✦</div>
+        <h3>Biographie</h3>
+      </div>
+      <div class="card-body">
+        {% if auteur.biographie %}
+          <div class="bio-text">
+            {{ auteur.biographie|linebreaks }}
+          </div>
+        {% else %}
+          <p class="bio-empty">Aucune biographie renseignée pour cet auteur.</p>
+        {% endif %}
+      </div>
     </div>
+
+    <!-- Prix littéraires -->
+    {% if auteur.prix_litteraires %}
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">★</div>
+        <h3>Prix &amp; Distinctions</h3>
+      </div>
+      <div class="card-body">
+        <div class="bio-text">
+          {{ auteur.prix_litteraires|linebreaks }}
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+
+  <!-- Colonne latérale -->
+  <div>
+
+    <!-- Informations clés -->
+    <div class="card">
+      <div class="card-header">
+        <div class="icon">i</div>
+        <h3>Informations</h3>
+      </div>
+      <div class="card-body" style="padding: .5rem 1.6rem;">
+        <div class="data-list">
+
+          {% if auteur.email %}
+          <div class="data-row">
+            <span class="data-label">Email</span>
+            <span class="data-value">
+              <a href="mailto:{{ auteur.email }}" style="color: var(--accent); text-decoration: none;">{{ auteur.email }}</a>
+            </span>
+          </div>
+          {% endif %}
+
+          <div class="data-row">
+            <span class="data-label">Naissance</span>
+            <span class="data-value {% if not auteur.date_naissance %}muted{% endif %}">
+              {{ auteur.date_naissance|date:"d F Y"|default:"Non renseignée" }}
+            </span>
+          </div>
+
+          {% if auteur.pays_origine %}
+          <div class="data-row">
+            <span class="data-label">Pays d'origine</span>
+            <span class="data-value">{{ auteur.pays_origine }}</span>
+          </div>
+          {% endif %}
+
+          {% if auteur.maison_edition_principale %}
+          <div class="data-row">
+            <span class="data-label">Édition</span>
+            <span class="data-value">{{ auteur.maison_edition_principale }}</span>
+          </div>
+          {% endif %}
+
+          <div class="data-row">
+            <span class="data-label">Statut</span>
+            <span class="data-value">
+              <span class="status-dot {% if auteur.est_actif %}dot-green{% else %}dot-gray{% endif %}"></span>
+              {% if auteur.est_actif %}Actif{% else %}Inactif{% endif %}
+            </span>
+          </div>
+
+          <div class="data-row">
+            <span class="data-label">Vérifié</span>
+            <span class="data-value">
+              {% if auteur.est_verifie %}
+                <span class="status-dot dot-gold"></span>Oui
+              {% else %}
+                <span class="status-dot dot-gray"></span>Non
+              {% endif %}
+            </span>
+          </div>
+
+          <div class="data-row">
+            <span class="data-label">Créé le</span>
+            <span class="data-value muted">{{ auteur.created_at|date:"d/m/Y" }}</span>
+          </div>
+
+          <div class="data-row">
+            <span class="data-label">Modifié le</span>
+            <span class="data-value muted">{{ auteur.updated_at|date:"d/m/Y" }}</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

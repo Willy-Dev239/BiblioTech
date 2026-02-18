@@ -28,6 +28,18 @@ urlpatterns = [
     path('livres/<int:pk>/modifier/', views.livre_update_view, name='livre_update'),
     path('livres/<int:pk>/supprimer/', views.livre_delete_view, name='livre_delete'),
     
+    
+    
+    # ==========================================
+    # GESTION DES ABONNÉS (ÉTUDIANTS)
+    # ==========================================
+    path('abonnes/', views.abonnes, name='abonnes'),
+    path('abonnes/<int:pk>/', views.abonne_detail, name='abonne_detail'),
+    path('abonnes/create/', views.abonne_create, name='abonne_create'),
+    path('abonnes/<int:pk>/edit/', views.abonne_edit, name='abonne_edit'),
+    path('abonnes/<int:pk>/delete/', views.abonne_delete, name='abonne_delete'),
+    path('abonnes/<int:pk>/emprunts/', views.abonne_emprunts, name='abonne_emprunts'),
+    
     # Abonne.es
     path('abonnes/', views.etudiant_list_view, name='abonnes'),
     path('abonnes/<int:pk>/', views.etudiant_detail_view, name='etudiant_detail'),
@@ -36,8 +48,18 @@ urlpatterns = [
     
     # Emprunts
     path('emprunts/', views.emprunt_list_view, name='emprunt_list'),
+    path('emprunts/<int:pk>/', views.emprunt_detail, name='emprunt_detail'),
     path('emprunts/creer/', views.emprunt_create_view, name='emprunt_create'),
     path('emprunts/<int:pk>/retour/', views.emprunt_retour_view, name='emprunt_retour'),
+    
+    # ==========================================
+    # GESTION DES EMPRUNTS
+    # ==========================================
+    # # path('emprunts/', views.emprunt_list, name='emprunt_list'),
+    # path('emprunts/<int:pk>/', views.emprunt_detail, name='emprunt_detail'),
+    # # path('emprunts/create/', views.emprunt_create, name='emprunt_create'),
+    # path('emprunts/<int:pk>/retour/', views.emprunt_retour, name='emprunt_retour'),
+    # path('emprunts/<int:pk>/delete/', views.emprunt_delete, name='emprunt_delete'),
     
     # Réservations
     path('reservations/<int:livre_pk>/creer/', views.reservation_create_view, name='reservation_create'),
@@ -178,6 +200,7 @@ urlpatterns = [
     
 #     # Supprimer un utilisateur
 #     path('api/users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
+    
     
 #      # Recherche et gestion des étudiants
 #     path('etudiants/recherche/', 

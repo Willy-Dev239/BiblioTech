@@ -1,647 +1,747 @@
-<!-- templates/bibliotheque/livres/form.html -->
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}{{ action }} un livre - Bibliothèque{% endblock %}
-
-{% block page_title %}{{ action }} un livre{% endblock %}
+{% block title %}{{ action|default:"Ajouter" }} un livre — Bibliothèque{% endblock %}
 
 {% block extra_css %}
 <style>
-    .form-section {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-    }
-    
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid #3498db;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .form-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-    }
-    
-    .form-label .required {
-        color: #e74c3c;
-        margin-left: 0.25rem;
-    }
-    
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #3498db;
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
-    }
-    
-    .form-text {
-        font-size: 0.875rem;
-        color: #7f8c8d;
-        margin-top: 0.25rem;
-    }
-    
-    .error-message {
-        background: #fee;
-        border-left: 3px solid #e74c3c;
-        padding: 0.75rem;
-        margin-top: 0.5rem;
-        border-radius: 4px;
-        font-size: 0.875rem;
-        color: #c0392b;
-    }
-    
-    .file-preview {
-        margin-top: 1rem;
-        max-width: 300px;
-    }
-    
-    .file-preview img {
-        width: 100%;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    .btn-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 2rem;
-        padding-top: 2rem;
-        border-top: 2px solid #ecf0f1;
-    }
-    
-    .character-counter {
-        font-size: 0.75rem;
-        color: #95a5a6;
-        text-align: right;
-        margin-top: 0.25rem;
-    }
-    
-    .select2-container {
-        width: 100% !important;
-    }
-    
-    .form-help {
-        background: #e8f5e9;
-        border-left: 3px solid #4caf50;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        border-radius: 4px;
-    }
-    
-    .form-help i {
-        color: #4caf50;
-        margin-right: 0.5rem;
-    }
-    
-    .breadcrumb-custom {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .preview-card {
-        background: #f8f9fa;
-        padding: 1rem;
-        border-radius: 8px;
-        border: 2px dashed #dee2e6;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #2c3e6b;
+    --sepia-light: #6b8cba;
+    --sepia-pale: #e0e8f4;
+    --accent: #b04030;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.12);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(44,62,107,.05) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(176,64,48,.04) 0%, transparent 50%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  .page-header {
+    background: var(--ink);
+    padding: 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+  .breadcrumb-top {
+    font-size: .7rem;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--sepia-light);
+    margin-bottom: .6rem;
+  }
+  .breadcrumb-top a { color: var(--sepia-light); text-decoration: none; }
+  .breadcrumb-top a:hover { color: #fff; }
+  .page-header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.1rem;
+    color: #fff;
+    font-weight: 400;
+    font-style: italic;
+  }
+  .page-header h1 span { color: var(--sepia-light); font-style: normal; }
+  .page-header p { font-size: .83rem; color: rgba(255,255,255,.4); margin-top: .4rem; }
+
+  /* ── Container ── */
+  .form-container {
+    max-width: 980px;
+    margin: 2.5rem auto;
+    padding: 0 1.5rem 4rem;
+  }
+
+  /* ── Conseil banner ── */
+  .conseil-banner {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    background: #f0f5ff;
+    border-left: 3px solid var(--sepia-light);
+    border-radius: 1px;
+    padding: .85rem 1.2rem;
+    margin-bottom: 1.8rem;
+    font-size: .82rem;
+    color: var(--sepia);
+  }
+
+  /* ── Section card ── */
+  .form-section {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px var(--shadow);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    transform: translateY(14px);
+    animation: fadeUp .4s ease forwards;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: .8rem;
+    padding: 1.2rem 2rem;
+    border-bottom: 1px solid var(--sepia-pale);
+    background: var(--parchment);
+  }
+  .section-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--sepia-light);
+    font-family: 'Playfair Display', serif;
+    font-size: .8rem;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: var(--ink);
+  }
+  .section-header p { font-size: .73rem; color: var(--sepia); margin-top: .1rem; }
+
+  .section-body { padding: 1.8rem 2rem; }
+
+  /* ── Grids ── */
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.3rem 1.8rem;
+  }
+  .fields-grid .full { grid-column: 1 / -1; }
+  .fields-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1.3rem 1.8rem;
+  }
+
+  /* ── Field group ── */
+  .field-group { display: flex; flex-direction: column; gap: .38rem; }
+
+  .field-group label {
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--sepia);
+  }
+  .field-group label .req { color: var(--accent); margin-left: 2px; }
+
+  /* ── Tous les champs texte/select/textarea ── */
+  .field-group input[type="text"],
+  .field-group input[type="number"],
+  .field-group input[type="email"],
+  .field-group input[type="url"],
+  .field-group select,
+  .field-group textarea {
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: .68rem 1rem;
+    font-family: 'Lato', sans-serif;
+    font-size: .9rem;
+    color: var(--ink);
+    background: #fdfcfa;
+    outline: none;
+    width: 100%;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .field-group input[type="text"]:focus,
+  .field-group input[type="number"]:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    border-color: var(--sepia);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(44,62,107,.12);
+  }
+  .field-group input.error-field,
+  .field-group select.error-field,
+  .field-group textarea.error-field {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(176,64,48,.1);
+  }
+
+  /* Select arrow */
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8cba' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right .9rem center;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  /* SelectMultiple */
+  .field-group select[multiple] {
+    background-image: none;
+    padding: .5rem .8rem;
+    min-height: 130px;
+  }
+  .field-group select[multiple] option {
+    padding: .3rem .5rem;
+    border-radius: 1px;
+  }
+  .field-group select[multiple] option:checked {
+    background: var(--sepia);
+    color: #fff;
+  }
+
+  /* Textarea */
+  .field-group textarea {
+    resize: vertical;
+    min-height: 110px;
+    line-height: 1.65;
+  }
+
+  /* File input */
+  .field-group input[type="file"] {
+    border: none;
+    padding: 0;
+    background: transparent;
+    font-size: .82rem;
+    color: var(--sepia);
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .field-group .help  { font-size: .72rem; color: var(--sepia-light); font-style: italic; }
+  .field-group .error { font-size: .72rem; color: var(--accent); margin-top: .1rem; }
+
+  /* Compteur */
+  .char-counter {
+    font-size: .68rem;
+    color: var(--sepia-light);
+    text-align: right;
+    font-style: italic;
+  }
+  .char-counter.warn { color: var(--accent); }
+
+  /* ── Checkbox ── */
+  .check-row {
+    display: flex;
+    align-items: flex-start;
+    gap: .75rem;
+    padding: .5rem 0;
+  }
+  .check-row input[type="checkbox"] {
+    width: 18px; height: 18px;
+    border: 2px solid var(--border);
+    border-radius: 2px;
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fdfcfa;
+    cursor: pointer;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: all .15s;
+    position: relative;
+  }
+  .check-row input[type="checkbox"]:checked {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+  .check-row input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff; font-size: .7rem; font-weight: 700;
+  }
+  .check-label strong { font-size: .85rem; font-weight: 700; color: var(--ink); display: block; }
+  .check-label span   { font-size: .73rem; color: var(--sepia); font-style: italic; }
+
+  /* ── Zone upload ── */
+  .upload-area {
+    border: 2px dashed var(--border);
+    border-radius: 1px;
+    padding: 1.4rem;
+    text-align: center;
+    background: #fdfcfa;
+    transition: border-color .2s, background .2s;
+  }
+  .upload-area:hover { border-color: var(--sepia-light); background: var(--sepia-pale); }
+  .upload-area .up-icon { font-size: 1.8rem; opacity: .3; margin-bottom: .4rem; }
+  .upload-area p { font-size: .77rem; color: var(--sepia); font-style: italic; margin-bottom: .6rem; }
+
+  .cover-preview { display: none; margin-top: .75rem; text-align: center; }
+  .cover-preview img {
+    max-width: 120px;
+    border-radius: 1px;
+    box-shadow: 3px 3px 12px var(--shadow);
+  }
+  .cover-preview p { font-size: .7rem; color: var(--sepia-light); font-style: italic; margin-top: .35rem; }
+
+  .current-cover { margin-top: .75rem; text-align: center; }
+  .current-cover img {
+    max-width: 100px;
+    border-radius: 1px;
+    box-shadow: 3px 3px 10px var(--shadow);
+  }
+  .current-cover p { font-size: .7rem; color: var(--sepia-light); font-style: italic; margin-top: .3rem; }
+
+  .pdf-existing {
+    margin-top: .6rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .6rem .9rem;
+    background: var(--parchment);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    font-size: .8rem;
+    color: var(--sepia);
+  }
+  .pdf-existing a { color: var(--accent); font-weight: 700; text-decoration: none; }
+  .pdf-existing a:hover { text-decoration: underline; }
+
+  /* ── Erreurs globales ── */
+  .alert-errors {
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.2rem;
+    background: #fef5f4;
+    border-left: 3px solid var(--accent);
+    border-radius: 1px;
+    font-size: .85rem;
+    color: var(--accent);
+  }
+
+  /* ── Actions ── */
+  .form-actions {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px var(--shadow);
+    padding: 1.4rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: .45rem;
+    padding: .72rem 1.6rem;
+    font-family: 'Lato', sans-serif;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    border-radius: 1px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-primary:hover {
+    background: var(--accent); border-color: var(--accent);
+    transform: translateY(-1px); box-shadow: 0 4px 16px rgba(176,64,48,.3);
+    color: #fff;
+  }
+  .btn-secondary { background: transparent; color: var(--sepia); border-color: var(--border); }
+  .btn-secondary:hover { border-color: var(--sepia); color: var(--ink); }
+  .btn-view { background: var(--sepia-pale); color: var(--sepia); border-color: var(--sepia-light); margin-left: auto; }
+  .btn-view:hover { background: var(--sepia); color: #fff; }
+
+  .ornament {
+    text-align: center;
+    padding: 1rem 0 .5rem;
+    color: var(--border);
+    font-size: 1rem;
+    letter-spacing: .5em;
+  }
+
+  kbd {
+    background: var(--ink); color: var(--sepia-light);
+    padding: .1rem .4rem; border-radius: 2px;
+    font-size: .73rem; font-family: monospace;
+  }
+
+  @media (max-width: 640px) {
+    .fields-grid, .fields-grid-3 { grid-template-columns: 1fr; }
+    .section-body { padding: 1.2rem; }
+    .page-header { padding: 1.5rem; }
+    .form-actions { flex-direction: column; }
+    .btn-view { margin-left: 0; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="breadcrumb-custom">
-    <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item">
-            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{% url 'livre_list' %}"><i class="bi bi-book"></i> Livres</a>
-        </li>
-        <li class="breadcrumb-item active">{{ action }}</li>
-    </ol>
-</nav>
 
-<!-- En-tête -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h2>
-            <i class="bi bi-{% if action == 'Ajouter' %}plus-circle{% else %}pencil{% endif %}"></i>
-            {{ action }} un livre
-        </h2>
-        <p class="text-muted mb-0">
-            {% if action == 'Ajouter' %}
-                Remplissez le formulaire pour ajouter un nouveau livre au catalogue
-            {% else %}
-                Modifiez les informations du livre
-            {% endif %}
-        </p>
-    </div>
-    <a href="{% url 'livre_list' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Retour à la liste
-    </a>
-</div>
-
-<!-- Message d'aide -->
-<div class="form-help">
-    <i class="bi bi-info-circle"></i>
-    <strong>Conseil :</strong> Les champs marqués d'un astérisque (<span class="text-danger">*</span>) sont obligatoires.
-</div>
-
-<form method="post" enctype="multipart/form-data" id="livreForm" novalidate>
-    {% csrf_token %}
-    
-    <!-- Erreurs globales -->
-    {% if form.non_field_errors %}
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            <i class="bi bi-exclamation-triangle"></i>
-            <strong>Erreur :</strong>
-            {{ form.non_field_errors }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+<!-- Header -->
+<div class="page-header">
+  <div class="breadcrumb-top">
+    <a href="{% url 'home' %}">Accueil</a> &nbsp;›&nbsp;
+    <a href="{% url 'livre_list' %}">Livres</a> &nbsp;›&nbsp;
+    {{ action|default:"Ajouter" }}
+  </div>
+  <h1>
+    {% if action == 'Modifier' %}
+      Modifier <span>« {{ livre.titre|truncatewords:5 }} »</span>
+    {% else %}
+      <span>Enregistrer</span> un nouveau livre
     {% endif %}
-    
-    <!-- Section 1: Informations de base -->
-    <div class="form-section">
-        <h4 class="section-title">
-            <i class="bi bi-info-circle"></i>
-            Informations de base
-        </h4>
-        
-        <div class="row">
-            <!-- ISBN -->
-            <div class="col-md-4 mb-3">
-                <label for="{{ form.isbn.id_for_label }}" class="form-label">
-                    ISBN <span class="required">*</span>
-                </label>
-                {{ form.isbn }}
-                <div class="form-text">
-                    <i class="bi bi-lightbulb"></i> Code à 13 chiffres uniquement
-                </div>
-                {% if form.isbn.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.isbn.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Langue -->
-            <div class="col-md-4 mb-3">
-                <label for="{{ form.langue.id_for_label }}" class="form-label">
-                    Langue <span class="required">*</span>
-                </label>
-                {{ form.langue }}
-                {% if form.langue.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.langue.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- État -->
-            <div class="col-md-4 mb-3">
-                <label for="{{ form.etat.id_for_label }}" class="form-label">
-                    État du livre <span class="required">*</span>
-                </label>
-                {{ form.etat }}
-                {% if form.etat.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.etat.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+  </h1>
+  <p>
+    {% if action == 'Modifier' %}Mettez à jour les informations du livre dans le catalogue.
+    {% else %}Remplissez le formulaire pour ajouter un livre au catalogue.{% endif %}
+  </p>
+</div>
+
+<div class="form-container">
+
+  <div class="conseil-banner">
+    ℹ &nbsp; Les champs marqués d'un astérisque (<strong style="color:var(--accent)">*</strong>) sont obligatoires.
+  </div>
+
+  <form method="post" enctype="multipart/form-data" id="livreForm" novalidate>
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="alert-errors">
+      {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- ① Informations de base -->
+    <div class="form-section" style="animation-delay: 0ms">
+      <div class="section-header">
+        <div class="section-num">I</div>
+        <div>
+          <h2>Informations de base</h2>
+          <p>ISBN, langue, état et titre</p>
         </div>
-        
-        <!-- Titre -->
-        <div class="mb-3">
-            <label for="{{ form.titre.id_for_label }}" class="form-label">
-                Titre du livre <span class="required">*</span>
-            </label>
+      </div>
+      <div class="section-body">
+
+        <div class="fields-grid-3" style="margin-bottom: 1.3rem">
+          <div class="field-group">
+            <label for="{{ form.isbn.id_for_label }}">ISBN <span class="req">*</span></label>
+            {{ form.isbn }}
+            <span class="help">{{ form.isbn.help_text }}</span>
+            {% if form.isbn.errors %}<span class="error">{{ form.isbn.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.langue.id_for_label }}">Langue <span class="req">*</span></label>
+            {{ form.langue }}
+            {% if form.langue.errors %}<span class="error">{{ form.langue.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.etat.id_for_label }}">État du livre <span class="req">*</span></label>
+            {{ form.etat }}
+            {% if form.etat.errors %}<span class="error">{{ form.etat.errors|join:", " }}</span>{% endif %}
+          </div>
+        </div>
+
+        <div class="fields-grid">
+          <div class="field-group full">
+            <label for="{{ form.titre.id_for_label }}">Titre du livre <span class="req">*</span></label>
             {{ form.titre }}
-            <div class="character-counter" id="titreCounter">0 / 300 caractères</div>
-            {% if form.titre.errors %}
-                <div class="error-message">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {% for error in form.titre.errors %}{{ error }}{% endfor %}
-                </div>
-            {% endif %}
-        </div>
-        
-        <!-- Sous-titre -->
-        <div class="mb-3">
-            <label for="{{ form.sous_titre.id_for_label }}" class="form-label">
-                Sous-titre
-            </label>
+            <div class="char-counter" id="titreCounter">0 / 300 caractères</div>
+            {% if form.titre.errors %}<span class="error">{{ form.titre.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group full">
+            <label for="{{ form.sous_titre.id_for_label }}">Sous-titre</label>
             {{ form.sous_titre }}
-            <div class="form-text">
-                <i class="bi bi-info-circle"></i> Optionnel
-            </div>
-            {% if form.sous_titre.errors %}
-                <div class="error-message">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {% for error in form.sous_titre.errors %}{{ error }}{% endfor %}
-                </div>
-            {% endif %}
+            <span class="help">Optionnel</span>
+            {% if form.sous_titre.errors %}<span class="error">{{ form.sous_titre.errors|join:", " }}</span>{% endif %}
+          </div>
         </div>
+
+      </div>
     </div>
-    
-    <!-- Section 2: Auteurs et publication -->
-    <div class="form-section">
-        <h4 class="section-title">
-            <i class="bi bi-people"></i>
-            Auteurs et publication
-        </h4>
-        
-        <!-- Auteurs -->
-        <div class="mb-3">
-            <label for="{{ form.auteurs.id_for_label }}" class="form-label">
-                Auteur(s) <span class="required">*</span>
-            </label>
+
+    <!-- ② Auteurs & Publication -->
+    <div class="form-section" style="animation-delay: 80ms">
+      <div class="section-header">
+        <div class="section-num">II</div>
+        <div>
+          <h2>Auteurs &amp; Publication</h2>
+          <p>Auteurs, éditeur et année</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+
+          <div class="field-group full">
+            <label for="{{ form.auteurs.id_for_label }}">Auteur(s) <span class="req">*</span></label>
             {{ form.auteurs }}
-            <div class="form-text">
-                <i class="bi bi-hand-index"></i> Maintenez <kbd>Ctrl</kbd> (Windows) ou <kbd>Cmd</kbd> (Mac) pour sélectionner plusieurs auteurs
-            </div>
-            {% if form.auteurs.errors %}
-                <div class="error-message">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {% for error in form.auteurs.errors %}{{ error }}{% endfor %}
-                </div>
-            {% endif %}
+            <span class="help">{{ form.auteurs.help_text }}</span>
+            {% if form.auteurs.errors %}<span class="error">{{ form.auteurs.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.editeur.id_for_label }}">Éditeur <span class="req">*</span></label>
+            {{ form.editeur }}
+            {% if form.editeur.errors %}<span class="error">{{ form.editeur.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.annee_publication.id_for_label }}">Année de publication <span class="req">*</span></label>
+            {{ form.annee_publication }}
+            {% if form.annee_publication.errors %}<span class="error">{{ form.annee_publication.errors|join:", " }}</span>{% endif %}
+          </div>
+
         </div>
-        
-        <div class="row">
-            <!-- Éditeur -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.editeur.id_for_label }}" class="form-label">
-                    Éditeur <span class="required">*</span>
-                </label>
-                {{ form.editeur }}
-                {% if form.editeur.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.editeur.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Année de publication -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.annee_publication.id_for_label }}" class="form-label">
-                    Année de publication <span class="required">*</span>
-                </label>
-                {{ form.annee_publication }}
-                <div class="form-text">
-                    <i class="bi bi-calendar3"></i> Exemple: 2024
-                </div>
-                {% if form.annee_publication.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.annee_publication.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+      </div>
     </div>
-    
-    <!-- Section 3: Catégorisation -->
-    <div class="form-section">
-        <h4 class="section-title">
-            <i class="bi bi-tags"></i>
-            Catégorisation
-        </h4>
-        
-        <div class="row">
-            <!-- Catégorie -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.categorie.id_for_label }}" class="form-label">
-                    Catégorie <span class="required">*</span>
-                </label>
-                {{ form.categorie }}
-                <div class="form-text">
-                    <i class="bi bi-tag"></i> Exemple: Roman, Informatique, Histoire...
-                </div>
-                {% if form.categorie.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.categorie.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Nombre de pages -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.nombre_pages.id_for_label }}" class="form-label">
-                    Nombre de pages <span class="required">*</span>
-                </label>
-                {{ form.nombre_pages }}
-                {% if form.nombre_pages.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.nombre_pages.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
+
+    <!-- ③ Catégorisation -->
+    <div class="form-section" style="animation-delay: 160ms">
+      <div class="section-header">
+        <div class="section-num">III</div>
+        <div>
+          <h2>Catégorisation</h2>
+          <p>Genre, nombre de pages et résumé</p>
         </div>
-        
-        <!-- Résumé -->
-        <div class="mb-3">
-            <label for="{{ form.resume.id_for_label }}" class="form-label">
-                Résumé du livre
-            </label>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+
+          <div class="field-group">
+            <label for="{{ form.categorie.id_for_label }}">Catégorie <span class="req">*</span></label>
+            {{ form.categorie }}
+            {% if form.categorie.errors %}<span class="error">{{ form.categorie.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.nombre_pages.id_for_label }}">Nombre de pages <span class="req">*</span></label>
+            {{ form.nombre_pages }}
+            {% if form.nombre_pages.errors %}<span class="error">{{ form.nombre_pages.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group full">
+            <label for="{{ form.resume.id_for_label }}">Résumé</label>
             {{ form.resume }}
-            <div class="character-counter" id="resumeCounter">0 caractères</div>
-            <div class="form-text">
-                <i class="bi bi-info-circle"></i> Description brève du contenu du livre
+            <div class="char-counter" id="resumeCounter">0 caractères</div>
+            {% if form.resume.errors %}<span class="error">{{ form.resume.errors|join:", " }}</span>{% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ④ Gestion des exemplaires -->
+    <div class="form-section" style="animation-delay: 240ms">
+      <div class="section-header">
+        <div class="section-num">IV</div>
+        <div>
+          <h2>Gestion des exemplaires</h2>
+          <p>Stock, emplacement et disponibilité</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid-3">
+
+          <div class="field-group">
+            <label for="{{ form.nombre_exemplaires.id_for_label }}">Exemplaires <span class="req">*</span></label>
+            {{ form.nombre_exemplaires }}
+            <span class="help">{{ form.nombre_exemplaires.help_text }}</span>
+            {% if form.nombre_exemplaires.errors %}<span class="error">{{ form.nombre_exemplaires.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label for="{{ form.emplacement.id_for_label }}">Emplacement</label>
+            {{ form.emplacement }}
+            <span class="help">{{ form.emplacement.help_text }}</span>
+            {% if form.emplacement.errors %}<span class="error">{{ form.emplacement.errors|join:", " }}</span>{% endif %}
+          </div>
+
+          <div class="field-group">
+            <label>Statut</label>
+            <div class="check-row" style="margin-top: .3rem">
+              {{ form.disponible }}
+              <div class="check-label">
+                <strong>Disponible à l'emprunt</strong>
+                <span>{{ form.disponible.help_text }}</span>
+              </div>
             </div>
-            {% if form.resume.errors %}
-                <div class="error-message">
-                    <i class="bi bi-exclamation-circle"></i>
-                    {% for error in form.resume.errors %}{{ error }}{% endfor %}
-                </div>
+            {% if form.disponible.errors %}<span class="error">{{ form.disponible.errors|join:", " }}</span>{% endif %}
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ Fichiers multimédias -->
+    <div class="form-section" style="animation-delay: 320ms">
+      <div class="section-header">
+        <div class="section-num">V</div>
+        <div>
+          <h2>Fichiers multimédias</h2>
+          <p>Couverture et version numérique PDF</p>
+        </div>
+      </div>
+      <div class="section-body">
+        <div class="fields-grid">
+
+          <!-- Couverture -->
+          <div class="field-group">
+            <label>Image de couverture</label>
+            <div class="upload-area">
+              <div class="up-icon">🖼</div>
+              <p>{{ form.couverture.help_text }}</p>
+              {{ form.couverture }}
+            </div>
+            {% if form.couverture.errors %}<span class="error">{{ form.couverture.errors|join:", " }}</span>{% endif %}
+
+            <div class="cover-preview" id="coverPreview">
+              <img id="previewImg" src="" alt="Aperçu">
+              <p>Aperçu de la nouvelle couverture</p>
+            </div>
+
+            {% if livre and livre.couverture %}
+            <div class="current-cover">
+              <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
+              <p>Couverture actuelle</p>
+            </div>
             {% endif %}
+          </div>
+
+          <!-- PDF -->
+          <div class="field-group">
+            <label>Version numérique (PDF)</label>
+            <div class="upload-area">
+              <div class="up-icon">📄</div>
+              <p>{{ form.version_numerique.help_text }}</p>
+              {{ form.version_numerique }}
+            </div>
+            {% if form.version_numerique.errors %}<span class="error">{{ form.version_numerique.errors|join:", " }}</span>{% endif %}
+
+            {% if livre and livre.version_numerique %}
+            <div class="pdf-existing">
+              <span>📄</span>
+              Fichier actuel :
+              <a href="{{ livre.version_numerique.url }}" target="_blank">Télécharger ↗</a>
+            </div>
+            {% endif %}
+          </div>
+
         </div>
+      </div>
     </div>
-    
-    <!-- Section 4: Gestion des exemplaires -->
-    <div class="form-section">
-        <h4 class="section-title">
-            <i class="bi bi-box-seam"></i>
-            Gestion des exemplaires
-        </h4>
-        
-        <div class="row">
-            <!-- Nombre d'exemplaires -->
-            <div class="col-md-4 mb-3">
-                <label for="{{ form.nombre_exemplaires.id_for_label }}" class="form-label">
-                    Nombre d'exemplaires <span class="required">*</span>
-                </label>
-                {{ form.nombre_exemplaires }}
-                <div class="form-text">
-                    <i class="bi bi-stack"></i> Total d'exemplaires disponibles
-                </div>
-                {% if form.nombre_exemplaires.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.nombre_exemplaires.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Emplacement -->
-            <div class="col-md-4 mb-3">
-                <label for="{{ form.emplacement.id_for_label }}" class="form-label">
-                    Emplacement physique
-                </label>
-                {{ form.emplacement }}
-                <div class="form-text">
-                    <i class="bi bi-geo-alt"></i> Optionnel
-                </div>
-                {% if form.emplacement.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.emplacement.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Disponible -->
-            <div class="col-md-4 mb-3">
-                <label class="form-label d-block">Statut</label>
-                <div class="form-check form-switch mt-2">
-                    {{ form.disponible }}
-                    <label class="form-check-label" for="{{ form.disponible.id_for_label }}">
-                        <i class="bi bi-check-circle"></i> Marquer comme disponible
-                    </label>
-                </div>
-                {% if form.disponible.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.disponible.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-            </div>
-        </div>
+
+    <div class="ornament">✦ ✦ ✦</div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {% if action == 'Modifier' %}Enregistrer les modifications →{% else %}Créer le livre →{% endif %}
+      </button>
+      <a href="{% url 'livre_list' %}" class="btn btn-secondary" id="cancelBtn">← Annuler</a>
+      {% if livre %}
+        <a href="{% url 'livre_detail' livre.pk %}" class="btn btn-view">👁 Voir le livre</a>
+      {% endif %}
     </div>
-    
-    <!-- Section 5: Fichiers multimédias -->
-    <div class="form-section">
-        <h4 class="section-title">
-            <i class="bi bi-image"></i>
-            Fichiers multimédias
-        </h4>
-        
-        <div class="row">
-            <!-- Image de couverture -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.couverture.id_for_label }}" class="form-label">
-                    Image de couverture
-                </label>
-                {{ form.couverture }}
-                <div class="form-text">
-                    <i class="bi bi-file-image"></i> Formats acceptés: JPG, PNG (Max: 5MB)
-                </div>
-                {% if form.couverture.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.couverture.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-                
-                <!-- Preview de l'image -->
-                <div class="file-preview" id="imagePreview" style="display:none;">
-                    <p class="small text-muted mb-2">Aperçu :</p>
-                    <img id="previewImg" src="" alt="Aperçu">
-                </div>
-                
-                {% if livre and livre.couverture %}
-                    <div class="file-preview mt-2">
-                        <p class="small text-muted mb-2">Image actuelle :</p>
-                        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Version numérique -->
-            <div class="col-md-6 mb-3">
-                <label for="{{ form.version_numerique.id_for_label }}" class="form-label">
-                    Version numérique (PDF)
-                </label>
-                {{ form.version_numerique }}
-                <div class="form-text">
-                    <i class="bi bi-file-pdf"></i> Format PDF uniquement (Max: 50MB)
-                </div>
-                {% if form.version_numerique.errors %}
-                    <div class="error-message">
-                        <i class="bi bi-exclamation-circle"></i>
-                        {% for error in form.version_numerique.errors %}{{ error }}{% endfor %}
-                    </div>
-                {% endif %}
-                
-                {% if livre and livre.version_numerique %}
-                    <div class="preview-card mt-2">
-                        <i class="bi bi-file-pdf text-danger"></i>
-                        Fichier actuel: 
-                        <a href="{{ livre.version_numerique.url }}" target="_blank">
-                            Télécharger <i class="bi bi-download"></i>
-                        </a>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-    
-    <!-- Boutons d'action -->
-    <div class="btn-actions">
-        <button type="submit" class="btn btn-primary btn-lg">
-            <i class="bi bi-check-circle"></i> 
-            {% if action == 'Ajouter' %}Ajouter le livre{% else %}Enregistrer les modifications{% endif %}
-        </button>
-        <a href="{% url 'livre_list' %}" class="btn btn-outline-secondary btn-lg">
-            <i class="bi bi-x-circle"></i> Annuler
-        </a>
-        {% if livre %}
-            <a href="{% url 'livre_detail' livre.pk %}" class="btn btn-outline-info btn-lg ms-auto">
-                <i class="bi bi-eye"></i> Voir le livre
-            </a>
-        {% endif %}
-    </div>
-</form>
+
+  </form>
+</div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Compteur de caractères pour le titre
-    const titreInput = document.getElementById('{{ form.titre.id_for_label }}');
-    const titreCounter = document.getElementById('titreCounter');
-    
-    if (titreInput && titreCounter) {
-        titreInput.addEventListener('input', function() {
-            const count = this.value.length;
-            titreCounter.textContent = `${count} / 300 caractères`;
-            titreCounter.style.color = count > 300 ? '#e74c3c' : '#95a5a6';
-        });
-        // Initialiser le compteur
-        titreInput.dispatchEvent(new Event('input'));
+  // ── Compteur titre ──
+  const titreInput   = document.getElementById('{{ form.titre.id_for_label }}');
+  const titreCounter = document.getElementById('titreCounter');
+  if (titreInput && titreCounter) {
+    titreInput.addEventListener('input', function() {
+      const n = this.value.length;
+      titreCounter.textContent = n + ' / 300 caractères';
+      titreCounter.className = 'char-counter' + (n > 300 ? ' warn' : '');
+    });
+    titreInput.dispatchEvent(new Event('input'));
+  }
+
+  // ── Compteur résumé ──
+  const resumeInput   = document.getElementById('{{ form.resume.id_for_label }}');
+  const resumeCounter = document.getElementById('resumeCounter');
+  if (resumeInput && resumeCounter) {
+    resumeInput.addEventListener('input', function() {
+      resumeCounter.textContent = this.value.length + ' caractères';
+    });
+    resumeInput.dispatchEvent(new Event('input'));
+  }
+
+  // ── Prévisualisation couverture ──
+  const couvertureInput = document.getElementById('{{ form.couverture.id_for_label }}');
+  const coverPreview    = document.getElementById('coverPreview');
+  const previewImg      = document.getElementById('previewImg');
+  if (couvertureInput) {
+    couvertureInput.addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          previewImg.src = e.target.result;
+          coverPreview.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      } else {
+        coverPreview.style.display = 'none';
+      }
+    });
+  }
+
+  // ── Validation côté client ──
+  const livreForm = document.getElementById('livreForm');
+  livreForm.addEventListener('submit', function(e) {
+    let valid = true;
+    this.querySelectorAll('input[required], select[required], textarea[required]').forEach(f => {
+      if (!f.value.trim()) {
+        f.classList.add('error-field');
+        valid = false;
+      } else {
+        f.classList.remove('error-field');
+      }
+    });
+    if (!valid) {
+      e.preventDefault();
+      const first = this.querySelector('.error-field');
+      if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
     }
-    
-    // Compteur de caractères pour le résumé
-    const resumeInput = document.getElementById('{{ form.resume.id_for_label }}');
-    const resumeCounter = document.getElementById('resumeCounter');
-    
-    if (resumeInput && resumeCounter) {
-        resumeInput.addEventListener('input', function() {
-            const count = this.value.length;
-            resumeCounter.textContent = `${count} caractères`;
-        });
-        // Initialiser le compteur
-        resumeInput.dispatchEvent(new Event('input'));
+  });
+  livreForm.querySelectorAll('input, select, textarea').forEach(f => {
+    f.addEventListener('input', () => f.classList.remove('error-field'));
+  });
+
+  // ── Alerte quitter sans sauvegarder ──
+  let formModified = false;
+  livreForm.addEventListener('input', () => { formModified = true; });
+  document.getElementById('cancelBtn')?.addEventListener('click', function(e) {
+    if (formModified && !confirm('Des modifications ne sont pas enregistrées. Quitter quand même ?')) {
+      e.preventDefault();
     }
-    
-    // Prévisualisation de l'image de couverture
-    const couvertureInput = document.getElementById('{{ form.couverture.id_for_label }}');
-    const imagePreview = document.getElementById('imagePreview');
-    const previewImg = document.getElementById('previewImg');
-    
-    if (couvertureInput) {
-        couvertureInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    previewImg.src = e.target.result;
-                    imagePreview.style.display = 'block';
-                };
-                
-                reader.readAsDataURL(file);
-            } else {
-                imagePreview.style.display = 'none';
-            }
-        });
-    }
-    
-    // Validation côté client
-    const form = document.getElementById('livreForm');
-    
-    form.addEventListener('submit', function(e) {
-        let isValid = true;
-        const requiredFields = form.querySelectorAll('[required]');
-        
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-            }
-        });
-        
-        if (!isValid) {
-            e.preventDefault();
-            alert('Veuillez remplir tous les champs obligatoires (marqués d\'un *)');
-            // Scroll vers le premier champ invalide
-            const firstInvalid = form.querySelector('.is-invalid');
-            if (firstInvalid) {
-                firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                firstInvalid.focus();
-            }
-        }
-    });
-    
-    // Enlever l'indicateur d'erreur lors de la saisie
-    form.querySelectorAll('input, select, textarea').forEach(field => {
-        field.addEventListener('input', function() {
-            this.classList.remove('is-invalid');
-        });
-    });
-    
-    // Confirmation avant d'annuler si le formulaire a été modifié
-    let formModified = false;
-    
-    form.addEventListener('input', function() {
-        formModified = true;
-    });
-    
-    document.querySelectorAll('a[href*="livre_list"]').forEach(link => {
-        link.addEventListener('click', function(e) {
-            if (formModified) {
-                if (!confirm('Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?')) {
-                    e.preventDefault();
-                }
-            }
-        });
-    });
-    
-    // Animation d'apparition des sections
-    document.addEventListener('DOMContentLoaded', function() {
-        const sections = document.querySelectorAll('.form-section');
-        sections.forEach((section, index) => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                section.style.transition = 'all 0.5s ease';
-                section.style.opacity = '1';
-                section.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
-    });
+  });
 </script>
 {% endblock %}
