@@ -229,8 +229,12 @@ function validateForm(form) {
 }
 
 // Export des fonctions pour utilisation globale
-window.bibliotheque = {
-    fetchData,
-    showNotification,
-    validateForm
-};
+// window.bibliotheque = {
+//     fetchData,
+//     showNotification,
+//     validateForm
+// };
+
+
+
+

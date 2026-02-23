@@ -6,7 +6,11 @@
 {% block extra_css %}
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap');
+</style>
+{% endblock %}
 
+{% block extra_css_override %}
+<style>
   :root {
     --ink: #1a1209;
     --parchment: #f5f0e8;
@@ -15,380 +19,328 @@
     --sepia-pale: #e0e8f4;
     --accent: #b04030;
     --border: #d4c4a8;
-    --shadow: rgba(26, 18, 9, 0.12);
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    background-color: var(--parchment);
-    background-image:
-      radial-gradient(ellipse at 20% 50%, rgba(44,62,107,.05) 0%, transparent 60%),
-      radial-gradient(ellipse at 80% 20%, rgba(176,64,48,.04) 0%, transparent 50%);
-    font-family: 'Lato', sans-serif;
-    color: var(--ink);
-    min-height: 100vh;
+    --shadow: rgba(26,18,9,0.10);
   }
 
   /* ── Header ── */
   .page-header {
     background: var(--ink);
-    padding: 2.5rem 3rem;
+    padding: 2.2rem 2.5rem;
+    margin: -28px -24px 2rem -24px;
     position: relative;
-    overflow: hidden;
   }
   .page-header::after {
     content: '';
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
+    bottom: 0; left: 0; right: 0; height: 3px;
     background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
   }
-  .breadcrumb-top {
-    font-size: .7rem;
-    letter-spacing: .15em;
-    text-transform: uppercase;
-    color: var(--sepia-light);
-    margin-bottom: .6rem;
+  .ph-breadcrumb {
+    font-size: .7rem; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--sepia-light); margin-bottom: .5rem;
   }
-  .breadcrumb-top a { color: var(--sepia-light); text-decoration: none; }
-  .breadcrumb-top a:hover { color: #fff; }
-  .page-header h1 {
+  .ph-breadcrumb a { color: var(--sepia-light); text-decoration: none; }
+  .ph-breadcrumb a:hover { color: #fff; }
+  .ph-title {
     font-family: 'Playfair Display', serif;
-    font-size: 2.1rem;
-    color: #fff;
-    font-weight: 400;
-    font-style: italic;
+    font-size: 2rem; color: #fff; font-weight: 400; font-style: italic;
+    margin: 0;
   }
-  .page-header h1 span { color: var(--sepia-light); font-style: normal; }
-  .page-header p { font-size: .83rem; color: rgba(255,255,255,.4); margin-top: .4rem; }
+  .ph-title span { color: var(--sepia-light); font-style: normal; }
+  .ph-sub { font-size: .82rem; color: rgba(255,255,255,.4); margin-top: .3rem; }
 
-  /* ── Container ── */
-  .form-container {
-    max-width: 980px;
-    margin: 2.5rem auto;
-    padding: 0 1.5rem 4rem;
-  }
-
-  /* ── Conseil banner ── */
-  .conseil-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: .75rem;
-    background: #f0f5ff;
-    border-left: 3px solid var(--sepia-light);
-    border-radius: 1px;
-    padding: .85rem 1.2rem;
-    margin-bottom: 1.8rem;
-    font-size: .82rem;
-    color: var(--sepia);
+  /* ── Conseil ── */
+  .conseil {
+    display: flex; gap: .6rem; align-items: flex-start;
+    background: #f0f5ff; border-left: 3px solid var(--sepia-light);
+    padding: .8rem 1.1rem; margin-bottom: 1.5rem;
+    font-size: .82rem; color: var(--sepia);
   }
 
-  /* ── Section card ── */
-  .form-section {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    box-shadow: 0 4px 20px var(--shadow);
-    overflow: hidden;
-    margin-bottom: 1.5rem;
-    opacity: 0;
-    transform: translateY(14px);
-    animation: fadeUp .4s ease forwards;
+  /* ── Erreurs globales ── */
+  .form-errors {
+    background: #fef5f4; border-left: 3px solid var(--accent);
+    padding: .9rem 1.1rem; margin-bottom: 1.5rem;
+    font-size: .85rem; color: var(--accent);
   }
-  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
 
-  .section-header {
-    display: flex;
-    align-items: center;
-    gap: .8rem;
-    padding: 1.2rem 2rem;
-    border-bottom: 1px solid var(--sepia-pale);
-    background: var(--parchment);
+  /* ── Sections ── */
+  .f-section {
+    background: #fff !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 2px !important;
+    box-shadow: 0 3px 16px var(--shadow) !important;
+    margin-bottom: 1.4rem !important;
+    overflow: hidden !important;
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
   }
-  .section-num {
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    background: var(--ink);
-    color: var(--sepia-light);
-    font-family: 'Playfair Display', serif;
-    font-size: .8rem;
+  .f-section-head {
+    display: flex !important;
+    align-items: center !important;
+    gap: .75rem !important;
+    padding: 1rem 1.8rem !important;
+    background: var(--parchment) !important;
+    border-bottom: 1px solid var(--sepia-pale) !important;
+  }
+  .f-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--ink); color: var(--sepia-light);
+    font-family: 'Playfair Display', serif; font-size: .78rem;
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
-  .section-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--ink);
+  .f-section-head h2 {
+    font-family: 'Playfair Display', serif !important;
+    font-size: .95rem !important; font-weight: 400 !important;
+    color: var(--ink) !important; margin: 0 !important;
   }
-  .section-header p { font-size: .73rem; color: var(--sepia); margin-top: .1rem; }
-
-  .section-body { padding: 1.8rem 2rem; }
+  .f-section-head p {
+    font-size: .72rem !important; color: var(--sepia) !important;
+    margin: .1rem 0 0 0 !important;
+  }
+  .f-body {
+    padding: 1.6rem 1.8rem !important;
+    display: block !important;
+  }
 
   /* ── Grids ── */
-  .fields-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.3rem 1.8rem;
+  .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem 1.6rem; }
+  .fg3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.2rem 1.6rem; }
+  .fg2 .full, .fg3 .full { grid-column: 1 / -1; }
+  .fgap { margin-bottom: 1.2rem; }
+
+  /* ── Champ ── */
+  .f-field { display: flex; flex-direction: column; gap: .35rem; }
+  .f-field label {
+    font-size: .67rem !important; font-weight: 700 !important;
+    letter-spacing: .1em !important; text-transform: uppercase !important;
+    color: var(--sepia) !important; margin-bottom: 0 !important;
   }
-  .fields-grid .full { grid-column: 1 / -1; }
-  .fields-grid-3 {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 1.3rem 1.8rem;
+  .f-field label .req { color: var(--accent); margin-left: 2px; }
+  .f-field .f-help { font-size: .71rem; color: var(--sepia-light); font-style: italic; }
+  .f-field .f-error { font-size: .71rem; color: var(--accent); }
+  .f-field .f-counter { font-size: .67rem; color: var(--sepia-light); text-align: right; font-style: italic; }
+  .f-field .f-counter.warn { color: var(--accent); }
+
+  /* ── INPUTS — override total de Bootstrap ── */
+  #livreForm input[type="text"],
+  #livreForm input[type="number"],
+  #livreForm input[type="email"],
+  #livreForm input[type="url"],
+  #livreForm input[type="search"],
+  #livreForm select,
+  #livreForm textarea {
+    display: block !important;
+    width: 100% !important;
+    padding: .65rem .95rem !important;
+    font-family: 'Lato', sans-serif !important;
+    font-size: .88rem !important;
+    font-weight: 400 !important;
+    color: #1a1209 !important;
+    background-color: #fdfcfa !important;
+    background-image: none !important;
+    border: 1px solid #d4c4a8 !important;
+    border-radius: 1px !important;
+    box-shadow: none !important;
+    outline: none !important;
+    line-height: 1.5 !important;
+    transition: border-color .2s, box-shadow .2s !important;
+    margin: 0 !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+  }
+  #livreForm input[type="text"]:focus,
+  #livreForm input[type="number"]:focus,
+  #livreForm input[type="email"]:focus,
+  #livreForm select:focus,
+  #livreForm textarea:focus {
+    border-color: #2c3e6b !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 3px rgba(44,62,107,.12) !important;
+    outline: none !important;
   }
 
-  /* ── Field group ── */
-  .field-group { display: flex; flex-direction: column; gap: .38rem; }
-
-  .field-group label {
-    font-size: .68rem;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    color: var(--sepia);
-  }
-  .field-group label .req { color: var(--accent); margin-left: 2px; }
-
-  /* ── Tous les champs texte/select/textarea ── */
-  .field-group input[type="text"],
-  .field-group input[type="number"],
-  .field-group input[type="email"],
-  .field-group input[type="url"],
-  .field-group select,
-  .field-group textarea {
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    padding: .68rem 1rem;
-    font-family: 'Lato', sans-serif;
-    font-size: .9rem;
-    color: var(--ink);
-    background: #fdfcfa;
-    outline: none;
-    width: 100%;
-    transition: border-color .2s, box-shadow .2s, background .2s;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-  .field-group input[type="text"]:focus,
-  .field-group input[type="number"]:focus,
-  .field-group select:focus,
-  .field-group textarea:focus {
-    border-color: var(--sepia);
-    background: #fff;
-    box-shadow: 0 0 0 3px rgba(44,62,107,.12);
-  }
-  .field-group input.error-field,
-  .field-group select.error-field,
-  .field-group textarea.error-field {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px rgba(176,64,48,.1);
+  /* Select flèche */
+  #livreForm select:not([multiple]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8cba' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right .85rem center !important;
+    padding-right: 2.5rem !important;
+    cursor: pointer !important;
   }
 
-  /* Select arrow */
-  .field-group select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8cba' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right .9rem center;
-    padding-right: 2.5rem;
-    cursor: pointer;
-  }
-
-  /* SelectMultiple */
-  .field-group select[multiple] {
-    background-image: none;
-    padding: .5rem .8rem;
-    min-height: 130px;
-  }
-  .field-group select[multiple] option {
-    padding: .3rem .5rem;
-    border-radius: 1px;
-  }
-  .field-group select[multiple] option:checked {
-    background: var(--sepia);
-    color: #fff;
+  /* Select multiple */
+  #livreForm select[multiple] {
+    background-image: none !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    min-height: 130px !important;
+    padding: .4rem .7rem !important;
   }
 
   /* Textarea */
-  .field-group textarea {
-    resize: vertical;
-    min-height: 110px;
-    line-height: 1.65;
+  #livreForm textarea {
+    resize: vertical !important;
+    min-height: 100px !important;
+    line-height: 1.65 !important;
+  }
+
+  /* Checkbox */
+  #livreForm input[type="checkbox"] {
+    display: inline-block !important;
+    width: 18px !important; height: 18px !important;
+    padding: 0 !important;
+    border: 2px solid #d4c4a8 !important;
+    border-radius: 2px !important;
+    background-color: #fdfcfa !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    vertical-align: middle !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    position: relative !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+  }
+  #livreForm input[type="checkbox"]:checked {
+    background-color: #1a1209 !important;
+    border-color: #1a1209 !important;
+  }
+  #livreForm input[type="checkbox"]:checked::after {
+    content: '✓' !important;
+    position: absolute !important;
+    top: 50% !important; left: 50% !important;
+    transform: translate(-50%,-50%) !important;
+    color: #fff !important; font-size: .68rem !important; font-weight: 700 !important;
   }
 
   /* File input */
-  .field-group input[type="file"] {
-    border: none;
-    padding: 0;
-    background: transparent;
-    font-size: .82rem;
-    color: var(--sepia);
-    width: 100%;
-    cursor: pointer;
+  #livreForm input[type="file"] {
+    display: block !important;
+    width: 100% !important;
+    border: none !important;
+    padding: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: .82rem !important;
+    color: var(--sepia) !important;
+    cursor: pointer !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
   }
 
-  .field-group .help  { font-size: .72rem; color: var(--sepia-light); font-style: italic; }
-  .field-group .error { font-size: .72rem; color: var(--accent); margin-top: .1rem; }
-
-  /* Compteur */
-  .char-counter {
-    font-size: .68rem;
-    color: var(--sepia-light);
-    text-align: right;
-    font-style: italic;
-  }
-  .char-counter.warn { color: var(--accent); }
-
-  /* ── Checkbox ── */
+  /* ── Checkbox row ── */
   .check-row {
-    display: flex;
-    align-items: flex-start;
-    gap: .75rem;
-    padding: .5rem 0;
-  }
-  .check-row input[type="checkbox"] {
-    width: 18px; height: 18px;
-    border: 2px solid var(--border);
-    border-radius: 2px;
-    appearance: none;
-    -webkit-appearance: none;
-    background: #fdfcfa;
-    cursor: pointer;
-    flex-shrink: 0;
-    margin-top: 2px;
-    transition: all .15s;
-    position: relative;
-  }
-  .check-row input[type="checkbox"]:checked {
-    background: var(--ink);
-    border-color: var(--ink);
-  }
-  .check-row input[type="checkbox"]:checked::after {
-    content: '✓';
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff; font-size: .7rem; font-weight: 700;
+    display: flex; align-items: flex-start;
+    gap: .7rem; padding: .4rem 0;
   }
   .check-label strong { font-size: .85rem; font-weight: 700; color: var(--ink); display: block; }
-  .check-label span   { font-size: .73rem; color: var(--sepia); font-style: italic; }
+  .check-label span   { font-size: .72rem; color: var(--sepia); font-style: italic; }
 
   /* ── Zone upload ── */
-  .upload-area {
-    border: 2px dashed var(--border);
-    border-radius: 1px;
-    padding: 1.4rem;
-    text-align: center;
-    background: #fdfcfa;
-    transition: border-color .2s, background .2s;
+  .upload-zone {
+    border: 2px dashed var(--border); border-radius: 1px;
+    padding: 1.2rem; text-align: center; background: #fdfcfa;
+    transition: border-color .2s;
   }
-  .upload-area:hover { border-color: var(--sepia-light); background: var(--sepia-pale); }
-  .upload-area .up-icon { font-size: 1.8rem; opacity: .3; margin-bottom: .4rem; }
-  .upload-area p { font-size: .77rem; color: var(--sepia); font-style: italic; margin-bottom: .6rem; }
+  .upload-zone:hover { border-color: var(--sepia-light); background: var(--sepia-pale); }
+  .upload-zone .uz-icon { font-size: 1.6rem; opacity: .25; display: block; margin-bottom: .3rem; }
+  .upload-zone .uz-hint { font-size: .75rem; color: var(--sepia); font-style: italic; margin-bottom: .5rem; }
 
-  .cover-preview { display: none; margin-top: .75rem; text-align: center; }
-  .cover-preview img {
-    max-width: 120px;
-    border-radius: 1px;
-    box-shadow: 3px 3px 12px var(--shadow);
-  }
-  .cover-preview p { font-size: .7rem; color: var(--sepia-light); font-style: italic; margin-top: .35rem; }
+  .cover-preview { display: none; margin-top: .7rem; text-align: center; }
+  .cover-preview img { max-width: 110px; border-radius: 1px; box-shadow: 3px 3px 10px var(--shadow); }
+  .cover-preview p { font-size: .68rem; color: var(--sepia-light); font-style: italic; margin-top: .3rem; }
 
-  .current-cover { margin-top: .75rem; text-align: center; }
-  .current-cover img {
-    max-width: 100px;
-    border-radius: 1px;
-    box-shadow: 3px 3px 10px var(--shadow);
-  }
-  .current-cover p { font-size: .7rem; color: var(--sepia-light); font-style: italic; margin-top: .3rem; }
+  .current-cover { margin-top: .7rem; text-align: center; }
+  .current-cover img { max-width: 90px; border-radius: 1px; box-shadow: 3px 3px 10px var(--shadow); }
+  .current-cover p { font-size: .68rem; color: var(--sepia-light); font-style: italic; margin-top: .3rem; }
 
   .pdf-existing {
-    margin-top: .6rem;
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    padding: .6rem .9rem;
-    background: var(--parchment);
-    border: 1px solid var(--border);
-    border-radius: 1px;
-    font-size: .8rem;
-    color: var(--sepia);
+    margin-top: .6rem; display: flex; align-items: center; gap: .5rem;
+    padding: .55rem .9rem; background: #fff8e1; border-left: 3px solid #d4a017;
+    font-size: .8rem; color: #7a5c00;
   }
   .pdf-existing a { color: var(--accent); font-weight: 700; text-decoration: none; }
-  .pdf-existing a:hover { text-decoration: underline; }
 
-  /* ── Erreurs globales ── */
-  .alert-errors {
-    margin-bottom: 1.5rem;
-    padding: 1rem 1.2rem;
-    background: #fef5f4;
-    border-left: 3px solid var(--accent);
-    border-radius: 1px;
-    font-size: .85rem;
-    color: var(--accent);
-  }
+  /* ── Ornement ── */
+  .ornament { text-align: center; padding: .8rem 0 .4rem; color: var(--border); letter-spacing: .5em; }
 
   /* ── Actions ── */
   .form-actions {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    box-shadow: 0 4px 20px var(--shadow);
-    padding: 1.4rem 2rem;
-    display: flex;
-    align-items: center;
-    gap: .75rem;
-    flex-wrap: wrap;
+    background: #fff !important; border: 1px solid var(--border) !important;
+    border-radius: 2px !important; box-shadow: 0 3px 16px var(--shadow) !important;
+    padding: 1.2rem 1.8rem !important; display: flex !important;
+    align-items: center !important; gap: .7rem !important; flex-wrap: wrap !important;
   }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: .45rem;
-    padding: .72rem 1.6rem;
-    font-family: 'Lato', sans-serif;
-    font-size: .78rem;
-    font-weight: 700;
-    letter-spacing: .1em;
-    text-transform: uppercase;
-    border: 1px solid transparent;
-    border-radius: 1px;
-    cursor: pointer;
-    text-decoration: none;
-    transition: all .2s;
-    white-space: nowrap;
+  .f-btn {
+    display: inline-flex !important; align-items: center !important; gap: .4rem !important;
+    padding: .68rem 1.5rem !important; font-family: 'Lato', sans-serif !important;
+    font-size: .75rem !important; font-weight: 700 !important;
+    letter-spacing: .1em !important; text-transform: uppercase !important;
+    border: 1px solid transparent !important; border-radius: 1px !important;
+    cursor: pointer !important; text-decoration: none !important;
+    transition: all .18s !important; white-space: nowrap !important;
   }
-  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
-  .btn-primary:hover {
-    background: var(--accent); border-color: var(--accent);
-    transform: translateY(-1px); box-shadow: 0 4px 16px rgba(176,64,48,.3);
-    color: #fff;
+  .f-btn-primary {
+    background: var(--ink) !important; color: #fff !important;
+    border-color: var(--ink) !important;
   }
-  .btn-secondary { background: transparent; color: var(--sepia); border-color: var(--border); }
-  .btn-secondary:hover { border-color: var(--sepia); color: var(--ink); }
-  .btn-view { background: var(--sepia-pale); color: var(--sepia); border-color: var(--sepia-light); margin-left: auto; }
-  .btn-view:hover { background: var(--sepia); color: #fff; }
+  .f-btn-primary:hover {
+    background: var(--accent) !important; border-color: var(--accent) !important;
+    color: #fff !important; transform: translateY(-1px) !important;
+  }
+  .f-btn-secondary {
+    background: transparent !important; color: var(--sepia) !important;
+    border-color: var(--border) !important;
+  }
+  .f-btn-secondary:hover { border-color: var(--sepia) !important; color: var(--ink) !important; }
+  .f-btn-view {
+    background: var(--sepia-pale) !important; color: var(--sepia) !important;
+    border-color: var(--sepia-light) !important; margin-left: auto !important;
+  }
+  .f-btn-view:hover { background: var(--sepia) !important; color: #fff !important; }
 
-  .ornament {
-    text-align: center;
-    padding: 1rem 0 .5rem;
-    color: var(--border);
-    font-size: 1rem;
-    letter-spacing: .5em;
+  /* ── SelectMultiple auteurs ── */
+  #livreForm select[multiple] {
+    background-image: none !important;
+    -webkit-appearance: auto !important;
+    appearance: auto !important;
+    min-height: 160px !important;
+    padding: .4rem .6rem !important;
+    cursor: pointer !important;
+    font-size: .88rem !important;
+    line-height: 1.8 !important;
+  }
+  #livreForm select[multiple] option {
+    padding: .35rem .6rem !important;
+    border-radius: 2px !important;
+    margin-bottom: 1px !important;
+    color: var(--ink) !important;
+    cursor: pointer !important;
+  }
+  #livreForm select[multiple] option:checked,
+  #livreForm select[multiple] option:selected {
+    background: var(--sepia) !important;
+    color: #fff !important;
+  }
+  #livreForm select[multiple] option:hover {
+    background: var(--sepia-pale) !important;
   }
 
   kbd {
     background: var(--ink); color: var(--sepia-light);
-    padding: .1rem .4rem; border-radius: 2px;
-    font-size: .73rem; font-family: monospace;
+    padding: .1rem .35rem; border-radius: 2px; font-size: .72rem;
   }
 
   @media (max-width: 640px) {
-    .fields-grid, .fields-grid-3 { grid-template-columns: 1fr; }
-    .section-body { padding: 1.2rem; }
-    .page-header { padding: 1.5rem; }
-    .form-actions { flex-direction: column; }
-    .btn-view { margin-left: 0; }
+    .fg2, .fg3 { grid-template-columns: 1fr !important; }
+    .f-body { padding: 1.1rem !important; }
+    .page-header { padding: 1.4rem !important; }
+    .form-actions { flex-direction: column !important; }
+    .f-btn-view { margin-left: 0 !important; }
   }
 </style>
 {% endblock %}
@@ -397,294 +349,265 @@
 
 <!-- Header -->
 <div class="page-header">
-  <div class="breadcrumb-top">
+  <div class="ph-breadcrumb">
     <a href="{% url 'home' %}">Accueil</a> &nbsp;›&nbsp;
     <a href="{% url 'livre_list' %}">Livres</a> &nbsp;›&nbsp;
     {{ action|default:"Ajouter" }}
   </div>
-  <h1>
+  <h1 class="ph-title">
     {% if action == 'Modifier' %}
-      Modifier <span>« {{ livre.titre|truncatewords:5 }} »</span>
+      Modifier <span>« {{ livre.titre|truncatewords:4 }} »</span>
     {% else %}
       <span>Enregistrer</span> un nouveau livre
     {% endif %}
   </h1>
-  <p>
+  <p class="ph-sub">
     {% if action == 'Modifier' %}Mettez à jour les informations du livre dans le catalogue.
     {% else %}Remplissez le formulaire pour ajouter un livre au catalogue.{% endif %}
   </p>
 </div>
 
-<div class="form-container">
-
-  <div class="conseil-banner">
-    ℹ &nbsp; Les champs marqués d'un astérisque (<strong style="color:var(--accent)">*</strong>) sont obligatoires.
-  </div>
-
-  <form method="post" enctype="multipart/form-data" id="livreForm" novalidate>
-    {% csrf_token %}
-
-    {% if form.non_field_errors %}
-    <div class="alert-errors">
-      {% for e in form.non_field_errors %}{{ e }}{% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- ① Informations de base -->
-    <div class="form-section" style="animation-delay: 0ms">
-      <div class="section-header">
-        <div class="section-num">I</div>
-        <div>
-          <h2>Informations de base</h2>
-          <p>ISBN, langue, état et titre</p>
-        </div>
-      </div>
-      <div class="section-body">
-
-        <div class="fields-grid-3" style="margin-bottom: 1.3rem">
-          <div class="field-group">
-            <label for="{{ form.isbn.id_for_label }}">ISBN <span class="req">*</span></label>
-            {{ form.isbn }}
-            <span class="help">{{ form.isbn.help_text }}</span>
-            {% if form.isbn.errors %}<span class="error">{{ form.isbn.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.langue.id_for_label }}">Langue <span class="req">*</span></label>
-            {{ form.langue }}
-            {% if form.langue.errors %}<span class="error">{{ form.langue.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.etat.id_for_label }}">État du livre <span class="req">*</span></label>
-            {{ form.etat }}
-            {% if form.etat.errors %}<span class="error">{{ form.etat.errors|join:", " }}</span>{% endif %}
-          </div>
-        </div>
-
-        <div class="fields-grid">
-          <div class="field-group full">
-            <label for="{{ form.titre.id_for_label }}">Titre du livre <span class="req">*</span></label>
-            {{ form.titre }}
-            <div class="char-counter" id="titreCounter">0 / 300 caractères</div>
-            {% if form.titre.errors %}<span class="error">{{ form.titre.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group full">
-            <label for="{{ form.sous_titre.id_for_label }}">Sous-titre</label>
-            {{ form.sous_titre }}
-            <span class="help">Optionnel</span>
-            {% if form.sous_titre.errors %}<span class="error">{{ form.sous_titre.errors|join:", " }}</span>{% endif %}
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- ② Auteurs & Publication -->
-    <div class="form-section" style="animation-delay: 80ms">
-      <div class="section-header">
-        <div class="section-num">II</div>
-        <div>
-          <h2>Auteurs &amp; Publication</h2>
-          <p>Auteurs, éditeur et année</p>
-        </div>
-      </div>
-      <div class="section-body">
-        <div class="fields-grid">
-
-          <div class="field-group full">
-            <label for="{{ form.auteurs.id_for_label }}">Auteur(s) <span class="req">*</span></label>
-            {{ form.auteurs }}
-            <span class="help">{{ form.auteurs.help_text }}</span>
-            {% if form.auteurs.errors %}<span class="error">{{ form.auteurs.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.editeur.id_for_label }}">Éditeur <span class="req">*</span></label>
-            {{ form.editeur }}
-            {% if form.editeur.errors %}<span class="error">{{ form.editeur.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.annee_publication.id_for_label }}">Année de publication <span class="req">*</span></label>
-            {{ form.annee_publication }}
-            {% if form.annee_publication.errors %}<span class="error">{{ form.annee_publication.errors|join:", " }}</span>{% endif %}
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ③ Catégorisation -->
-    <div class="form-section" style="animation-delay: 160ms">
-      <div class="section-header">
-        <div class="section-num">III</div>
-        <div>
-          <h2>Catégorisation</h2>
-          <p>Genre, nombre de pages et résumé</p>
-        </div>
-      </div>
-      <div class="section-body">
-        <div class="fields-grid">
-
-          <div class="field-group">
-            <label for="{{ form.categorie.id_for_label }}">Catégorie <span class="req">*</span></label>
-            {{ form.categorie }}
-            {% if form.categorie.errors %}<span class="error">{{ form.categorie.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.nombre_pages.id_for_label }}">Nombre de pages <span class="req">*</span></label>
-            {{ form.nombre_pages }}
-            {% if form.nombre_pages.errors %}<span class="error">{{ form.nombre_pages.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group full">
-            <label for="{{ form.resume.id_for_label }}">Résumé</label>
-            {{ form.resume }}
-            <div class="char-counter" id="resumeCounter">0 caractères</div>
-            {% if form.resume.errors %}<span class="error">{{ form.resume.errors|join:", " }}</span>{% endif %}
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ④ Gestion des exemplaires -->
-    <div class="form-section" style="animation-delay: 240ms">
-      <div class="section-header">
-        <div class="section-num">IV</div>
-        <div>
-          <h2>Gestion des exemplaires</h2>
-          <p>Stock, emplacement et disponibilité</p>
-        </div>
-      </div>
-      <div class="section-body">
-        <div class="fields-grid-3">
-
-          <div class="field-group">
-            <label for="{{ form.nombre_exemplaires.id_for_label }}">Exemplaires <span class="req">*</span></label>
-            {{ form.nombre_exemplaires }}
-            <span class="help">{{ form.nombre_exemplaires.help_text }}</span>
-            {% if form.nombre_exemplaires.errors %}<span class="error">{{ form.nombre_exemplaires.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label for="{{ form.emplacement.id_for_label }}">Emplacement</label>
-            {{ form.emplacement }}
-            <span class="help">{{ form.emplacement.help_text }}</span>
-            {% if form.emplacement.errors %}<span class="error">{{ form.emplacement.errors|join:", " }}</span>{% endif %}
-          </div>
-
-          <div class="field-group">
-            <label>Statut</label>
-            <div class="check-row" style="margin-top: .3rem">
-              {{ form.disponible }}
-              <div class="check-label">
-                <strong>Disponible à l'emprunt</strong>
-                <span>{{ form.disponible.help_text }}</span>
-              </div>
-            </div>
-            {% if form.disponible.errors %}<span class="error">{{ form.disponible.errors|join:", " }}</span>{% endif %}
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <!-- ⑤ Fichiers multimédias -->
-    <div class="form-section" style="animation-delay: 320ms">
-      <div class="section-header">
-        <div class="section-num">V</div>
-        <div>
-          <h2>Fichiers multimédias</h2>
-          <p>Couverture et version numérique PDF</p>
-        </div>
-      </div>
-      <div class="section-body">
-        <div class="fields-grid">
-
-          <!-- Couverture -->
-          <div class="field-group">
-            <label>Image de couverture</label>
-            <div class="upload-area">
-              <div class="up-icon">🖼</div>
-              <p>{{ form.couverture.help_text }}</p>
-              {{ form.couverture }}
-            </div>
-            {% if form.couverture.errors %}<span class="error">{{ form.couverture.errors|join:", " }}</span>{% endif %}
-
-            <div class="cover-preview" id="coverPreview">
-              <img id="previewImg" src="" alt="Aperçu">
-              <p>Aperçu de la nouvelle couverture</p>
-            </div>
-
-            {% if livre and livre.couverture %}
-            <div class="current-cover">
-              <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
-              <p>Couverture actuelle</p>
-            </div>
-            {% endif %}
-          </div>
-
-          <!-- PDF -->
-          <div class="field-group">
-            <label>Version numérique (PDF)</label>
-            <div class="upload-area">
-              <div class="up-icon">📄</div>
-              <p>{{ form.version_numerique.help_text }}</p>
-              {{ form.version_numerique }}
-            </div>
-            {% if form.version_numerique.errors %}<span class="error">{{ form.version_numerique.errors|join:", " }}</span>{% endif %}
-
-            {% if livre and livre.version_numerique %}
-            <div class="pdf-existing">
-              <span>📄</span>
-              Fichier actuel :
-              <a href="{{ livre.version_numerique.url }}" target="_blank">Télécharger ↗</a>
-            </div>
-            {% endif %}
-          </div>
-
-        </div>
-      </div>
-    </div>
-
-    <div class="ornament">✦ ✦ ✦</div>
-
-    <!-- Actions -->
-    <div class="form-actions">
-      <button type="submit" class="btn btn-primary">
-        {% if action == 'Modifier' %}Enregistrer les modifications →{% else %}Créer le livre →{% endif %}
-      </button>
-      <a href="{% url 'livre_list' %}" class="btn btn-secondary" id="cancelBtn">← Annuler</a>
-      {% if livre %}
-        <a href="{% url 'livre_detail' livre.pk %}" class="btn btn-view">👁 Voir le livre</a>
-      {% endif %}
-    </div>
-
-  </form>
+<!-- Conseil -->
+<div class="conseil">
+  ℹ &nbsp; Les champs marqués d'un astérisque (<strong style="color:var(--accent)">*</strong>) sont obligatoires.
 </div>
 
+<!-- Erreurs globales -->
+{% if form.non_field_errors %}
+<div class="form-errors">
+  {% for e in form.non_field_errors %}{{ e }}{% endfor %}
+</div>
+{% endif %}
+
+<form method="post" enctype="multipart/form-data" id="livreForm" novalidate>
+  {% csrf_token %}
+
+  <!-- ① Informations de base -->
+  <div class="f-section">
+    <div class="f-section-head">
+      <div class="f-num">I</div>
+      <div>
+        <h2>Informations de base</h2>
+        <p>ISBN, langue, état et titre</p>
+      </div>
+    </div>
+    <div class="f-body">
+      <div class="fg3 fgap">
+        <div class="f-field">
+          <label for="{{ form.isbn.id_for_label }}">ISBN <span class="req">*</span></label>
+          {{ form.isbn }}
+          <span class="f-help">{{ form.isbn.help_text }}</span>
+          {% if form.isbn.errors %}<span class="f-error">{{ form.isbn.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.langue.id_for_label }}">Langue <span class="req">*</span></label>
+          {{ form.langue }}
+          {% if form.langue.errors %}<span class="f-error">{{ form.langue.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.etat.id_for_label }}">État <span class="req">*</span></label>
+          {{ form.etat }}
+          {% if form.etat.errors %}<span class="f-error">{{ form.etat.errors|join:", " }}</span>{% endif %}
+        </div>
+      </div>
+      <div class="fg2">
+        <div class="f-field full">
+          <label for="{{ form.titre.id_for_label }}">Titre du livre <span class="req">*</span></label>
+          {{ form.titre }}
+          <div class="f-counter" id="titreCounter">0 / 300 caractères</div>
+          {% if form.titre.errors %}<span class="f-error">{{ form.titre.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field full">
+          <label for="{{ form.sous_titre.id_for_label }}">Sous-titre</label>
+          {{ form.sous_titre }}
+          <span class="f-help">Optionnel</span>
+          {% if form.sous_titre.errors %}<span class="f-error">{{ form.sous_titre.errors|join:", " }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② Auteurs & Publication -->
+  <div class="f-section">
+    <div class="f-section-head">
+      <div class="f-num">II</div>
+      <div>
+        <h2>Auteurs &amp; Publication</h2>
+        <p>Auteurs, éditeur et année</p>
+      </div>
+    </div>
+    <div class="f-body">
+      <div class="fg2">
+        <div class="f-field full">
+          <label for="{{ form.auteurs.id_for_label }}">Auteur(s) <span class="req">*</span></label>
+          {{ form.auteurs }}
+          <span class="f-help">Maintenez <kbd>Ctrl</kbd> (Windows) ou <kbd>Cmd</kbd> (Mac) pour plusieurs auteurs.</span>
+          {% if form.auteurs.errors %}<span class="f-error">{{ form.auteurs.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.editeur.id_for_label }}">Éditeur <span class="req">*</span></label>
+          {{ form.editeur }}
+          {% if form.editeur.errors %}<span class="f-error">{{ form.editeur.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.annee_publication.id_for_label }}">Année <span class="req">*</span></label>
+          {{ form.annee_publication }}
+          {% if form.annee_publication.errors %}<span class="f-error">{{ form.annee_publication.errors|join:", " }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ Catégorisation -->
+  <div class="f-section">
+    <div class="f-section-head">
+      <div class="f-num">III</div>
+      <div>
+        <h2>Catégorisation</h2>
+        <p>Genre, pages et résumé</p>
+      </div>
+    </div>
+    <div class="f-body">
+      <div class="fg2">
+        <div class="f-field">
+          <label for="{{ form.categorie.id_for_label }}">Catégorie <span class="req">*</span></label>
+          {{ form.categorie }}
+          {% if form.categorie.errors %}<span class="f-error">{{ form.categorie.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.nombre_pages.id_for_label }}">Nombre de pages <span class="req">*</span></label>
+          {{ form.nombre_pages }}
+          {% if form.nombre_pages.errors %}<span class="f-error">{{ form.nombre_pages.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field full">
+          <label for="{{ form.resume.id_for_label }}">Résumé</label>
+          {{ form.resume }}
+          <div class="f-counter" id="resumeCounter">0 caractères</div>
+          {% if form.resume.errors %}<span class="f-error">{{ form.resume.errors|join:", " }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④ Gestion des exemplaires -->
+  <div class="f-section">
+    <div class="f-section-head">
+      <div class="f-num">IV</div>
+      <div>
+        <h2>Gestion des exemplaires</h2>
+        <p>Stock, emplacement et disponibilité</p>
+      </div>
+    </div>
+    <div class="f-body">
+      <div class="fg3">
+        <div class="f-field">
+          <label for="{{ form.nombre_exemplaires.id_for_label }}">Exemplaires <span class="req">*</span></label>
+          {{ form.nombre_exemplaires }}
+          {% if form.nombre_exemplaires.errors %}<span class="f-error">{{ form.nombre_exemplaires.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label for="{{ form.emplacement.id_for_label }}">Emplacement</label>
+          {{ form.emplacement }}
+          {% if form.emplacement.errors %}<span class="f-error">{{ form.emplacement.errors|join:", " }}</span>{% endif %}
+        </div>
+        <div class="f-field">
+          <label>Statut</label>
+          <div class="check-row" style="margin-top:.3rem">
+            {{ form.disponible }}
+            <div class="check-label">
+              <strong>Disponible à l'emprunt</strong>
+              <span>Visible et empruntable par les membres.</span>
+            </div>
+          </div>
+          {% if form.disponible.errors %}<span class="f-error">{{ form.disponible.errors|join:", " }}</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ⑤ Fichiers multimédias -->
+  <div class="f-section">
+    <div class="f-section-head">
+      <div class="f-num">V</div>
+      <div>
+        <h2>Fichiers multimédias</h2>
+        <p>Couverture et version numérique PDF</p>
+      </div>
+    </div>
+    <div class="f-body">
+      <div class="fg2">
+        <!-- Couverture -->
+        <div class="f-field">
+          <label>Image de couverture</label>
+          <div class="upload-zone">
+            <span class="uz-icon">🖼</span>
+            <p class="uz-hint">{{ form.couverture.help_text }}</p>
+            {{ form.couverture }}
+          </div>
+          {% if form.couverture.errors %}<span class="f-error">{{ form.couverture.errors|join:", " }}</span>{% endif %}
+          <div class="cover-preview" id="coverPreview">
+            <img id="previewImg" src="" alt="Aperçu">
+            <p>Aperçu de la nouvelle couverture</p>
+          </div>
+          {% if livre and livre.couverture %}
+          <div class="current-cover">
+            <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
+            <p>Couverture actuelle</p>
+          </div>
+          {% endif %}
+        </div>
+        <!-- PDF -->
+        <div class="f-field">
+          <label>Version numérique (PDF)</label>
+          <div class="upload-zone">
+            <span class="uz-icon">📄</span>
+            <p class="uz-hint">{{ form.version_numerique.help_text }}</p>
+            {{ form.version_numerique }}
+          </div>
+          {% if form.version_numerique.errors %}<span class="f-error">{{ form.version_numerique.errors|join:", " }}</span>{% endif %}
+          {% if livre and livre.version_numerique %}
+          <div class="pdf-existing">
+            📄 Fichier actuel :
+            <a href="{{ livre.version_numerique.url }}" target="_blank">Télécharger ↗</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ornament">✦ ✦ ✦</div>
+
+  <!-- Actions -->
+  <div class="form-actions">
+    <button type="submit" class="f-btn f-btn-primary">
+      {% if action == 'Modifier' %}Enregistrer les modifications →{% else %}Créer le livre →{% endif %}
+    </button>
+    <a href="{% url 'livre_list' %}" class="f-btn f-btn-secondary" id="cancelBtn">← Annuler</a>
+    {% if livre %}
+    <a href="{% url 'livre_detail' livre.pk %}" class="f-btn f-btn-view">👁 Voir le livre</a>
+    {% endif %}
+  </div>
+
+</form>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-  // ── Compteur titre ──
-  const titreInput   = document.getElementById('{{ form.titre.id_for_label }}');
+  // Compteur titre
+  const titreInput = document.getElementById('{{ form.titre.id_for_label }}');
   const titreCounter = document.getElementById('titreCounter');
   if (titreInput && titreCounter) {
     titreInput.addEventListener('input', function() {
       const n = this.value.length;
       titreCounter.textContent = n + ' / 300 caractères';
-      titreCounter.className = 'char-counter' + (n > 300 ? ' warn' : '');
+      titreCounter.className = 'f-counter' + (n > 300 ? ' warn' : '');
     });
     titreInput.dispatchEvent(new Event('input'));
   }
 
-  // ── Compteur résumé ──
-  const resumeInput   = document.getElementById('{{ form.resume.id_for_label }}');
+  // Compteur résumé
+  const resumeInput = document.getElementById('{{ form.resume.id_for_label }}');
   const resumeCounter = document.getElementById('resumeCounter');
   if (resumeInput && resumeCounter) {
     resumeInput.addEventListener('input', function() {
@@ -693,19 +616,16 @@
     resumeInput.dispatchEvent(new Event('input'));
   }
 
-  // ── Prévisualisation couverture ──
+  // Prévisualisation couverture
   const couvertureInput = document.getElementById('{{ form.couverture.id_for_label }}');
-  const coverPreview    = document.getElementById('coverPreview');
-  const previewImg      = document.getElementById('previewImg');
+  const coverPreview = document.getElementById('coverPreview');
+  const previewImg = document.getElementById('previewImg');
   if (couvertureInput) {
     couvertureInput.addEventListener('change', function(e) {
       const file = e.target.files[0];
       if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = e => {
-          previewImg.src = e.target.result;
-          coverPreview.style.display = 'block';
-        };
+        reader.onload = e => { previewImg.src = e.target.result; coverPreview.style.display = 'block'; };
         reader.readAsDataURL(file);
       } else {
         coverPreview.style.display = 'none';
@@ -713,31 +633,9 @@
     });
   }
 
-  // ── Validation côté client ──
-  const livreForm = document.getElementById('livreForm');
-  livreForm.addEventListener('submit', function(e) {
-    let valid = true;
-    this.querySelectorAll('input[required], select[required], textarea[required]').forEach(f => {
-      if (!f.value.trim()) {
-        f.classList.add('error-field');
-        valid = false;
-      } else {
-        f.classList.remove('error-field');
-      }
-    });
-    if (!valid) {
-      e.preventDefault();
-      const first = this.querySelector('.error-field');
-      if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
-    }
-  });
-  livreForm.querySelectorAll('input, select, textarea').forEach(f => {
-    f.addEventListener('input', () => f.classList.remove('error-field'));
-  });
-
-  // ── Alerte quitter sans sauvegarder ──
+  // Alerte quitter sans sauvegarder
   let formModified = false;
-  livreForm.addEventListener('input', () => { formModified = true; });
+  document.getElementById('livreForm').addEventListener('input', () => { formModified = true; });
   document.getElementById('cancelBtn')?.addEventListener('click', function(e) {
     if (formModified && !confirm('Des modifications ne sont pas enregistrées. Quitter quand même ?')) {
       e.preventDefault();

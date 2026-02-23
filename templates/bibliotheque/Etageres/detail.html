@@ -1,200 +1,647 @@
 {% extends 'bibliotheque/base.html' %}
 {% load static %}
 
-{% block title %}Étagère {{ etagere.code }}{% endblock %}
+{% block title %}Étagère | BiblioSmart{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <a href="{% url 'etagere_list' %}" class="btn btn-outline-secondary mb-3">
-                <i class="fas fa-arrow-left"></i> Retour à la liste
-            </a>
-            <div class="d-flex justify-content-between align-items-center">
-                <h2>
-                    <i class="fas fa-warehouse text-primary"></i> 
-                    Étagère {{ etagere.code }}
-                </h2>
-                <div>
-                    <a href="{% url 'compartiment_create' %}?etagere={{ etagere.pk }}" 
-                       class="btn btn-success">
-                        <i class="fas fa-plus"></i> Ajouter un compartiment
-                    </a>
-                    <a href="{% url 'etagere_update' etagere.pk %}" 
-                       class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <a href="{% url 'etagere_delete' etagere.pk %}" 
-                       class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row">
-        <!-- Informations de l'étagère -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong><i class="fas fa-barcode text-primary"></i> Code:</strong>
-                        <p class="mb-0">{{ etagere.code }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-file-alt text-primary"></i> Description:</strong>
-                        <p class="mb-0">{{ etagere.description }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-door-open text-primary"></i> Salle:</strong>
-                        <p class="mb-0"><span class="badge bg-info">{{ etagere.salle }}</span></p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-layer-group text-primary"></i> Étage:</strong>
-                        <p class="mb-0">{{ etagere.etage }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-box text-primary"></i> Capacité maximale:</strong>
-                        <p class="mb-0">{{ etagere.capacite_max }} unités</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistiques -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Statistiques</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Compartiments:</span>
-                            <strong>{{ compartiments.count }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-1">
-                            <span>Emplacements totaux:</span>
-                            <strong>{{ etagere.nombre_emplacements }}</strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span>Emplacements occupés:</span>
-                            <strong>{{ etagere.nombre_emplacements_occupes }}</strong>
-                        </div>
-                        
-                        <strong>Taux de remplissage:</strong>
-                        <div class="progress mt-2" style="height: 25px;">
-                            <div class="progress-bar 
-                                {% if taux_remplissage < 50 %}bg-success
-                                {% elif taux_remplissage < 80 %}bg-warning
-                                {% else %}bg-danger{% endif %}"
-                                 role="progressbar" 
-                                 style="width: {{ taux_remplissage }}%">
-                                {{ taux_remplissage }}%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Liste des compartiments -->
-        <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-th"></i> Compartiments 
-                        <span class="badge bg-light text-dark">{{ compartiments.count }}</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if compartiments %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Numéro</th>
-                                        <th>Niveau</th>
-                                        <th>Catégorie</th>
-                                        <th>Capacité</th>
-                                        <th>Emplacements</th>
-                                        <th>Occupés</th>
-                                        <th>Taux</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for compartiment in compartiments %}
-                                    <tr>
-                                        <td><strong>{{ compartiment.numero }}</strong></td>
-                                        <td>{{ compartiment.niveau }}</td>
-                                        <td>
-                                            {% if compartiment.categorie %}
-                                                <span class="badge bg-secondary">{{ compartiment.categorie }}</span>
-                                            {% else %}
-                                                <span class="text-muted">-</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>{{ compartiment.capacite }}</td>
-                                        <td>
-                                            <span class="badge bg-primary">{{ compartiment.nb_emplacements }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-warning">{{ compartiment.nb_emplacements_occupes }}</span>
-                                        </td>
-                                        <td>
-                                            {% with taux=compartiment.taux_occupation %}
-                                                <div class="progress" style="width: 80px;">
-                                                    <div class="progress-bar 
-                                                        {% if taux < 50 %}bg-success
-                                                        {% elif taux < 80 %}bg-warning
-                                                        {% else %}bg-danger{% endif %}"
-                                                         style="width: {{ taux }}%">
-                                                        {{ taux }}%
-                                                    </div>
-                                                </div>
-                                            {% endwith %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'compartiment_detail' compartiment.pk %}" 
-                                                   class="btn btn-info" title="Détails">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{% url 'compartiment_update' compartiment.pk %}" 
-                                                   class="btn btn-warning" title="Modifier">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{% url 'compartiment_delete' compartiment.pk %}" 
-                                                   class="btn btn-danger" title="Supprimer">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            Aucun compartiment dans cette étagère.
-                            <a href="{% url 'compartiment_create' %}?etagere={{ etagere.pk }}" 
-                               class="alert-link">Créer le premier compartiment</a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-.progress {
-    height: 20px;
-}
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5f0e8;
+    --cream: #faf7f2;
+    --sienna: #8B4513;
+    --gold: #c9922a;
+    --gold-light: #e8b84b;
+    --sage: #4a7c59;
+    --sage-light: #6aad7e;
+    --rust: #b85c38;
+    --mist: #e8e2d8;
+    --shadow: rgba(26,18,8,0.12);
+  }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+
+  .detail-page {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* ── BACK + HEADER ── */
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: #7a6a55;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--sienna); }
+
+  .page-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding-bottom: 1.4rem;
+    border-bottom: 2px solid var(--mist);
+    position: relative;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .page-header::after {
+    content: '';
+    position: absolute;
+    bottom: -4px; left: 0;
+    width: 60px; height: 2px;
+    background: var(--gold);
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--ink);
+  }
+
+  .page-title .code-highlight {
+    color: var(--sienna);
+  }
+
+  .page-title-sub {
+    font-size: 0.8rem;
+    color: #7a6a55;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    margin-top: 0.25rem;
+    font-weight: 300;
+  }
+
+  /* ── ACTION BUTTONS ── */
+  .header-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .btn-action-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.58rem 1.1rem;
+    border-radius: 6px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .btn-add-comp {
+    background: var(--sage);
+    color: white;
+    box-shadow: 0 2px 6px rgba(74,124,89,0.3);
+  }
+  .btn-add-comp:hover {
+    background: #3a6b49;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  .btn-edit {
+    background: var(--parchment);
+    color: var(--ink);
+    border-color: var(--mist);
+  }
+  .btn-edit:hover {
+    background: var(--gold);
+    color: white;
+    border-color: var(--gold);
+  }
+
+  .btn-del {
+    background: #fff0ee;
+    color: var(--rust);
+    border-color: #f5c6bc;
+  }
+  .btn-del:hover {
+    background: var(--rust);
+    color: white;
+    border-color: var(--rust);
+  }
+
+  /* ── LAYOUT ── */
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* ── CARDS ── */
+  .panel {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--mist);
+  }
+
+  .panel + .panel { margin-top: 1.5rem; }
+
+  .panel-header {
+    padding: 0.9rem 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  .panel-header.dark   { background: var(--ink);  color: var(--parchment); }
+  .panel-header.amber  { background: #7a5c20;     color: var(--parchment); }
+  .panel-header.green  { background: #2d5e40;     color: var(--parchment); }
+
+  .panel-header .badge-count {
+    margin-left: auto;
+    background: rgba(255,255,255,0.15);
+    color: var(--gold-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .panel-body { padding: 1.3rem; }
+
+  /* ── INFO LIST ── */
+  .info-list { list-style: none; margin: 0; padding: 0; }
+
+  .info-list li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem 0;
+    border-bottom: 1px solid #f0ebe0;
+  }
+
+  .info-list li:last-child { border-bottom: none; }
+
+  .info-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #9a8a78;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .info-label i { color: var(--gold); font-size: 0.75rem; }
+
+  .info-value {
+    font-size: 0.95rem;
+    color: var(--ink);
+    font-weight: 400;
+    padding-left: 0.1rem;
+  }
+
+  .badge-salle {
+    display: inline-block;
+    background: #eef4ff;
+    color: #2563ab;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+    border-radius: 20px;
+    border: 1px solid #c3d9f8;
+  }
+
+  /* ── STATS ── */
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.55rem 0;
+    border-bottom: 1px dashed #f0ebe0;
+    font-size: 0.88rem;
+  }
+
+  .stat-row:last-of-type { border-bottom: none; }
+
+  .stat-label { color: #7a6a55; }
+  .stat-val {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--ink);
+  }
+
+  .progress-section { margin-top: 1rem; }
+
+  .progress-section .prog-label {
+    font-size: 0.74rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9a8a78;
+    margin-bottom: 0.5rem;
+  }
+
+  .progress-bar-bg {
+    width: 100%;
+    height: 10px;
+    background: var(--mist);
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 0.35rem;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 0.6s ease;
+  }
+
+  .fill-low    { background: var(--sage-light); }
+  .fill-medium { background: var(--gold); }
+  .fill-high   { background: var(--rust); }
+
+  .progress-pct {
+    font-size: 1.4rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--parchment);
+    padding: 0.7rem 1rem;
+    font-size: 0.71rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #7a6a55;
+    border-bottom: 1px solid var(--mist);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f0ebe0;
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fdf9f3; }
+
+  tbody td {
+    padding: 0.8rem 1rem;
+    font-size: 0.88rem;
+    vertical-align: middle;
+  }
+
+  .comp-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--sienna);
+  }
+
+  .badge-cat {
+    background: #f3f0fa;
+    color: #6b4fa0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.18rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid #d9cef5;
+  }
+
+  .badge-emp {
+    background: #eef4ff;
+    color: #2563ab;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.18rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid #c3d9f8;
+  }
+
+  .badge-occ {
+    background: #fffaed;
+    color: #9a6c00;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.18rem 0.6rem;
+    border-radius: 20px;
+    border: 1px solid #f0d580;
+  }
+
+  .inline-prog {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .inline-prog-bg {
+    width: 56px;
+    height: 5px;
+    background: var(--mist);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .inline-prog-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .inline-prog-val {
+    font-size: 0.75rem;
+    color: #7a6a55;
+    font-weight: 600;
+    min-width: 2.2rem;
+  }
+
+  /* row action buttons */
+  .row-actions { display: flex; gap: 0.35rem; }
+
+  .btn-row {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 0.8rem;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .btn-row-view  { background:#eef4ff; color:#2563ab; border-color:#c3d9f8; }
+  .btn-row-view:hover  { background:#2563ab; color:white; }
+  .btn-row-edit  { background:#f0faf4; color:var(--sage); border-color:#b8e5c8; }
+  .btn-row-edit:hover  { background:var(--sage); color:white; }
+  .btn-row-del   { background:#fff0ee; color:var(--rust); border-color:#f5c6bc; }
+  .btn-row-del:hover   { background:var(--rust); color:white; }
+
+  /* ── EMPTY ── */
+  .empty-block {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: #9a8a78;
+  }
+
+  .empty-block .empty-icon {
+    font-size: 2.5rem;
+    opacity: 0.35;
+    margin-bottom: 0.8rem;
+  }
+
+  .empty-block h5 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+
+  .empty-block a {
+    color: var(--gold);
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .side-col  { animation: fadeUp 0.4s ease 0.05s both; }
+  .main-col  { animation: fadeUp 0.4s ease 0.12s both; }
+
+  tbody tr { animation: fadeUp 0.3s ease both; }
+  tbody tr:nth-child(1) { animation-delay: 0.18s; }
+  tbody tr:nth-child(2) { animation-delay: 0.24s; }
+  tbody tr:nth-child(3) { animation-delay: 0.30s; }
+  tbody tr:nth-child(4) { animation-delay: 0.36s; }
+  tbody tr:nth-child(5) { animation-delay: 0.42s; }
+
+  @media (max-width: 960px) {
+    .detail-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 600px) {
+    .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .header-actions { width: 100%; }
+  }
 </style>
+
+<div class="detail-page">
+
+  <a href="{% url 'etagere_list' %}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Retour à la liste
+  </a>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">
+        Étagère <span class="code-highlight">{{ etagere.code }}</span>
+      </h2>
+      <div class="page-title-sub">Détail — Gestion des étagères</div>
+    </div>
+    <div class="header-actions">
+      <a href="{% url 'compartiment_create' %}?etagere={{ etagere.pk }}" class="btn-action-main btn-add-comp">
+        <i class="fas fa-plus"></i> Ajouter un compartiment
+      </a>
+      <a href="{% url 'etagere_update' etagere.pk %}" class="btn-action-main btn-edit">
+        <i class="fas fa-edit"></i> Modifier
+      </a>
+      <a href="{% url 'etagere_delete' etagere.pk %}" class="btn-action-main btn-del">
+        <i class="fas fa-trash"></i> Supprimer
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Grid -->
+  <div class="detail-grid">
+
+    <!-- LEFT COLUMN -->
+    <div class="side-col">
+
+      <!-- Informations -->
+      <div class="panel">
+        <div class="panel-header dark">
+          <i class="fas fa-info-circle"></i> Informations
+        </div>
+        <div class="panel-body">
+          <ul class="info-list">
+            <li>
+              <span class="info-label"><i class="fas fa-barcode"></i> Code</span>
+              <span class="info-value" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--sienna);font-weight:600;">
+                {{ etagere.code }}
+              </span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-file-alt"></i> Description</span>
+              <span class="info-value">{{ etagere.description }}</span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-door-open"></i> Salle</span>
+              <span class="info-value"><span class="badge-salle">{{ etagere.salle }}</span></span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-layer-group"></i> Étage</span>
+              <span class="info-value">{{ etagere.etage }}</span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-box"></i> Capacité maximale</span>
+              <span class="info-value">{{ etagere.capacite_max }} unités</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Statistiques -->
+      <div class="panel">
+        <div class="panel-header amber">
+          <i class="fas fa-chart-pie"></i> Statistiques
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <span class="stat-label">Compartiments</span>
+            <span class="stat-val">{{ compartiments.count }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Emplacements totaux</span>
+            <span class="stat-val">{{ etagere.nombre_emplacements }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Emplacements occupés</span>
+            <span class="stat-val">{{ etagere.nombre_emplacements_occupes }}</span>
+          </div>
+
+          <div class="progress-section">
+            <div class="prog-label">Taux de remplissage</div>
+            <div class="progress-pct">{{ taux_remplissage }}%</div>
+            <div class="progress-bar-bg">
+              <div class="progress-fill
+                {% if taux_remplissage < 50 %}fill-low
+                {% elif taux_remplissage < 80 %}fill-medium
+                {% else %}fill-high{% endif %}"
+                style="width:{{ taux_remplissage }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /side-col -->
+
+    <!-- RIGHT COLUMN -->
+    <div class="main-col">
+      <div class="panel">
+        <div class="panel-header green">
+          <i class="fas fa-th"></i> Compartiments
+          <span class="badge-count">{{ compartiments.count }}</span>
+        </div>
+
+        {% if compartiments %}
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Numéro</th>
+                  <th>Niveau</th>
+                  <th>Catégorie</th>
+                  <th>Capacité</th>
+                  <th>Emplacements</th>
+                  <th>Occupés</th>
+                  <th>Taux</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for compartiment in compartiments %}
+                <tr>
+                  <td><span class="comp-num">{{ compartiment.numero }}</span></td>
+                  <td>{{ compartiment.niveau }}</td>
+                  <td>
+                    {% if compartiment.categorie %}
+                      <span class="badge-cat">{{ compartiment.categorie }}</span>
+                    {% else %}
+                      <span style="color:#bbb;">—</span>
+                    {% endif %}
+                  </td>
+                  <td>{{ compartiment.capacite }}</td>
+                  <td><span class="badge-emp">{{ compartiment.nb_emplacements }}</span></td>
+                  <td><span class="badge-occ">{{ compartiment.nb_emplacements_occupes }}</span></td>
+                  <td>
+                    {% with taux=compartiment.taux_occupation %}
+                    <div class="inline-prog">
+                      <div class="inline-prog-bg">
+                        <div class="inline-prog-fill progress-fill
+                          {% if taux < 50 %}fill-low
+                          {% elif taux < 80 %}fill-medium
+                          {% else %}fill-high{% endif %}"
+                          style="width:{{ taux }}%"></div>
+                      </div>
+                      <span class="inline-prog-val">{{ taux }}%</span>
+                    </div>
+                    {% endwith %}
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <a href="{% url 'compartiment_detail' compartiment.pk %}" class="btn-row btn-row-view" title="Voir">
+                        <i class="fas fa-eye"></i>
+                      </a>
+                      <a href="{% url 'compartiment_update' compartiment.pk %}" class="btn-row btn-row-edit" title="Modifier">
+                        <i class="fas fa-edit"></i>
+                      </a>
+                      <a href="{% url 'compartiment_delete' compartiment.pk %}" class="btn-row btn-row-del" title="Supprimer">
+                        <i class="fas fa-trash"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-block">
+            <div class="empty-icon"><i class="fas fa-th"></i></div>
+            <h5>Aucun compartiment</h5>
+            <p>
+              <a href="{% url 'compartiment_create' %}?etagere={{ etagere.pk }}">
+                Créer le premier compartiment
+              </a>
+            </p>
+          </div>
+        {% endif %}
+      </div>
+    </div><!-- /main-col -->
+
+  </div>
+</div>
 {% endblock %}

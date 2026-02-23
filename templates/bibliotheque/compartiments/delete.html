@@ -1,7 +1,7 @@
 <!-- compartiments/delete.html -->
 {% extends 'bibliotheque/base.html' %}
 
-{% block title %}Supprimer le compartiment{% endblock %}
+{% block title %}Suppression | BiblioSmart{% endblock %}
 
 {% block content %}
 <div class="container py-4">
@@ -33,7 +33,7 @@
                     <form method="post">
                         {% csrf_token %}
                         <div class="d-flex justify-content-between">
-                            <a href="{% url 'compartiment_detail' compartiment.pk %}" class="btn btn-secondary">
+                            <a href="{% url 'compartiment_detail' emplacement.compartiment.pk %}" class="btn btn-secondary">
                                 Annuler
                             </a>
                             <button type="submit" class="btn btn-danger">

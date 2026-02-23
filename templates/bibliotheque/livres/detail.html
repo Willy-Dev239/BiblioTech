@@ -1,592 +1,622 @@
-<!-- templates/bibliotheque/livres/detail.html -->
 {% extends 'bibliotheque/base.html' %}
+{% load static %}
 
-{% block title %}{{ livre.titre }} - Bibliothèque{% endblock %}
-
-{% block page_title %}Détails du livre{% endblock %}
+{% block title %}{{ livre.titre }} | BiblioSmart{% endblock %}
 
 {% block extra_css %}
 <style>
-    .book-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 10px;
-        margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-    
-    .book-cover-section {
-        background: white;
-        padding: 2rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        position: sticky;
-        top: 20px;
-    }
-    
-    .book-cover-large {
-        width: 100%;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        margin-bottom: 1.5rem;
-    }
-    
-    .book-cover-placeholder {
-        width: 100%;
-        aspect-ratio: 2/3;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 5rem;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-    }
-    
-    .info-card {
-        background: white;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        margin-bottom: 1.5rem;
-    }
-    
-    .info-card-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 1rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid #3498db;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .info-row {
-        display: flex;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #ecf0f1;
-    }
-    
-    .info-row:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        font-weight: 600;
-        color: #7f8c8d;
-        width: 180px;
-        flex-shrink: 0;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .info-value {
-        flex: 1;
-        color: #2c3e50;
-    }
-    
-    .status-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 1rem;
-    }
-    
-    .status-badge.available {
-        background: #d4edda;
-        color: #155724;
-    }
-    
-    .status-badge.unavailable {
-        background: #f8d7da;
-        color: #721c24;
-    }
-    
-    .action-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .action-buttons .btn {
-        width: 100%;
-        padding: 0.75rem;
-        font-weight: 600;
-    }
-    
-    .author-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .author-badge {
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        font-size: 0.875rem;
-    }
-    
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-    }
-    
-    .stat-box {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-    }
-    
-    .stat-box .stat-number {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #2c3e50;
-        display: block;
-    }
-    
-    .stat-box .stat-label {
-        font-size: 0.875rem;
-        color: #7f8c8d;
-        display: block;
-        margin-top: 0.25rem;
-    }
-    
-    .resume-section {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 8px;
-        border-left: 4px solid #3498db;
-        margin-bottom: 1.5rem;
-    }
-    
-    .tag-list {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-    }
-    
-    .breadcrumb-custom {
-        background: white;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    }
-    
-    .history-table {
-        background: white;
-        border-radius: 8px;
-        overflow: hidden;
-    }
-    
-    .alert-info-custom {
-        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-        border: none;
-        border-left: 4px solid #2196f3;
-        border-radius: 8px;
-    }
-    
-    .download-section {
-        background: #fff3cd;
-        border-left: 4px solid #ffc107;
-        padding: 1rem;
-        border-radius: 8px;
-        margin-top: 1rem;
-    }
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --ink: #1a1209;
+    --parchment: #f5f0e8;
+    --sepia: #2c3e6b;
+    --sepia-light: #6b8cba;
+    --sepia-pale: #e0e8f4;
+    --accent: #b04030;
+    --green: #2d7a4f;
+    --border: #d4c4a8;
+    --shadow: rgba(26, 18, 9, 0.10);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--parchment);
+    background-image: radial-gradient(ellipse at 15% 60%, rgba(44,62,107,.06) 0%, transparent 55%);
+    font-family: 'Lato', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: var(--ink);
+    padding: 2.5rem 3rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '§';
+    position: absolute; top: -2rem; right: 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 16rem; color: rgba(255,255,255,.025);
+    line-height: 1; pointer-events: none;
+  }
+  .hero::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, transparent, var(--sepia-light), var(--accent), var(--sepia-light), transparent);
+  }
+  .hero-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: 2.5rem; align-items: flex-start;
+    position: relative; z-index: 1;
+  }
+
+  /* Cover dans le hero */
+  .hero-cover { flex-shrink: 0; width: 120px; }
+  .hero-cover img {
+    width: 120px; height: 170px; object-fit: cover;
+    border-radius: 1px; box-shadow: 6px 6px 24px rgba(0,0,0,.4); display: block;
+  }
+  .hero-cover-placeholder {
+    width: 120px; height: 170px;
+    background: linear-gradient(160deg, var(--sepia) 0%, #1a2a4a 100%);
+    border-radius: 1px; box-shadow: 6px 6px 24px rgba(0,0,0,.4);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: .5rem; position: relative;
+    font-family: 'Playfair Display', serif; font-style: italic;
+    font-size: .7rem; color: rgba(107,140,186,.6); text-align: center; padding: .75rem;
+  }
+  .hero-cover-placeholder::before {
+    content: ''; position: absolute; inset: 6px;
+    border: 1px solid rgba(107,140,186,.15);
+  }
+  .hero-cover-placeholder .ph-icon { font-size: 2rem; opacity: .5; }
+
+  .hero-meta { flex: 1; }
+  .hero-breadcrumb {
+    font-size: .68rem; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--sepia-light); margin-bottom: .6rem;
+  }
+  .hero-breadcrumb a { color: var(--sepia-light); text-decoration: none; }
+  .hero-breadcrumb a:hover { color: #fff; }
+  .hero-title {
+    font-family: 'Playfair Display', serif; font-size: 2rem;
+    color: #fff; font-weight: 400; line-height: 1.15; margin-bottom: .3rem;
+  }
+  .hero-subtitle {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    color: rgba(255,255,255,.5); font-size: .95rem; margin-bottom: .75rem;
+  }
+  .hero-authors {
+    font-family: 'Playfair Display', serif; font-style: italic;
+    color: var(--sepia-light); font-size: .95rem; margin-bottom: .9rem;
+  }
+  .hero-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .badge {
+    display: inline-flex; align-items: center; gap: .3rem;
+    padding: .22rem .7rem; font-size: .68rem; font-weight: 700;
+    letter-spacing: .07em; text-transform: uppercase; border-radius: 20px;
+  }
+  .badge-blue  { background: rgba(107,140,186,.2); color: var(--sepia-light); }
+  .badge-green { background: rgba(45,122,79,.25); color: #7ecba0; }
+  .badge-red   { background: rgba(176,64,48,.25); color: #e8907f; }
+  .badge-muted { background: rgba(255,255,255,.08); color: rgba(255,255,255,.45); }
+  .badge-gold  { background: rgba(212,160,23,.2); color: #f0c84a; }
+
+  /* ── Actions strip ── */
+  .actions-strip {
+    background: #fff; border-bottom: 1px solid var(--border); padding: .85rem 3rem;
+  }
+  .actions-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; gap: .6rem; align-items: center; flex-wrap: wrap;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: .4rem;
+    padding: .52rem 1.2rem; font-size: .73rem; font-weight: 700;
+    letter-spacing: .08em; text-transform: uppercase; border-radius: 1px;
+    cursor: pointer; text-decoration: none; border: 1px solid transparent;
+    transition: all .18s;
+  }
+  .btn-dark    { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-dark:hover { background: var(--sepia); border-color: var(--sepia); color: #fff; }
+  .btn-green   { background: var(--green); color: #fff; border-color: var(--green); }
+  .btn-green:hover { background: #245f3e; color: #fff; }
+  .btn-amber   { background: #d4a017; color: #fff; border-color: #d4a017; }
+  .btn-amber:hover { background: #b8881a; color: #fff; }
+  .btn-outline { background: transparent; color: var(--sepia); border-color: var(--border); }
+  .btn-outline:hover { border-color: var(--sepia); color: var(--ink); }
+  .btn-danger  { background: transparent; color: var(--accent); border-color: #f0ccc8; }
+  .btn-danger:hover { background: #fef5f4; }
+  .sep { flex: 1; }
+
+  /* ── Body layout ── */
+  .page-body {
+    max-width: 1100px; margin: 2.5rem auto;
+    padding: 0 1.5rem 4rem;
+    display: grid; grid-template-columns: 280px 1fr;
+    gap: 2rem; align-items: start;
+  }
+
+  /* ── Cards ── */
+  .card {
+    background: #fff; border: 1px solid var(--border); border-radius: 2px;
+    box-shadow: 0 4px 20px var(--shadow); overflow: hidden; margin-bottom: 1.5rem;
+    opacity: 0; transform: translateY(12px); animation: fadeUp .4s ease forwards;
+  }
+  @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+  .card-header {
+    padding: 1rem 1.5rem; border-bottom: 1px solid var(--sepia-pale);
+    background: var(--parchment); display: flex; align-items: center; gap: .65rem;
+  }
+  .card-icon {
+    width: 26px; height: 26px; background: var(--ink); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; color: var(--sepia-light);
+  }
+  .card-header h3 {
+    font-family: 'Playfair Display', serif; font-size: .95rem;
+    font-weight: 400; color: var(--ink);
+  }
+  .card-body { padding: 1.5rem; }
+
+  /* ── Sidebar gauche ── */
+
+  /* Statut dispo */
+  .dispo-block {
+    text-align: center; padding: 1.2rem;
+    border-bottom: 1px solid var(--sepia-pale);
+  }
+  .dispo-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .5rem 1.2rem; border-radius: 20px;
+    font-size: .82rem; font-weight: 700;
+  }
+  .dispo-on  { background: #e8f5e9; color: #2d7a4f; }
+  .dispo-off { background: #fef5f4; color: var(--accent); }
+
+  /* Stats exemplaires */
+  .ex-stats {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--border);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .ex-cell {
+    background: #fff; padding: 1rem; text-align: center;
+  }
+  .ex-cell .ex-num {
+    font-family: 'Playfair Display', serif; font-size: 1.8rem;
+    font-weight: 700; line-height: 1; color: var(--ink);
+  }
+  .ex-cell .ex-num.green { color: var(--green); }
+  .ex-cell .ex-num.red   { color: var(--accent); }
+  .ex-cell .ex-lbl {
+    font-size: .62rem; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--sepia); margin-top: .2rem;
+  }
+
+  /* Barre de progression */
+  .progress-wrap { padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--sepia-pale); }
+  .progress-label {
+    display: flex; justify-content: space-between;
+    font-size: .7rem; color: var(--sepia); margin-bottom: .5rem;
+  }
+  .progress-bar-bg {
+    height: 8px; background: var(--sepia-pale); border-radius: 4px; overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%; background: var(--green); border-radius: 4px;
+    transition: width .6s ease;
+  }
+
+  /* Actions sidebar */
+  .sidebar-actions { padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: .6rem; }
+  .sidebar-actions .btn { justify-content: center; width: 100%; }
+
+  /* PDF */
+  .pdf-block {
+    margin: 0 1.5rem 1.2rem;
+    padding: .85rem 1rem;
+    background: #fff8e1;
+    border-left: 3px solid #d4a017;
+    border-radius: 1px;
+    font-size: .82rem; color: #7a5c00;
+  }
+  .pdf-block a {
+    display: flex; align-items: center; gap: .4rem;
+    margin-top: .5rem; color: var(--accent); font-weight: 700; text-decoration: none;
+  }
+  .pdf-block a:hover { text-decoration: underline; }
+
+  /* ── Colonne droite ── */
+
+  /* Résumé */
+  .resume-block {
+    background: var(--sepia-pale); border-left: 3px solid var(--sepia-light);
+    border-radius: 1px; padding: 1.2rem 1.4rem;
+    font-size: .92rem; line-height: 1.85; color: #3d2f1e; font-weight: 300;
+  }
+
+  /* Infos rows */
+  .info-list { display: flex; flex-direction: column; }
+  .info-row {
+    display: flex; align-items: flex-start;
+    padding: .75rem 0; border-bottom: 1px solid var(--sepia-pale); gap: 1rem;
+  }
+  .info-row:last-child { border-bottom: none; }
+  .info-label {
+    font-size: .7rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--sepia-light);
+    width: 160px; flex-shrink: 0; padding-top: .1rem;
+  }
+  .info-value { font-size: .88rem; color: var(--ink); flex: 1; }
+  .info-value code {
+    background: var(--sepia-pale); color: var(--sepia); padding: .15rem .5rem;
+    border-radius: 2px; font-size: .82rem; letter-spacing: .05em;
+  }
+
+  /* Auteurs badges */
+  .authors-wrap { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .author-chip {
+    display: inline-flex; align-items: center; gap: .35rem;
+    background: var(--sepia-pale); color: var(--sepia);
+    padding: .25rem .75rem; border-radius: 20px; font-size: .78rem;
+    text-decoration: none; transition: background .15s;
+  }
+  .author-chip:hover { background: var(--sepia); color: #fff; }
+
+  /* Emplacement */
+  .emplacement-chip {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: var(--ink); color: var(--sepia-light);
+    padding: .25rem .8rem; border-radius: 2px; font-size: .78rem;
+    font-family: monospace; letter-spacing: .05em;
+  }
+
+  /* Historique emprunts */
+  .emprunts-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .emprunts-table thead tr { background: var(--ink); }
+  .emprunts-table thead th {
+    padding: .75rem 1rem; font-size: .65rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; color: var(--sepia-light);
+    text-align: left;
+  }
+  .emprunts-table tbody tr { border-bottom: 1px solid var(--sepia-pale); transition: background .12s; }
+  .emprunts-table tbody tr:last-child { border-bottom: none; }
+  .emprunts-table tbody tr:hover { background: #fdfcfa; }
+  .emprunts-table td { padding: .75rem 1rem; color: var(--ink); }
+  .emprunts-table td a { color: var(--sepia); text-decoration: none; font-weight: 700; }
+  .emprunts-table td a:hover { color: var(--accent); }
+
+  .retard-badge {
+    display: inline-block; font-size: .65rem; color: var(--accent);
+    font-weight: 700; margin-top: .2rem;
+  }
+
+  @media (max-width: 900px) {
+    .page-body { grid-template-columns: 1fr; }
+    .hero-inner { flex-direction: column; gap: 1.5rem; }
+    .hero { padding: 1.5rem; }
+    .actions-strip { padding: .9rem 1rem; }
+  }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- Breadcrumb -->
-<nav aria-label="breadcrumb" class="breadcrumb-custom">
-    <ol class="breadcrumb mb-0">
-        <li class="breadcrumb-item">
-            <a href="{% url 'home' %}"><i class="bi bi-house"></i> Accueil</a>
-        </li>
-        <li class="breadcrumb-item">
-            <a href="{% url 'livre_list' %}"><i class="bi bi-book"></i> Catalogue</a>
-        </li>
-        <li class="breadcrumb-item active">{{ livre.titre|truncatewords:5 }}</li>
-    </ol>
-</nav>
 
-<div class="row">
-    <!-- Colonne gauche: Couverture et actions -->
-    <div class="col-lg-4">
-        <div class="book-cover-section">
-            <!-- Image de couverture -->
-            {% if livre.couverture %}
-                <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}" class="book-cover-large">
-            {% else %}
-                <div class="book-cover-placeholder">
-                    <i class="bi bi-book"></i>
-                </div>
-            {% endif %}
-            
-            <!-- Statut de disponibilité -->
-            <div class="text-center mb-3">
-                {% if livre.disponible %}
-                    <div class="status-badge available">
-                        <i class="bi bi-check-circle"></i>
-                        Disponible
-                    </div>
-                {% else %}
-                    <div class="status-badge unavailable">
-                        <i class="bi bi-x-circle"></i>
-                        Indisponible
-                    </div>
-                {% endif %}
-            </div>
-            
-            <!-- Statistiques rapides -->
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-number">{{ livre.exemplaires_disponibles }}</span>
-                    <span class="stat-label">Disponibles</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-number">{{ livre.nombre_exemplaires }}</span>
-                    <span class="stat-label">Total</span>
-                </div>
-            </div>
-            
-            <!-- Boutons d'action -->
-            <div class="action-buttons">
-                {% if peut_reserver %}
-                    <a href="{% url 'reservation_create' livre.pk %}" class="btn btn-warning">
-                        <i class="bi bi-bookmark-plus"></i> Réserver ce livre
-                    </a>
-                {% endif %}
-                
-                {% if user.is_staff %}
-                    <a href="{% url 'livre_update' livre.pk %}" class="btn btn-primary">
-                        <i class="bi bi-pencil"></i> Modifier
-                    </a>
-                    <a href="{% url 'livre_delete' livre.pk %}" class="btn btn-danger">
-                        <i class="bi bi-trash"></i> Supprimer
-                    </a>
-                    <a href="{% url 'emprunt_create' %}?livre={{ livre.pk }}" class="btn btn-success">
-                        <i class="bi bi-plus-circle"></i> Créer un emprunt
-                    </a>
-                {% endif %}
-                
-                <a href="{% url 'livre_list' %}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Retour au catalogue
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-cover">
+      {% if livre.couverture %}
+        <img src="{{ livre.couverture.url }}" alt="{{ livre.titre }}">
+      {% else %}
+        <div class="hero-cover-placeholder">
+          <span class="ph-icon">📖</span>
+          <span>{{ livre.titre|truncatewords:3 }}</span>
+        </div>
+      {% endif %}
+    </div>
+    <div class="hero-meta">
+      <div class="hero-breadcrumb">
+        <a href="{% url 'home' %}">Accueil</a> &nbsp;›&nbsp;
+        <a href="{% url 'livre_list' %}">Catalogue</a> &nbsp;›&nbsp;
+        {{ livre.titre|truncatewords:4 }}
+      </div>
+      <h1 class="hero-title">{{ livre.titre }}</h1>
+      {% if livre.sous_titre %}
+        <div class="hero-subtitle">{{ livre.sous_titre }}</div>
+      {% endif %}
+      <div class="hero-authors">
+        {% for auteur in livre.auteurs.all %}
+          {{ auteur.nom_complet }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+      </div>
+      <div class="hero-tags">
+        {% if livre.categorie %}
+          <span class="badge badge-blue">{{ livre.categorie }}</span>
+        {% endif %}
+        <span class="badge badge-muted">{{ livre.get_langue_display }}</span>
+        <span class="badge badge-gold">{{ livre.get_etat_display }}</span>
+        {% if livre.disponible %}
+          <span class="badge badge-green">● Disponible</span>
+        {% else %}
+          <span class="badge badge-red">● Indisponible</span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions strip -->
+<div class="actions-strip">
+  <div class="actions-inner">
+    <a href="{% url 'livre_list' %}" class="btn btn-outline">← Catalogue</a>
+    {% if peut_reserver %}
+      <a href="{% url 'reservation_create' livre.pk %}" class="btn btn-amber">⊕ Réserver</a>
+    {% endif %}
+    {% if user.is_staff %}
+      <a href="{% url 'emprunt_create' %}?livre={{ livre.pk }}" class="btn btn-green">+ Créer un emprunt</a>
+      <a href="{% url 'livre_update' livre.pk %}" class="btn btn-dark">✎ Modifier</a>
+      <span class="sep"></span>
+      <a href="{% url 'livre_delete' livre.pk %}" class="btn btn-danger" id="deleteBtn">✕ Supprimer</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Body -->
+<div class="page-body">
+
+  <!-- ── Colonne gauche (sidebar) ── -->
+  <div>
+
+    <div class="card" style="animation-delay: 0ms; padding: 0;">
+
+      <!-- Disponibilité -->
+      <div class="dispo-block">
+        {% if livre.disponible %}
+          <span class="dispo-badge dispo-on">✓ Disponible à l'emprunt</span>
+        {% else %}
+          <span class="dispo-badge dispo-off">✗ Indisponible</span>
+        {% endif %}
+      </div>
+
+      <!-- Stats exemplaires -->
+      <div class="ex-stats">
+        <div class="ex-cell">
+          <div class="ex-num green">{{ livre.exemplaires_disponibles }}</div>
+          <div class="ex-lbl">Disponible(s)</div>
+        </div>
+        <div class="ex-cell">
+          <div class="ex-num">{{ livre.nombre_exemplaires }}</div>
+          <div class="ex-lbl">Total</div>
+        </div>
+      </div>
+
+      <!-- Barre de progression -->
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Disponibilité</span>
+          <span>{{ livre.exemplaires_disponibles }} / {{ livre.nombre_exemplaires }}</span>
+        </div>
+        <div class="progress-bar-bg">
+          {% widthratio livre.exemplaires_disponibles livre.nombre_exemplaires 100 as pct %}
+          <div class="progress-bar-fill" style="width: {{ pct }}%"></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="sidebar-actions">
+        {% if peut_reserver %}
+          <a href="{% url 'reservation_create' livre.pk %}" class="btn btn-amber">⊕ Réserver ce livre</a>
+        {% endif %}
+        {% if user.is_staff %}
+          <a href="{% url 'emprunt_create' %}?livre={{ livre.pk }}" class="btn btn-green">+ Créer un emprunt</a>
+          <a href="{% url 'livre_update' livre.pk %}" class="btn btn-dark">✎ Modifier</a>
+          <a href="{% url 'livre_delete' livre.pk %}" class="btn btn-danger" id="deleteBtn2">✕ Supprimer</a>
+        {% endif %}
+        <a href="{% url 'livre_list' %}" class="btn btn-outline">← Retour au catalogue</a>
+      </div>
+
+      <!-- PDF -->
+      {% if livre.version_numerique %}
+      <div class="pdf-block">
+        <strong>📄 Version numérique disponible</strong>
+        <a href="{{ livre.version_numerique.url }}" download>
+          ↓ Télécharger le PDF
+        </a>
+      </div>
+      {% endif %}
+
+    </div>
+
+  </div>
+
+  <!-- ── Colonne droite ── -->
+  <div>
+
+    <!-- Titre + auteurs + tags -->
+    <div class="card" style="animation-delay: 60ms">
+      <div class="card-body">
+        <h1 style="font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:400; margin-bottom:.3rem;">
+          {{ livre.titre }}
+        </h1>
+        {% if livre.sous_titre %}
+          <p style="font-family:'Playfair Display',serif; font-style:italic; color:var(--sepia-light); margin-bottom:.75rem;">
+            {{ livre.sous_titre }}
+          </p>
+        {% endif %}
+        <div class="authors-wrap" style="margin-bottom:.9rem;">
+          {% for auteur in livre.auteurs.all %}
+            <a href="{% url 'auteur_detail' auteur.pk %}" class="author-chip">
+              👤 {{ auteur.nom_complet }}
+            </a>
+          {% endfor %}
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:.4rem;">
+          <span class="badge badge-blue">{{ livre.get_langue_display }}</span>
+          {% if livre.categorie %}
+            <span class="badge" style="background:#f0e8de; color:var(--sepia);">{{ livre.categorie }}</span>
+          {% endif %}
+          <span class="badge badge-gold">{{ livre.get_etat_display }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résumé -->
+    {% if livre.resume %}
+    <div class="card" style="animation-delay: 120ms">
+      <div class="card-header">
+        <div class="card-icon">✦</div>
+        <h3>Résumé</h3>
+      </div>
+      <div class="card-body">
+        <div class="resume-block">{{ livre.resume|linebreaks }}</div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Informations détaillées -->
+    <div class="card" style="animation-delay: 180ms">
+      <div class="card-header">
+        <div class="card-icon">i</div>
+        <h3>Informations détaillées</h3>
+      </div>
+      <div class="card-body" style="padding: .4rem 1.5rem;">
+        <div class="info-list">
+
+          <div class="info-row">
+            <span class="info-label">ISBN</span>
+            <span class="info-value"><code>{{ livre.isbn }}</code></span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Éditeur</span>
+            <span class="info-value">{{ livre.editeur|default:"–" }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Année</span>
+            <span class="info-value">{{ livre.annee_publication|default:"–" }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Pages</span>
+            <span class="info-value">{{ livre.nombre_pages|default:"–" }} pages</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Langue</span>
+            <span class="info-value">{{ livre.get_langue_display }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Catégorie</span>
+            <span class="info-value">{{ livre.categorie|default:"–" }}</span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">État</span>
+            <span class="info-value">{{ livre.get_etat_display }}</span>
+          </div>
+
+          {% if livre.emplacement %}
+          <div class="info-row">
+            <span class="info-label">Emplacement</span>
+            <span class="info-value">
+              <span class="emplacement-chip">{{ livre.emplacement.code_emplacement }}</span>
+              <small style="color:var(--sepia-light); margin-left:.5rem;">
+                {{ livre.emplacement.compartiment.etagere.salle }} —
+                Étage {{ livre.emplacement.compartiment.etagere.etage }}
+              </small>
+            </span>
+          </div>
+          {% endif %}
+
+          <div class="info-row">
+            <span class="info-label">Ajouté le</span>
+            <span class="info-value" style="color:var(--sepia-light); font-style:italic;">
+              {{ livre.created_at|date:"d/m/Y à H:i" }}
+            </span>
+          </div>
+
+          <div class="info-row">
+            <span class="info-label">Modifié le</span>
+            <span class="info-value" style="color:var(--sepia-light); font-style:italic;">
+              {{ livre.updated_at|date:"d/m/Y à H:i" }}
+            </span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Historique emprunts (staff) -->
+    {% if user.is_staff and emprunts_historique %}
+    <div class="card" style="animation-delay: 240ms">
+      <div class="card-header">
+        <div class="card-icon">⟳</div>
+        <h3>Historique récent des emprunts</h3>
+      </div>
+      <div class="card-body" style="padding: 0;">
+        <table class="emprunts-table">
+          <thead>
+            <tr>
+              <th>Étudiant</th>
+              <th>Emprunté le</th>
+              <th>Retour prévu</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for emprunt in emprunts_historique %}
+            <tr>
+              <td>
+                <a href="{% url 'etudiant_detail' emprunt.etudiant.pk %}">
+                  {{ emprunt.etudiant.nom }} {{ emprunt.etudiant.prenom }}
                 </a>
-            </div>
-            
-            <!-- Version numérique -->
-            {% if livre.version_numerique %}
-                <div class="download-section">
-                    <i class="bi bi-file-pdf text-danger"></i>
-                    <strong>Version numérique disponible</strong>
-                    <a href="{{ livre.version_numerique.url }}" class="btn btn-sm btn-outline-danger mt-2 w-100" download>
-                        <i class="bi bi-download"></i> Télécharger PDF
-                    </a>
-                </div>
-            {% endif %}
+              </td>
+              <td>{{ emprunt.date_emprunt|date:"d/m/Y" }}</td>
+              <td>{{ emprunt.date_retour_prevue|date:"d/m/Y" }}</td>
+              <td>
+                <span class="badge {% if emprunt.statut == 'RETOURNE' %}badge-green{% elif emprunt.statut == 'EN_RETARD' %}badge-red{% else %}badge-gold{% endif %}">
+                  {{ emprunt.get_statut_display }}
+                </span>
+                {% if emprunt.est_en_retard %}
+                  <span class="retard-badge">⚠ {{ emprunt.jours_retard }} j. de retard</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <div style="padding: 1rem 1.5rem; border-top: 1px solid var(--sepia-pale);">
+          <a href="{% url 'emprunt_list' %}?livre={{ livre.pk }}" class="btn btn-outline" style="font-size:.72rem;">
+            ≡ Voir tous les emprunts
+          </a>
         </div>
+      </div>
     </div>
-    
-    <!-- Colonne droite: Informations détaillées -->
-    <div class="col-lg-8">
-        <!-- Titre et informations principales -->
-        <div class="info-card">
-            <h1 class="mb-2">{{ livre.titre }}</h1>
-            {% if livre.sous_titre %}
-                <h5 class="text-muted mb-3">{{ livre.sous_titre }}</h5>
-            {% endif %}
-            
-            <!-- Auteurs -->
-            <div class="author-list mb-3">
-                {% for auteur in livre.auteurs.all %}
-                    <span class="author-badge">
-                        <i class="bi bi-person"></i>
-                        {{ auteur.nom_complet }}
-                    </span>
-                {% endfor %}
-            </div>
-            
-            <!-- Tags -->
-            <div class="tag-list">
-                <span class="badge bg-info">
-                    <i class="bi bi-translate"></i> {{ livre.get_langue_display }}
-                </span>
-                <span class="badge bg-secondary">
-                    <i class="bi bi-tag"></i> {{ livre.categorie }}
-                </span>
-                {% comment %} <span class="badge bg-{{ livre.etat == 'NEUF' and 'success' or 'warning' }}"> {% endcomment %}
-                    <i class="bi bi-star"></i> {{ livre.get_etat_display }}
-                </span>
-            </div>
-        </div>
-        
-        <!-- Résumé -->
-        {% if livre.resume %}
-            <div class="info-card">
-                <h5 class="info-card-title">
-                    <i class="bi bi-file-text"></i>
-                    Résumé
-                </h5>
-                <div class="resume-section">
-                    <p class="mb-0">{{ livre.resume }}</p>
-                </div>
-            </div>
-        {% endif %}
-        
-        <!-- Informations détaillées -->
-        <div class="info-card">
-            <h5 class="info-card-title">
-                <i class="bi bi-info-circle"></i>
-                Informations détaillées
-            </h5>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-upc-scan"></i> ISBN
-                </div>
-                <div class="info-value">
-                    <code>{{ livre.isbn }}</code>
-                </div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-building"></i> Éditeur
-                </div>
-                <div class="info-value">{{ livre.editeur }}</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-calendar3"></i> Année de publication
-                </div>
-                <div class="info-value">{{ livre.annee_publication }}</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-file-text"></i> Nombre de pages
-                </div>
-                <div class="info-value">{{ livre.nombre_pages }} pages</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-translate"></i> Langue
-                </div>
-                <div class="info-value">{{ livre.get_langue_display }}</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-tag"></i> Catégorie
-                </div>
-                <div class="info-value">{{ livre.categorie }}</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-star"></i> État
-                </div>
-                <div class="info-value">
-                    
-                    {% comment %} <span class="badge bg-{{ livre.etat == 'NEUF' and 'success' or 'warning' }}"> {% endcomment %}
-                        {{ livre.get_etat_display }}
-                    </span>
-                </div>
-            </div>
-            
-            {% if livre.emplacement %}
-                <div class="info-row">
-                    <div class="info-label">
-                        <i class="bi bi-geo-alt"></i> Emplacement
-                    </div>
-                    <div class="info-value">
-                        <span class="badge bg-primary">{{ livre.emplacement.code_emplacement }}</span>
-                        <small class="text-muted ms-2">
-                            {{ livre.emplacement.compartiment.etagere.salle }} - 
-                            Étage {{ livre.emplacement.compartiment.etagere.etage }}
-                        </small>
-                    </div>
-                </div>
-            {% endif %}
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-clock-history"></i> Ajouté le
-                </div>
-                <div class="info-value">{{ livre.created_at|date:"d/m/Y à H:i" }}</div>
-            </div>
-            
-            <div class="info-row">
-                <div class="info-label">
-                    <i class="bi bi-arrow-repeat"></i> Dernière modification
-                </div>
-                <div class="info-value">{{ livre.updated_at|date:"d/m/Y à H:i" }}</div>
-            </div>
-        </div>
-        
-        <!-- Disponibilité des exemplaires -->
-        <div class="info-card">
-            <h5 class="info-card-title">
-                <i class="bi bi-box-seam"></i>
-                Disponibilité des exemplaires
-            </h5>
-            
-            <div class="progress mb-2" style="height: 30px;">
-                {% widthratio livre.exemplaires_disponibles livre.nombre_exemplaires 100 as percentage %}
-                <div class="progress-bar bg-success" role="progressbar" 
-                     style="width: {{ percentage }}%"
-                     aria-valuenow="{{ livre.exemplaires_disponibles }}" 
-                     aria-valuemin="0" 
-                     aria-valuemax="{{ livre.nombre_exemplaires }}">
-                    {{ livre.exemplaires_disponibles }} / {{ livre.nombre_exemplaires }}
-                </div>
-            </div>
-            
-            <div class="row text-center mt-3">
-                <div class="col-6">
-                    <div class="stat-box">
-                        <span class="stat-number text-success">{{ livre.exemplaires_disponibles }}</span>
-                        <span class="stat-label">Disponible(s)</span>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="stat-box">
-                        <span class="stat-number text-danger">
-                            {{ livre.nombre_exemplaires|add:"-"|add:livre.exemplaires_disponibles|stringformat:"d" }}
-                        </span>
-                        <span class="stat-label">Emprunté(s)</span>
-                    </div>
-                </div>
-            </div>
-            
-            {% comment %} {% if livre.exemplaires_disponibles == 0 %}
-                <div class="alert alert-info-custom mt-3 mb-0">
-                    <i class="bi bi-info-circle"></i>
-                    <strong>Tous les exemplaires sont actuellement empruntés.</strong>
-                    {% if user.is_authenticated and hasattr user 'etudiant' %}
-                        {% if peut_reserver %}
-                            Vous pouvez réserver ce livre pour être notifié dès qu'un exemplaire sera disponible.
-                        {% else %}
-                            {% if not user.etudiant.a_abonnement_actif %}
-                                Vous devez avoir un abonnement actif pour réserver des livres.
-                            {% elif livre.reservations.filter(etudiant=user.etudiant, statut='EN_ATTENTE').exists %}
-                                Vous avez déjà une réservation en cours pour ce livre.
-                            {% endif %}
-                        {% endif %}
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-         {% endcomment %}
-        <!-- Historique des emprunts (pour staff) -->
-        {% if user.is_staff and emprunts_historique %}
-            <div class="info-card">
-                <h5 class="info-card-title">
-                    <i class="bi bi-clock-history"></i>
-                    Historique récent des emprunts
-                </h5>
-                
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Étudiant</th>
-                                <th>Date emprunt</th>
-                                <th>Date retour prévue</th>
-                                <th>Statut</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for emprunt in emprunts_historique %}
-                                <tr>
-                                    <td>
-                                        <a href="{% url 'etudiant_detail' emprunt.etudiant.pk %}">
-                                            {{ emprunt.etudiant.nom }} {{ emprunt.etudiant.prenom }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        <i class="bi bi-calendar3"></i>
-                                        {{ emprunt.date_emprunt|date:"d/m/Y" }}
-                                    </td>
-                                    <td>
-                                        <i class="bi bi-calendar-check"></i>
-                                        {{ emprunt.date_retour_prevue|date:"d/m/Y" }}
-                                    </td>
-                                    <td>
-                                        {% comment %} <span class="badge bg-{{ emprunt.statut == 'RETOURNE' and 'success' or emprunt.statut == 'EN_RETARD' and 'danger' or 'warning' }}"> {% endcomment %}
-                                            {{ emprunt.get_statut_display }}
-                                        </span>
-                                        {% if emprunt.est_en_retard %}
-                                            <small class="text-danger d-block">
-                                                <i class="bi bi-exclamation-triangle"></i>
-                                                {{ emprunt.jours_retard }} jour(s) de retard
-                                            </small>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="text-center mt-3">
-                    <a href="{% url 'emprunt_list' %}?livre={{ livre.pk }}" class="btn btn-sm btn-outline-primary">
-                        <i class="bi bi-list"></i> Voir tous les emprunts
-                    </a>
-                </div>
-            </div>
-        {% endif %}
-    </div>
+    {% endif %}
+
+  </div>
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Animation au chargement
-    document.addEventListener('DOMContentLoaded', function() {
-        const cards = document.querySelectorAll('.info-card');
-        cards.forEach((card, index) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(20px)';
-            
-            setTimeout(() => {
-                card.style.transition = 'all 0.5s ease';
-                card.style.opacity = '1';
-                card.style.transform = 'translateY(0)';
-            }, index * 100);
-        });
+  // Confirmation suppression
+  document.querySelectorAll('#deleteBtn, #deleteBtn2').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      if (!confirm('Supprimer ce livre ? Cette action est irréversible.')) {
+        e.preventDefault();
+      }
     });
-    
-    // Confirmation avant suppression
-    const deleteButton = document.querySelector('a[href*="supprimer"]');
-    if (deleteButton) {
-        deleteButton.addEventListener('click', function(e) {
-            if (!confirm('Êtes-vous sûr de vouloir supprimer ce livre ? Cette action est irréversible.')) {
-                e.preventDefault();
-            }
-        });
-    }
+  });
 </script>
 {% endblock %}

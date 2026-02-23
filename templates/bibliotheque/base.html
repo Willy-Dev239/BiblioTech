@@ -426,8 +426,10 @@
             width: calc(100% - 64px);
         }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
+    {% block extra_css_override %}{% endblock %}  <!-- ← LIGNE AJOUTÉE : permet aux templates enfants d'écraser Bootstrap -->
+
 </head>
 {% block body_class %}
 <body>
@@ -458,32 +460,33 @@
                     <i class="bi bi-person-lines-fill"></i>
                     <span>Auteurs</span>
                 </a>
-            </li>
+                </li>
+                <li>
+                    <a href="{% url 'etagere_list' %}" class="{% if 'etagere' in request.resolver_match.url_name %}active{% endif %}">
+                        <i class="bi bi-bookshelf"></i>
+                        <span>Étagères</span>
+                    </a>
+                </li>
+            
             <li>
                 <a href="{% url 'livre_list' %}" class="{% if 'livre' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-book"></i>
                     <span>Catalogue</span>
                 </a>
             </li>
-            <li>
-                <a href="{% url 'etagere_list' %}" class="{% if 'etagere' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="bi bi-bookshelf"></i>
-                    <span>Étagères</span>
-                </a>
-            </li>
-            <li>
+            {% comment %} <li>
                 <a href="{% url 'compartiment_list' %}" class="{% if 'compartiment' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-th-large"></i>
                     <span>Compartiments</span>
                 </a>
-            </li>
-            <li>
+            </li> {% endcomment %}
+            {% comment %} <li>
                 <a href="{% url 'emplacement_list' %}" class="{% if 'emplacement' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="bi bi-geo-alt-fill"></i>
                     <span>Emplacements</span>
                 </a>
             </li>
-            
+             {% endcomment %}
             {% if user.is_authenticated %}
                 {% if user.is_staff %}
                     <div class="sidebar-divider"></div>
@@ -684,11 +687,9 @@
             const isMobile = window.innerWidth <= 768;
 
             if (isMobile) {
-                // Mobile : slide in / out
                 sidebar.classList.toggle('active');
                 overlay.classList.toggle('active');
             } else {
-                // Desktop : collapse / expand
                 document.body.classList.toggle('sidebar-collapsed');
             }
         }

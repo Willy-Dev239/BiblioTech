@@ -4,217 +4,336 @@
 {% block title %}Compartiment {{ compartiment }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <a href="{% url 'etagere_detail' compartiment.etagere.pk %}" class="btn btn-outline-secondary mb-3">
-                <i class="fas fa-arrow-left"></i> Retour à l'étagère
-            </a>
-            <div class="d-flex justify-content-between align-items-center">
-                <h2>
-                    <i class="fas fa-th text-primary"></i> 
-                    Compartiment {{ compartiment.numero }} - {{ compartiment.niveau }}
-                </h2>
-                <div>
-                    <a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}" 
-                       class="btn btn-success">
-                        <i class="fas fa-plus"></i> Ajouter un emplacement
-                    </a>
-                    <a href="{% url 'compartiment_update' compartiment.pk %}" 
-                       class="btn btn-warning">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <a href="{% url 'compartiment_delete' compartiment.pk %}" 
-                       class="btn btn-danger">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </a>
-                </div>
-            </div>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #24b7db;
+    --parchment: #f5f0e8;
+    --cream: #faf7f2;
+    --sienna: #8B4513;
+    --gold: #c9922a;
+    --gold-light: #e8b84b;
+    --sage: #4a7c59;
+    --sage-light: #6aad7e;
+    --rust: #b85c38;
+    --mist: #e8e2d8;
+    --shadow: rgba(26,18,8,0.12);
+  }
+
+  body { background: var(--cream); font-family: 'DM Sans', sans-serif; color: var(--ink); }
+  .detail-page { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.45rem;
+    color: #7a6a55; text-decoration: none; font-size: 0.85rem;
+    font-weight: 500; letter-spacing: 0.04em; margin-bottom: 1.5rem; transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--sienna); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .page-header {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    margin-bottom: 2rem; padding-bottom: 1.4rem; border-bottom: 2px solid var(--mist);
+    position: relative; animation: fadeUp 0.35s ease both;
+  }
+  .page-header::after {
+    content: ''; position: absolute; bottom: -4px; left: 0;
+    width: 60px; height: 2px; background: var(--sage);
+  }
+  .page-title { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; margin: 0; }
+  .page-title .num-highlight { color: var(--sienna); }
+  .page-title .lvl-highlight { color: var(--gold); font-size: 1.2rem; font-weight: 400; }
+  .page-title-sub { font-size: 0.8rem; color: #7a6a55; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 0.25rem; font-weight: 300; }
+
+  .header-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .btn-act {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.58rem 1.1rem; border-radius: 6px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500;
+    text-decoration: none; transition: all 0.2s; border: 1px solid transparent;
+  }
+  .btn-add  { background: var(--sage); color: white; box-shadow: 0 2px 6px rgba(74,124,89,0.3); }
+  .btn-add:hover  { background: #3a6b49; color: white; transform: translateY(-1px); }
+  .btn-edit { background: var(--parchment); color: var(--ink); border-color: var(--mist); }
+  .btn-edit:hover { background: var(--gold); color: white; border-color: var(--gold); }
+  .btn-del  { background: #fff0ee; color: var(--rust); border-color: #f5c6bc; }
+  .btn-del:hover  { background: var(--rust); color: white; }
+
+  .detail-grid { display: grid; grid-template-columns: 300px 1fr; gap: 1.5rem; align-items: start; }
+
+  .panel { background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 12px var(--shadow); border: 1px solid var(--mist); }
+  .panel + .panel { margin-top: 1.5rem; }
+
+  .panel-header { padding: 0.9rem 1.3rem; display: flex; align-items: center; gap: 0.6rem; font-family: 'Playfair Display', serif; font-size: 0.95rem; font-weight: 600; }
+  .panel-header.dark  { background: var(--ink);  color: var(--parchment); }
+  .panel-header.amber { background: #7a5c20;     color: var(--parchment); }
+  .panel-header.green { background: #2d5e40;     color: var(--parchment); }
+  .panel-header .badge-count { margin-left: auto; background: rgba(255,255,255,0.15); color: var(--gold-light); font-family: 'DM Sans', sans-serif; font-size: 0.75rem; font-weight: 700; padding: 0.15rem 0.55rem; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); }
+
+  .panel-body { padding: 1.3rem; }
+
+  .info-list { list-style: none; margin: 0; padding: 0; }
+  .info-list li { display: flex; flex-direction: column; gap: 0.15rem; padding: 0.7rem 0; border-bottom: 1px solid #f0ebe0; }
+  .info-list li:last-child { border-bottom: none; }
+  .info-label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #9a8a78; display: flex; align-items: center; gap: 0.35rem; }
+  .info-label i { color: var(--gold); font-size: 0.75rem; }
+  .info-value { font-size: 0.93rem; color: var(--ink); }
+
+  .badge-salle { display: inline-block; background: #eef4ff; color: #2563ab; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; border: 1px solid #c3d9f8; }
+  .badge-cat   { display: inline-block; background: #f3f0fa; color: #6b4fa0; font-size: 0.8rem; font-weight: 600; padding: 0.2rem 0.7rem; border-radius: 20px; border: 1px solid #d9cef5; }
+  .link-etagere { color: var(--sienna); font-weight: 600; text-decoration: none; font-family: 'Playfair Display', serif; font-size: 1rem; }
+  .link-etagere:hover { text-decoration: underline; }
+
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px dashed #f0ebe0; font-size: 0.88rem; }
+  .stat-row:last-of-type { border-bottom: none; }
+  .stat-label { color: #7a6a55; }
+  .stat-val { font-weight: 700; font-size: 1rem; color: var(--ink); }
+  .stat-val.green { color: var(--sage); }
+  .stat-val.amber { color: var(--gold); }
+
+  .progress-section { margin-top: 1.2rem; }
+  .prog-label { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #9a8a78; margin-bottom: 0.5rem; }
+  .progress-pct { font-size: 1.4rem; font-family: 'Playfair Display', serif; font-weight: 700; color: var(--ink); }
+  .progress-bar-bg { width: 100%; height: 10px; background: var(--mist); border-radius: 5px; overflow: hidden; margin-top: 0.35rem; }
+  .progress-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease; }
+  .fill-low    { background: var(--sage-light); }
+  .fill-medium { background: var(--gold); }
+  .fill-high   { background: var(--rust); }
+
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--parchment); padding: 0.7rem 1rem; font-size: 0.71rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: #7a6a55; border-bottom: 1px solid var(--mist); white-space: nowrap; }
+  tbody tr { border-bottom: 1px solid #f0ebe0; transition: background 0.15s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fdf9f3; }
+  tbody td { padding: 0.8rem 1rem; font-size: 0.88rem; vertical-align: middle; }
+
+  .pos-cell { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; color: var(--sienna); }
+  .code-cell { font-family: 'Courier New', monospace; font-size: 0.82rem; background: var(--parchment); color: var(--ink); padding: 0.18rem 0.5rem; border-radius: 4px; border: 1px solid var(--mist); display: inline-block; }
+  .livre-link { color: var(--ink); font-weight: 500; text-decoration: none; }
+  .livre-link:hover { color: var(--sienna); }
+  .livre-auteur { font-size: 0.75rem; color: #9a8a78; margin-top: 0.1rem; }
+
+  .badge-dispo { display: inline-flex; align-items: center; gap: 0.3rem; font-size: 0.76rem; font-weight: 600; padding: 0.22rem 0.65rem; border-radius: 20px; }
+  .badge-dispo.available { background: #f0faf4; color: var(--sage); border: 1px solid #b8e5c8; }
+  .badge-dispo.occupied  { background: #fffaed; color: #9a6c00;     border: 1px solid #f0d580; }
+
+  .row-actions { display: flex; gap: 0.35rem; }
+  .btn-row { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 5px; text-decoration: none; font-size: 0.8rem; border: 1px solid transparent; transition: all 0.15s; }
+  .btn-row-view { background:#eef4ff; color:#2563ab; border-color:#c3d9f8; }
+  .btn-row-view:hover { background:#2563ab; color:white; }
+  .btn-row-edit { background:#f0faf4; color:var(--sage); border-color:#b8e5c8; }
+  .btn-row-edit:hover { background:var(--sage); color:white; }
+  .btn-row-del  { background:#fff0ee; color:var(--rust); border-color:#f5c6bc; }
+  .btn-row-del:hover { background:var(--rust); color:white; }
+
+  .empty-block { padding: 3.5rem 2rem; text-align: center; color: #9a8a78; }
+  .empty-block .empty-icon { font-size: 2.5rem; opacity: 0.3; margin-bottom: 0.8rem; }
+  .empty-block h5 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--ink); margin-bottom: 0.4rem; }
+  .empty-block a { color: var(--gold); font-weight: 500; text-decoration: none; }
+
+  .side-col { animation: fadeUp 0.4s ease 0.05s both; }
+  .main-col { animation: fadeUp 0.4s ease 0.12s both; }
+  tbody tr { animation: fadeUp 0.3s ease both; }
+  tbody tr:nth-child(1) { animation-delay: 0.18s; }
+  tbody tr:nth-child(2) { animation-delay: 0.24s; }
+  tbody tr:nth-child(3) { animation-delay: 0.30s; }
+  tbody tr:nth-child(4) { animation-delay: 0.36s; }
+  tbody tr:nth-child(5) { animation-delay: 0.42s; }
+
+  @media (max-width: 960px) { .detail-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) {
+    .page-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+    .header-actions { width: 100%; }
+  }
+</style>
+
+<div class="detail-page">
+
+  <a href="{% url 'etagere_detail' compartiment.etagere.pk %}" class="back-link">
+    <i class="fas fa-arrow-left"></i> Retour à l'étagère
+  </a>
+
+  <div class="page-header">
+    <div>
+      <h2 class="page-title">
+        Compartiment <span class="num-highlight">{{ compartiment.numero }}</span>
+        <span class="lvl-highlight"> — {{ compartiment.niveau }}</span>
+      </h2>
+      <div class="page-title-sub">Détail — Gestion des compartiments</div>
+    </div>
+    <div class="header-actions">
+      <a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}" class="btn-act btn-add">
+        <i class="fas fa-plus"></i> Ajouter un emplacement
+      </a>
+      <a href="{% url 'compartiment_update' compartiment.pk %}" class="btn-act btn-edit">
+        <i class="fas fa-edit"></i> Modifier
+      </a>
+      <a href="{% url 'compartiment_delete' compartiment.pk %}" class="btn-act btn-del">
+        <i class="fas fa-trash"></i> Supprimer
+      </a>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+
+    <!-- LEFT -->
+    <div class="side-col">
+
+      <div class="panel">
+        <div class="panel-header dark">
+          <i class="fas fa-info-circle"></i> Informations
         </div>
+        <div class="panel-body">
+          <ul class="info-list">
+            <li>
+              <span class="info-label"><i class="fas fa-warehouse"></i> Étagère</span>
+              <span class="info-value">
+                <a href="{% url 'etagere_detail' compartiment.etagere.pk %}" class="link-etagere">
+                  {{ compartiment.etagere.code }}
+                </a>
+              </span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-door-open"></i> Salle</span>
+              <span class="info-value"><span class="badge-salle">{{ compartiment.etagere.salle }}</span></span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-hashtag"></i> Numéro</span>
+              <span class="info-value" style="font-family:'Playfair Display',serif;font-size:1.1rem;color:var(--sienna);font-weight:600;">
+                {{ compartiment.numero }}
+              </span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-layer-group"></i> Niveau</span>
+              <span class="info-value">{{ compartiment.niveau }}</span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-tag"></i> Catégorie</span>
+              <span class="info-value">
+                {% if compartiment.categorie %}
+                  <span class="badge-cat">{{ compartiment.categorie }}</span>
+                {% else %}
+                  <span style="color:#bbb;">Non définie</span>
+                {% endif %}
+              </span>
+            </li>
+            <li>
+              <span class="info-label"><i class="fas fa-box"></i> Capacité</span>
+              <span class="info-value">{{ compartiment.capacite }} emplacements</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Statistiques — compteurs calculés proprement côté vue -->
+      <div class="panel">
+        <div class="panel-header amber">
+          <i class="fas fa-chart-bar"></i> Statistiques
+        </div>
+        <div class="panel-body">
+          <div class="stat-row">
+            <span class="stat-label">Emplacements totaux</span>
+            <span class="stat-val">{{ emplacements.count }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Emplacements occupés</span>
+            <span class="stat-val amber">{{ nb_occupes }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Emplacements disponibles</span>
+            <span class="stat-val green">{{ nb_disponibles }}</span>
+          </div>
+
+          <div class="progress-section">
+            <div class="prog-label">Taux d'occupation</div>
+            <div class="progress-pct">{{ taux_occupation }}%</div>
+            <div class="progress-bar-bg">
+              <div class="progress-fill
+                {% if taux_occupation < 50 %}fill-low
+                {% elif taux_occupation < 80 %}fill-medium
+                {% else %}fill-high{% endif %}"
+                style="width:{{ taux_occupation }}%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="row">
-        <!-- Informations du compartiment -->
-        <div class="col-lg-4 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Informations</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong><i class="fas fa-warehouse text-primary"></i> Étagère:</strong>
-                        <p class="mb-0">
-                            <a href="{% url 'etagere_detail' compartiment.etagere.pk %}">
-                                {{ compartiment.etagere.code }}
-                            </a>
-                        </p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-door-open text-primary"></i> Salle:</strong>
-                        <p class="mb-0"><span class="badge bg-info">{{ compartiment.etagere.salle }}</span></p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-hashtag text-primary"></i> Numéro:</strong>
-                        <p class="mb-0">{{ compartiment.numero }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-layer-group text-primary"></i> Niveau:</strong>
-                        <p class="mb-0">{{ compartiment.niveau }}</p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-tag text-primary"></i> Catégorie:</strong>
-                        <p class="mb-0">
-                            {% if compartiment.categorie %}
-                                <span class="badge bg-secondary">{{ compartiment.categorie }}</span>
-                            {% else %}
-                                <span class="text-muted">Non définie</span>
-                            {% endif %}
-                        </p>
-                    </div>
-                    <div class="mb-3">
-                        <strong><i class="fas fa-box text-primary"></i> Capacité:</strong>
-                        <p class="mb-0">{{ compartiment.capacite }} emplacements</p>
-                    </div>
-                </div>
-            </div>
+    <!-- RIGHT -->
+    <div class="main-col">
+      <div class="panel">
+        <div class="panel-header green">
+          <i class="fas fa-map-marker-alt"></i> Emplacements
+          <span class="badge-count">{{ emplacements.count }}</span>
+        </div>
 
-            <!-- Statistiques -->
-            {% comment %} <div class="card shadow-sm mt-4">
-                <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Statistiques</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Emplacements totaux:</span>
-                            <strong>{{ emplacements.count }}</strong>
+        {% if emplacements %}
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Code</th>
+                  <th>Livre</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for emplacement in emplacements %}
+                <tr>
+                  <td><span class="pos-cell">{{ emplacement.position }}</span></td>
+                  <td><span class="code-cell">{{ emplacement.code_emplacement }}</span></td>
+                  <td>
+                    {% with livre=emplacement.livres.first %}
+                      {% if livre %}
+                        <div>
+                          <a href="{% url 'livre_detail' livre.pk %}" class="livre-link">
+                            {{ livre.titre|truncatewords:5 }}
+                          </a>
+                          <div class="livre-auteur">par {{ livre.auteur.nom }}</div>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>Emplacements occupés:</span>
-                            <strong class="text-warning">
-                                {{ compartiment|length|add:"-"|add:compartiment|length }}
-                                {% with occupes=0 %}
-                                    {% for emp in emplacements %}
-                                        {% if not emp.disponible %}
-                                            {% with occupes=occupes|add:1 %}{% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endwith %}
-                            </strong>
-                        </div>
-                        <div class="d-flex justify-content-between mb-3">
-                            <span>Emplacements disponibles:</span>
-                            <strong class="text-success">
-                                {% with dispo=0 %}
-                                    {% for emp in emplacements %}
-                                        {% if emp.disponible %}
-                                            {% with dispo=dispo|add:1 %}{% endwith %}
-                                        {% endif %}
-                                    {% endfor %}
-                                {% endwith %}
-                            </strong>
-                        </div>
-                        
-                        <strong>Taux d'occupation:</strong>
-                        <div class="progress mt-2" style="height: 25px;">
-                            <div class="progress-bar 
-                                {% if taux_occupation < 50 %}bg-success
-                                {% elif taux_occupation < 80 %}bg-warning
-                                {% else %}bg-danger{% endif %}"
-                                 style="width: {{ taux_occupation }}%">
-                                {{ taux_occupation }}%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> {% endcomment %}
-
-        <!-- Liste des emplacements -->
-        {% comment %} <div class="col-lg-8">
-            <div class="card shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-map-marker-alt"></i> Emplacements 
-                        <span class="badge bg-light text-dark">{{ emplacements.count }}</span>
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if emplacements %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Position</th>
-                                        <th>Code</th>
-                                        <th>Livre</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for emplacement in emplacements %}
-                                    <tr>
-                                        <td><strong>{{ emplacement.position }}</strong></td>
-                                        <td>
-                                            <code>{{ emplacement.code_emplacement }}</code>
-                                        </td>
-                                        <td>
-                                            {% if emplacement.livre %}
-                                                <a href="{% url 'livre_detail' emplacement.livre.pk %}">
-                                                    {{ emplacement.livre.titre|truncatewords:5 }}
-                                                </a>
-                                                <br>
-                                                <small class="text-muted">
-                                                    par {{ emplacement.livre.auteur.nom }}
-                                                </small>
-                                            {% else %}
-                                                <span class="text-muted">Vide</span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            {% if emplacement.disponible %}
-                                                <span class="badge bg-success">
-                                                    <i class="fas fa-check"></i> Disponible
-                                                </span>
-                                            {% else %}
-                                                <span class="badge bg-warning">
-                                                    <i class="fas fa-book"></i> Occupé
-                                                </span>
-                                            {% endif %}
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm">
-                                                <a href="{% url 'emplacement_detail' emplacement.pk %}" 
-                                                   class="btn btn-info" title="Détails">
-                                                    <i class="fas fa-eye"></i>
-                                                </a>
-                                                <a href="{% url 'emplacement_update' emplacement.pk %}" 
-                                                   class="btn btn-warning" title="Modifier">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="{% url 'emplacement_delete' emplacement.pk %}" 
-                                                   class="btn btn-danger" title="Supprimer">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
+                      {% else %}
+                        <span style="color:#bbb;">—</span>
+                      {% endif %}
+                    {% endwith %}
+                  </td>
+                  <td>
+                    {% if emplacement.disponible %}
+                      <span class="badge-dispo available"><i class="fas fa-check"></i> Disponible</span>
                     {% else %}
-                        <div class="alert alert-info">
-                            <i class="fas fa-info-circle"></i> 
-                            Aucun emplacement dans ce compartiment.
-                            <a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}" 
-                               class="alert-link">Créer le premier emplacement</a>
-                        </div>
+                      <span class="badge-dispo occupied"><i class="fas fa-book"></i> Occupé</span>
                     {% endif %}
-                </div>
-            </div>
-        </div>
+                  </td>
+                  <td>
+                    <div class="row-actions">
+                      <a href="{% url 'emplacement_detail' emplacement.pk %}" class="btn-row btn-row-view" title="Voir"><i class="fas fa-eye"></i></a>
+                      <a href="{% url 'emplacement_update' emplacement.pk %}" class="btn-row btn-row-edit" title="Modifier"><i class="fas fa-edit"></i></a>
+                      <a href="{% url 'emplacement_delete' emplacement.pk %}" class="btn-row btn-row-del" title="Supprimer"><i class="fas fa-trash"></i></a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-block">
+            <div class="empty-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <h5>Aucun emplacement</h5>
+            <p><a href="{% url 'emplacement_create' %}?compartiment={{ compartiment.pk }}">Créer le premier emplacement</a></p>
+          </div>
+        {% endif %}
+      </div>
     </div>
-</div> {% endcomment %}
+
+  </div>
+</div>
 {% endblock %}

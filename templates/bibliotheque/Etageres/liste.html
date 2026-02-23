@@ -1,171 +1,575 @@
 {% extends 'bibliotheque/base.html' %}
 {% load static %}
 
-{% block title %}Liste des Étagères{% endblock %}
+{% block title %}Étagères | BiblioSmart{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h2><i class="fas fa-warehouse text-primary"></i> Gestion des Étagères</h2>
-                <a href="{% url 'etagere_create' %}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> Nouvelle Étagère
-                </a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Filtres et recherche -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
-            <form method="get" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Rechercher</label>
-                    <input type="text" name="search" class="form-control" 
-                           placeholder="Code, description, salle..." 
-                           value="{{ search_query }}">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Salle</label>
-                    <select name="salle" class="form-select">
-                        <option value="">Toutes les salles</option>
-                        {% for salle in salles %}
-                            <option value="{{ salle }}" {% if salle == salle_filter %}selected{% endif %}>
-                                {{ salle }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">Étage</label>
-                    <select name="etage" class="form-select">
-                        <option value="">Tous les étages</option>
-                        {% for etage in etages %}
-                            <option value="{{ etage }}" {% if etage|stringformat:"s" == etage_filter %}selected{% endif %}>
-                                Étage {{ etage }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-2 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-search"></i> Filtrer
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Liste des étagères -->
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h5 class="mb-0">
-                <i class="fas fa-list"></i> Liste des étagères 
-                <span class="badge bg-light text-dark">{{ etageres.count }}</span>
-            </h5>
-        </div>
-        <div class="card-body">
-            {% if etageres %}
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Code</th>
-                                <th>Description</th>
-                                <th>Salle</th>
-                                <th>Étage</th>
-                                <th>Capacité</th>
-                                <th>Compartiments</th>
-                                <th>Emplacements</th>
-                                <th>Taux</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for etagere in etageres %}
-                            <tr>
-                                <td>
-                                    <strong>{{ etagere.code }}</strong>
-                                </td>
-                                <td>{{ etagere.description|truncatewords:5 }}</td>
-                                <td>
-                                    <span class="badge bg-info">{{ etagere.salle }}</span>
-                                </td>
-                                <td>{{ etagere.etage }}</td>
-                                <td>{{ etagere.capacite_max }}</td>
-                                <td>
-                                    <span class="badge bg-secondary">{{ etagere.nb_compartiments }}</span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-success">{{ etagere.nb_emplacements }}</span>
-                                </td>
-                                <td>
-                                    {% with taux=etagere.taux_remplissage %}
-                                        <div class="progress" style="width: 80px;">
-                                            <div class="progress-bar 
-                                                {% if taux < 50 %}bg-success
-                                                {% elif taux < 80 %}bg-warning
-                                                {% else %}bg-danger{% endif %}"
-                                                 role="progressbar" 
-                                                 style="width: {{ taux }}%"
-                                                 aria-valuenow="{{ taux }}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100">
-                                                {{ taux }}%
-                                            </div>
-                                        </div>
-                                    {% endwith %}
-                                </td>
-
-                                <td>
-                                     <a href="{% url 'etagere_detail' etagere.pk %}" class="btn btn-sm btn-primary">
-                               <i class="bi bi-eye"></i>
-                            </a>
-                            <a href="{% url 'etagere_update' etagere.pk %}" class="btn btn-sm" style="background-color: #28d17c; color: white;">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <a href="{% url 'etagere_delete' etagere.pk %}" class="btn btn-sm btn-danger">
-                                <i class="bi bi-trash"></i>
-                            </a>
-                        {% comment %} </td>
-                                <td>
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{% url 'etagere_detail' etagere.pk %}" 
-                                           class="btn btn-info" title="Détails">
-                                            <i class="fas fa-eye"></i>
-                                        </a>
-                                        <a href="{% url 'etagere_update' etagere.pk %}" 
-                                           class="btn btn-warning" title="Modifier">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <a href="{% url 'etagere_delete' etagere.pk %}" 
-                                           class="btn btn-danger" title="Supprimer">
-                                            <i class="fas fa-trash"></i>
-                                        </a>
-                                    </div>
-                                </td> {% endcomment %}
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            {% else %}
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle"></i> 
-                    Aucune étagère trouvée.
-                    {% if search_query or salle_filter or etage_filter %}
-                        <a href="{% url 'etagere_list' %}" class="alert-link">Réinitialiser les filtres</a>
-                    {% endif %}
-                </div>
-            {% endif %}
-        </div>
-    </div>
-</div>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-.progress {
-    height: 20px;
-}
+  :root {
+    --ink: #1a1208;
+    --parchment: #f5f0e8;
+    --cream: #faf7f2;
+    --sienna: #8B4513;
+    --gold: #c9922a;
+    --gold-light: #e8b84b;
+    --sage: #4a7c59;
+    --sage-light: #6aad7e;
+    --rust: #b85c38;
+    --mist: #e8e2d8;
+    --shadow: rgba(26,18,8,0.12);
+  }
+
+  body {
+    background: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    color: var(--ink);
+  }
+
+  .shelf-page {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* ── HEADER ── */
+  .shelf-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--mist);
+    position: relative;
+  }
+
+  .shelf-header::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 80px;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  .shelf-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.5px;
+    line-height: 1;
+    margin: 0;
+  }
+
+  .shelf-title span {
+    color: var(--gold);
+  }
+
+  .shelf-subtitle {
+    font-size: 0.85rem;
+    color: #7a6a55;
+    margin-top: 0.3rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .btn-new {
+    background: var(--ink);
+    color: var(--parchment);
+    border: none;
+    padding: 0.65rem 1.4rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+
+  .btn-new:hover {
+    background: var(--sienna);
+    color: var(--parchment);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(139,69,19,0.3);
+  }
+
+  /* ── FILTERS ── */
+  .filter-panel {
+    background: white;
+    border: 1px solid var(--mist);
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 4px var(--shadow);
+  }
+
+  .filter-panel form {
+    display: grid;
+    grid-template-columns: 2fr 1.5fr 1.5fr auto;
+    gap: 1rem;
+    align-items: end;
+  }
+
+  .filter-group label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #7a6a55;
+    margin-bottom: 0.4rem;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    border: 1px solid var(--mist);
+    background: var(--cream);
+    padding: 0.55rem 0.9rem;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .filter-group input:focus,
+  .filter-group select:focus {
+    border-color: var(--gold);
+    background: white;
+  }
+
+  .btn-filter {
+    background: var(--gold);
+    color: white;
+    border: none;
+    padding: 0.58rem 1.2rem;
+    border-radius: 4px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    white-space: nowrap;
+    transition: background 0.2s;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-filter:hover {
+    background: var(--sienna);
+  }
+
+  /* ── TABLE CARD ── */
+  .table-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px var(--shadow);
+    border: 1px solid var(--mist);
+  }
+
+  .table-card-header {
+    background: var(--ink);
+    color: var(--parchment);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .count-badge {
+    background: var(--gold);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.15rem 0.55rem;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    margin-left: auto;
+  }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: var(--parchment);
+    padding: 0.75rem 1.2rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #7a6a55;
+    border-bottom: 1px solid var(--mist);
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid #f0ebe0;
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: #fdf9f3;
+  }
+
+  tbody td {
+    padding: 0.85rem 1.2rem;
+    font-size: 0.9rem;
+    vertical-align: middle;
+  }
+
+  .code-cell {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--sienna);
+  }
+
+  .desc-cell {
+    color: #5a4a38;
+    font-weight: 300;
+  }
+
+  /* ── BADGES ── */
+  .badge-salle {
+    background: #eef6ff;
+    color: #2563ab;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    border: 1px solid #c3d9f8;
+  }
+
+  .badge-num {
+    background: var(--parchment);
+    color: var(--ink);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid var(--mist);
+  }
+
+  .badge-compartiment {
+    background: #f3f0fa;
+    color: #6b4fa0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid #d9cef5;
+  }
+
+  .badge-emplacement {
+    background: #f0faf4;
+    color: var(--sage);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 20px;
+    border: 1px solid #b8e5c8;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .progress-bar-bg {
+    width: 72px;
+    height: 6px;
+    background: var(--mist);
+    border-radius: 3px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+
+  .fill-low    { background: var(--sage-light); }
+  .fill-medium { background: var(--gold); }
+  .fill-high   { background: var(--rust); }
+
+  .progress-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #7a6a55;
+    min-width: 2.5rem;
+  }
+
+  /* ── ACTIONS ── */
+  .actions-cell {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .btn-action {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.82rem;
+    border: 1px solid transparent;
+    transition: all 0.15s ease;
+  }
+
+  .btn-view {
+    background: #eef4ff;
+    color: #2563ab;
+    border-color: #c3d9f8;
+  }
+
+  .btn-view:hover {
+    background: #2563ab;
+    color: white;
+  }
+
+  .btn-edit {
+    background: #f0faf4;
+    color: var(--sage);
+    border-color: #b8e5c8;
+  }
+
+  .btn-edit:hover {
+    background: var(--sage);
+    color: white;
+  }
+
+  .btn-delete {
+    background: #fff0ee;
+    color: var(--rust);
+    border-color: #f5c6bc;
+  }
+
+  .btn-delete:hover {
+    background: var(--rust);
+    color: white;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #9a8a78;
+  }
+
+  .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
+  }
+
+  .empty-state h4 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: var(--ink);
+    margin-bottom: 0.5rem;
+  }
+
+  .empty-state a {
+    color: var(--gold);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .shelf-header  { animation: fadeUp 0.4s ease both; }
+  .filter-panel  { animation: fadeUp 0.4s ease 0.08s both; }
+  .table-card    { animation: fadeUp 0.4s ease 0.16s both; }
+
+  tbody tr {
+    animation: fadeUp 0.3s ease both;
+  }
+  {% for i in "123456789" %}
+  tbody tr:nth-child({{ forloop.counter }}) { animation-delay: {{ forloop.counter0 }}00ms; }
+  {% endfor %}
+
+  @media (max-width: 900px) {
+    .filter-panel form {
+      grid-template-columns: 1fr 1fr;
+    }
+    .shelf-title { font-size: 1.7rem; }
+  }
+
+  @media (max-width: 600px) {
+    .filter-panel form { grid-template-columns: 1fr; }
+    .shelf-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
+  }
 </style>
+
+<div class="shelf-page">
+
+  <!-- Header -->
+  <div class="shelf-header">
+    <div>
+      <h2 class="shelf-title">Gestion des <span>Étagères</span></h2>
+      <div class="shelf-subtitle">Bibliothèque — Espace de stockage physique</div>
+    </div>
+    <a href="{% url 'etagere_create' %}" class="btn-new">
+      <i class="fas fa-plus"></i> Nouvelle Étagère
+    </a>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-panel">
+    <form method="get">
+      <div class="filter-group">
+        <label>Rechercher</label>
+        <input type="text" name="search"
+               placeholder="Code, description, salle…"
+               value="{{ search_query }}">
+      </div>
+      <div class="filter-group">
+        <label>Salle</label>
+        <select name="salle">
+          <option value="">Toutes les salles</option>
+          {% for salle in salles %}
+            <option value="{{ salle }}" {% if salle == salle_filter %}selected{% endif %}>
+              {{ salle }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Étage</label>
+        <select name="etage">
+          <option value="">Tous les étages</option>
+          {% for etage in etages %}
+            <option value="{{ etage }}" {% if etage|stringformat:"s" == etage_filter %}selected{% endif %}>
+              Étage {{ etage }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button type="submit" class="btn-filter">
+          <i class="fas fa-search"></i> Filtrer
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="table-card">
+    <div class="table-card-header">
+      <i class="fas fa-list"></i>
+      Liste des étagères
+      <span class="count-badge">{{ etageres.count }}</span>
+    </div>
+
+    {% if etageres %}
+      <div style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Description</th>
+              <th>Salle</th>
+              <th>Étage</th>
+              <th>Capacité</th>
+              <th>Compartiments</th>
+              <th>Emplacements</th>
+              <th>Taux</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for etagere in etageres %}
+            <tr>
+              <td><span class="code-cell">{{ etagere.code }}</span></td>
+              <td><span class="desc-cell">{{ etagere.description|truncatewords:5 }}</span></td>
+              <td><span class="badge-salle">{{ etagere.salle }}</span></td>
+              <td><span class="badge-num">{{ etagere.etage }}</span></td>
+              <td>{{ etagere.capacite_max }}</td>
+              <td><span class="badge-compartiment">{{ etagere.nb_compartiments }}</span></td>
+              <td><span class="badge-emplacement">{{ etagere.nb_emplacements }}</span></td>
+              <td>
+                {% with taux=etagere.taux_remplissage %}
+                <div class="progress-wrap">
+                  <div class="progress-bar-bg">
+                    <div class="progress-fill
+                      {% if taux < 50 %}fill-low
+                      {% elif taux < 80 %}fill-medium
+                      {% else %}fill-high{% endif %}"
+                      style="width:{{ taux }}%"></div>
+                  </div>
+                  <span class="progress-label">{{ taux }}%</span>
+                </div>
+                {% endwith %}
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <a href="{% url 'etagere_detail' etagere.pk %}" class="btn-action btn-view" title="Voir">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="{% url 'etagere_update' etagere.pk %}" class="btn-action btn-edit" title="Modifier">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="{% url 'etagere_delete' etagere.pk %}" class="btn-action btn-delete" title="Supprimer">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-warehouse"></i></div>
+        <h4>Aucune étagère trouvée</h4>
+        <p>
+          {% if search_query or salle_filter or etage_filter %}
+            <a href="{% url 'etagere_list' %}">Réinitialiser les filtres</a>
+          {% else %}
+            Commencez par créer une nouvelle étagère.
+          {% endif %}
+        </p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
 {% endblock %}

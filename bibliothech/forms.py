@@ -168,6 +168,7 @@ class AuteurForm(forms.ModelForm):
         widget=forms.Select(attrs={
             'class': 'form-select',
         })
+        
     )
 
     class Meta:
@@ -339,6 +340,49 @@ from django import forms
 from django.core.exceptions import ValidationError
 from .models import Livre
 
+CATEGORIE_CHOICES = [
+    ('', '— Choisir une catégorie —'),
+    # Littérature
+    ('Roman', 'Roman'),
+    ('Nouvelle', 'Nouvelle'),
+    ('Poésie', 'Poésie'),
+    ('Théâtre', 'Théâtre'),
+    ('Conte', 'Conte'),
+    ('Biographie', 'Biographie'),
+    ('Autobiographie', 'Autobiographie'),
+    # Sciences & Technique
+    ('Informatique', 'Informatique'),
+    ('Mathématiques', 'Mathématiques'),
+    ('Physique', 'Physique'),
+    ('Chimie', 'Chimie'),
+    ('Biologie', 'Biologie'),
+    ('Médecine', 'Médecine'),
+    ('Ingénierie', 'Ingénierie'),
+    # Sciences humaines
+    ('Histoire', 'Histoire'),
+    ('Géographie', 'Géographie'),
+    ('Philosophie', 'Philosophie'),
+    ('Psychologie', 'Psychologie'),
+    ('Sociologie', 'Sociologie'),
+    ('Économie', 'Économie'),
+    ('Droit', 'Droit'),
+    ('Politique', 'Politique'),
+    # Éducation
+    ('Manuel scolaire', 'Manuel scolaire'),
+    ('Dictionnaire', 'Dictionnaire'),
+    ('Encyclopédie', 'Encyclopédie'),
+    ('Thèse', 'Thèse'),
+    ('Mémoire', 'Mémoire'),
+    # Autres
+    ('Religion', 'Religion'),
+    ('Art', 'Art'),
+    ('Musique', 'Musique'),
+    ('Sport', 'Sport'),
+    ('Cuisine', 'Cuisine'),
+    ('Voyage', 'Voyage'),
+    ('Autre', 'Autre'),
+]
+
 
 class LivreForm(forms.ModelForm):
     """Formulaire pour les livres"""
@@ -363,7 +407,7 @@ class LivreForm(forms.ModelForm):
                 'placeholder': 'Sous-titre (optionnel)',
             }),
             'auteurs': forms.SelectMultiple(attrs={
-                'size': 5,
+                'size': 6,
             }),
             'editeur': forms.TextInput(attrs={
                 'placeholder': 'Ex : Gallimard, Hachette…',
@@ -378,9 +422,7 @@ class LivreForm(forms.ModelForm):
                 'min': 1,
             }),
             'langue': forms.Select(),
-            'categorie': forms.TextInput(attrs={
-                'placeholder': 'Ex : Roman, Informatique, Histoire…',
-            }),
+            'categorie': forms.Select(choices=CATEGORIE_CHOICES),
             'resume': forms.Textarea(attrs={
                 'rows': 4,
                 'placeholder': 'Résumé ou description du livre…',
@@ -453,7 +495,9 @@ class LivreForm(forms.ModelForm):
         if nb is not None and nb < 0:
             raise ValidationError("Le nombre d'exemplaires ne peut pas être négatif.")
         return nb
-
+    
+    
+    
 class PersonnelForm(forms.ModelForm):
     """Formulaire pour le personnel"""
     class Meta:

@@ -142,6 +142,71 @@ def change_password_view(request):
 
 # ==================== VUES GÉNÉRALES ====================
 
+
+
+import json
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+from django.utils import timezone
+
+def dashboard_view(request):
+    annee = timezone.now().year
+
+    # Emprunts par mois
+    emprunts_par_mois = (
+        Emprunt.objects
+        .filter(date_emprunt__year=annee)
+        .annotate(mois=TruncMonth('date_emprunt'))
+        .values('mois')
+        .annotate(total=Count('id'))
+        .order_by('mois')
+    )
+
+    # Retours par mois
+    retours_par_mois = (
+        Emprunt.objects
+        .filter(date_retour__year=annee, date_retour__isnull=False)
+        .annotate(mois=TruncMonth('date_retour'))
+        .values('mois')
+        .annotate(total=Count('id'))
+        .order_by('mois')
+    )
+
+    # Inscriptions par mois
+    inscriptions_par_mois = (
+        Emprunt.objects
+        .filter(date_inscription__year=annee)
+        .annotate(mois=TruncMonth('date_inscription'))
+        .values('mois')
+        .annotate(total=Count('id'))
+        .order_by('mois')
+    )
+
+    # Remplir les 12 mois (0 si pas de données)
+    def remplir_mois(queryset):
+        data = {q['mois'].month: q['total'] for q in queryset}
+        return [data.get(m, 0) for m in range(1, 13)]
+
+    # Répartition livres (doughnut)
+    total_livres = Livre.objects.count()
+    empruntes    = Emprunt.objects.filter(date_retour__isnull=True).count()
+    en_retard    = Emprunt.objects.filter(date_retour__isnull=True, date_echeance__lt=timezone.now().date()).count()
+    reserves     = Reservation.objects.filter(statut='active').count()
+    disponibles  = total_livres - empruntes - reserves
+
+    context = {
+        'stats_bar': json.dumps({
+            'emprunts':      remplir_mois(emprunts_par_mois),
+            'retours':       remplir_mois(retours_par_mois),
+            'inscriptions':  remplir_mois(inscriptions_par_mois),
+        }),
+        'stats_pie': json.dumps({
+            'labels': ['Disponibles', 'Empruntés', 'En retard', 'Réservés'],
+            'data':   [max(disponibles, 0), empruntes - en_retard, en_retard, reserves],
+        }),
+    }
+    return render(request, 'bibliotheque/home.html', context)
+
 @login_required
 def dashboard_home(request):
     """Vue principale du dashboard avec statistiques"""
@@ -403,6 +468,7 @@ def livre_detail_view(request, pk):
 @login_required
 def livre_create_view(request):
     """Créer un livre"""
+    
     if request.method == 'POST':
         form = LivreForm(request.POST, request.FILES)
         if form.is_valid():
@@ -1104,7 +1170,7 @@ def etagere_update_view(request, pk):
         if form.is_valid():
             form.save()
             messages.success(request, f"L'étagère {etagere.code} a été modifiée avec succès.")
-            return redirect('bibliotheque:etagere_detail', pk=etagere.pk)
+            return redirect('etagere_list')
     else:
         form = EtagereForm(instance=etagere)
     
@@ -1178,7 +1244,7 @@ def compartiment_detail_view(request, pk):
         Compartiment.objects.select_related('etagere'),
         pk=pk
     )
-    emplacements = compartiment.emplacements.select_related('livre').order_by('position')
+    emplacements = compartiment.emplacements.prefetch_related('livres').order_by('position')
     
     context = {
         'compartiment': compartiment,
@@ -1317,7 +1383,7 @@ def emplacement_create_view(request):
         if form.is_valid():
             emplacement = form.save()
             messages.success(request, f"L'emplacement {emplacement.code_emplacement} a été créé avec succès.")
-            return redirect('emplacement_detail', pk=emplacement.pk)
+            return redirect('compartiment_detail', pk=emplacement.compartiment.pk)
     else:
         initial = {}
         if compartiment_id:
@@ -1356,7 +1422,7 @@ def emplacement_delete_view(request, pk):
         code = emplacement.code_emplacement
         emplacement.delete()
         messages.success(request, f"L'emplacement {code} a été supprimé avec succès.")
-        return redirect('bibliotheque:compartiment_detail', pk=compartiment.pk)
+        return redirect('compartiment_detail', pk=compartiment.pk)
     
     context = {'emplacement': emplacement}
     return render(request, 'bibliotheque/emplacements/delete.html', context)
