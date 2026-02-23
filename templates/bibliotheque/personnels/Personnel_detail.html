@@ -1,0 +1,282 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}{{ personnel.nom }} {{ personnel.prenom }}{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap');
+  :root {
+    --ink:#0d0f14; --paper:#f7f5f0; --cream:#edeae2;
+    --accent:#c8522a; --blue:#3d6b8f; --green:#2e7d52;
+    --muted:#7a7570; --border:#d8d4cc; --r:4px;
+  }
+  .dw { font-family:'DM Sans',sans-serif; background:var(--paper); color:var(--ink); }
+
+  /* breadcrumb */
+  .bc { padding:2rem 2.5rem 0; display:flex; align-items:center; gap:.4rem;
+        font-size:.75rem; color:var(--muted); flex-wrap:wrap; }
+  .bc a { color:var(--muted); text-decoration:none; transition:color .14s; }
+  .bc a:hover { color:var(--accent); }
+  .bc-sep { color:var(--border); }
+  .bc-cur { color:var(--ink); font-weight:500; }
+
+  /* header */
+  .dh {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    padding:1.25rem 2.5rem 1.25rem;
+    border-bottom:2px solid var(--ink); margin-bottom:2.5rem;
+  }
+  .dh-eye { font-size:.67rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:.2rem; }
+  .dh-title {
+    font-family:'Syne',sans-serif; font-size:2rem; font-weight:800;
+    line-height:1; letter-spacing:-.02em; margin:0;
+  }
+  .dh-title em { color:var(--accent); font-style:normal; }
+
+  .dh-acts { display:flex; gap:.5rem; }
+  .btn-edit {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.75rem;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:.62rem 1.25rem; border:2px solid var(--ink);
+    background:var(--ink); color:#fff; text-decoration:none;
+    display:inline-flex; align-items:center; gap:.4rem;
+    border-radius:var(--r); transition:background .14s,border-color .14s;
+  }
+  .btn-edit:hover { background:var(--blue); border-color:var(--blue); color:#fff; }
+  .btn-del {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.75rem;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:.62rem 1.25rem; border:2px solid var(--border);
+    background:transparent; color:var(--muted); text-decoration:none;
+    display:inline-flex; align-items:center; gap:.4rem;
+    border-radius:var(--r); transition:all .14s;
+  }
+  .btn-del:hover { background:#fce8e2; border-color:var(--accent); color:var(--accent); }
+
+  /* layout */
+  .dgrid {
+    display:grid; grid-template-columns:280px 1fr; gap:1.5rem;
+    padding:0 2.5rem 3rem; max-width:1100px;
+  }
+
+  /* profile card */
+  .prof-card {
+    background:#fff; border:1.5px solid var(--border); border-radius:var(--r);
+    padding:2rem 1.5rem; text-align:center;
+    animation:fadeUp .28s ease both;
+    height:fit-content; position:sticky; top:1.5rem;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+  .prof-av {
+    width:100px; height:100px; border-radius:50%;
+    object-fit:cover; border:3px solid var(--border);
+    margin:0 auto 1.25rem;
+  }
+  .prof-av-i {
+    width:100px; height:100px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:800; font-size:2.2rem;
+    color:#fff; margin:0 auto 1.25rem;
+  }
+  .prof-name {
+    font-family:'Syne',sans-serif; font-weight:800; font-size:1.15rem;
+    line-height:1.2; margin-bottom:.6rem; color:var(--ink);
+  }
+  .role-badge {
+    display:inline-block; font-size:.68rem; font-weight:500;
+    letter-spacing:.1em; text-transform:uppercase;
+    padding:.22rem .7rem; border-radius:2px; margin-bottom:.75rem;
+  }
+  .r-DIRECTEUR     { background:#fce8e2; color:var(--accent);  border:1px solid #f5c4b3; }
+  .r-BIBLIOTHECAIRE{ background:#e2ecf4; color:var(--blue);    border:1px solid #b3ccdf; }
+  .r-ASSISTANT     { background:#e6f4ec; color:var(--green);   border:1px solid #aad5bc; }
+  .r-TECHNICIEN    { background:#f0ede6; color:#6b5e40;        border:1px solid #d4c9b0; }
+
+  .sd { display:inline-flex; align-items:center; gap:.38rem; font-size:.8rem; font-weight:500; }
+  .sd::before { content:''; width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .sd-on  { color:var(--green); } .sd-on::before  { background:var(--green); }
+  .sd-off { color:#b94040; }      .sd-off::before { background:#b94040; }
+
+  .prof-mat {
+    margin-top:1rem; padding-top:1rem; border-top:1px solid var(--border);
+    font-size:.72rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted);
+  }
+  .prof-mat span {
+    font-family:'Syne',sans-serif; font-size:.85rem; font-weight:700;
+    color:var(--ink); letter-spacing:.04em; text-transform:none; display:block; margin-top:.2rem;
+  }
+
+  /* info card */
+  .info-card {
+    background:#fff; border:1.5px solid var(--border); border-radius:var(--r);
+    overflow:hidden;
+    animation:fadeUp .3s .05s ease both;
+  }
+  .info-sec-head {
+    display:flex; align-items:center; gap:.6rem;
+    padding:.8rem 1.25rem; background:var(--cream); border-bottom:1px solid var(--border);
+  }
+  .info-sec-icon {
+    width:28px; height:28px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.8rem; color:#fff; flex-shrink:0;
+  }
+  .ic-user { background:var(--green); }
+  .ic-post { background:var(--accent); }
+  .ic-lock { background:var(--blue); }
+  .info-sec-label {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.73rem;
+    letter-spacing:.13em; text-transform:uppercase; color:var(--ink);
+  }
+
+  .info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .info-row {
+    display:contents;
+  }
+  .info-item {
+    padding:.85rem 1.25rem; border-bottom:1px solid var(--border);
+    transition:background .12s;
+  }
+  .info-item:hover { background:var(--cream); }
+  .info-lbl {
+    font-size:.67rem; font-weight:500; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted); margin-bottom:.2rem;
+  }
+  .info-val {
+    font-size:.9rem; color:var(--ink); font-weight:400;
+  }
+  .info-val a { color:var(--blue); text-decoration:none; }
+  .info-val a:hover { color:var(--accent); text-decoration:underline; }
+
+  .info-sec-sep { grid-column:1/-1; height:0; border-bottom:2px solid var(--border); }
+
+  @media(max-width:768px){
+    .dgrid { grid-template-columns:1fr; padding-left:1rem; padding-right:1rem; }
+    .bc,.dh { padding-left:1rem; padding-right:1rem; }
+    .prof-card { position:static; }
+    .info-grid { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="dw">
+
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <a href="{% url 'personnel_list' %}">Personnel</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">{{ personnel.nom }} {{ personnel.prenom }}</span>
+  </div>
+
+  <!-- Header -->
+  <div class="dh">
+    <div>
+      <div class="dh-eye">Fiche détaillée</div>
+      <h1 class="dh-title">{{ personnel.nom }} <em>{{ personnel.prenom }}</em></h1>
+    </div>
+    <div class="dh-acts">
+      <a href="{% url 'personnel_update' personnel.pk %}" class="btn-edit">
+        <i class="bi bi-pencil-fill"></i>Modifier
+      </a>
+      <a href="{% url 'personnel_delete' personnel.pk %}" class="btn-del">
+        <i class="bi bi-trash"></i>Supprimer
+      </a>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="dgrid">
+
+    <!-- Profil -->
+    <div class="prof-card">
+      {% if personnel.photo %}
+        <img src="{{ personnel.photo.url }}" class="prof-av" alt="{{ personnel.nom }}">
+      {% else %}
+        <div class="prof-av-i" style="background:{% if personnel.role == 'DIRECTEUR' %}#c8522a{% elif personnel.role == 'BIBLIOTHECAIRE' %}#3d6b8f{% elif personnel.role == 'ASSISTANT' %}#2e7d52{% else %}#7b5ea7{% endif %}">
+          {{ personnel.nom|first|upper }}{{ personnel.prenom|first|upper }}
+        </div>
+      {% endif %}
+      <div class="prof-name">{{ personnel.nom }}<br>{{ personnel.prenom }}</div>
+      <div><span class="role-badge r-{{ personnel.role }}">{{ personnel.get_role_display }}</span></div>
+      {% if personnel.actif %}
+        <span class="sd sd-on">Compte actif</span>
+      {% else %}
+        <span class="sd sd-off">Compte inactif</span>
+      {% endif %}
+      <div class="prof-mat">
+        Matricule
+        <span>{{ personnel.matricule }}</span>
+      </div>
+    </div>
+
+    <!-- Infos -->
+    <div class="info-card">
+
+      <!-- Contact -->
+      <div class="info-sec-head">
+        <div class="info-sec-icon ic-user"><i class="bi bi-person-lines-fill"></i></div>
+        <span class="info-sec-label">Coordonnées</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-lbl">Email</div>
+          <div class="info-val"><a href="mailto:{{ personnel.email }}">{{ personnel.email }}</a></div>
+        </div>
+        <div class="info-item">
+          <div class="info-lbl">Téléphone</div>
+          <div class="info-val">{{ personnel.telephone }}</div>
+        </div>
+      </div>
+
+      <!-- Poste -->
+      <div class="info-sec-head" style="border-top:1.5px solid var(--border);">
+        <div class="info-sec-icon ic-post"><i class="bi bi-briefcase-fill"></i></div>
+        <span class="info-sec-label">Poste &amp; Affectation</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-lbl">Rôle</div>
+          <div class="info-val"><span class="role-badge r-{{ personnel.role }}">{{ personnel.get_role_display }}</span></div>
+        </div>
+        <div class="info-item">
+          <div class="info-lbl">Université</div>
+          <div class="info-val">{{ personnel.universite }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-lbl">Date d'embauche</div>
+          <div class="info-val">{{ personnel.date_embauche|date:"d/m/Y" }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-lbl">Statut</div>
+          <div class="info-val">
+            {% if personnel.actif %}
+              <span class="sd sd-on">Actif</span>
+            {% else %}
+              <span class="sd sd-off">Inactif</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Compte -->
+      <div class="info-sec-head" style="border-top:1.5px solid var(--border);">
+        <div class="info-sec-icon ic-lock"><i class="bi bi-shield-lock-fill"></i></div>
+        <span class="info-sec-label">Compte utilisateur</span>
+      </div>
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-lbl">Nom d'utilisateur</div>
+          <div class="info-val">{{ personnel.user.username }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-lbl">Créé le</div>
+          <div class="info-val">{{ personnel.created_at|date:"d/m/Y — H:i" }}</div>
+        </div>
+        <div class="info-item" style="border-bottom:none;">
+          <div class="info-lbl">Dernière modification</div>
+          <div class="info-val">{{ personnel.updated_at|date:"d/m/Y — H:i" }}</div>
+        </div>
+      </div>
+
+    </div><!-- /info-card -->
+  </div><!-- /dgrid -->
+</div>
+{% endblock %}

@@ -7,7 +7,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import (
     Universite, Auteur, Etagere, Compartiment, EmplacementLivre,
-    Livre, Personnel, Etudiant, Abonnement, Emprunt, Reservation, Notification
+    Livre, Personnel, Etudiant, Abonnement, Emprunt, Reservation, Notification, Abonne, TypeAbonnement
 )
 from .models import Etudiant1, Faculte1, Departement, Classe, Emprunt, Livre, Auteur
 from .models import (
@@ -18,6 +18,14 @@ from .models import (
     RegleMetier,
     ConfigurationEmail,
 )
+
+
+
+
+
+
+
+
 
 
 
@@ -336,9 +344,6 @@ class EmplacementLivreForm(forms.ModelForm):
         }
 
 
-from django import forms
-from django.core.exceptions import ValidationError
-from .models import Livre
 
 CATEGORIE_CHOICES = [
     ('', '— Choisir une catégorie —'),
@@ -496,10 +501,22 @@ class LivreForm(forms.ModelForm):
             raise ValidationError("Le nombre d'exemplaires ne peut pas être négatif.")
         return nb
     
-    
-    
+
+
 class PersonnelForm(forms.ModelForm):
-    """Formulaire pour le personnel"""
+    # Champs pour créer/modifier l'utilisateur lié
+    username = forms.CharField(
+        max_length=150,
+        label="Nom d'utilisateur",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': "Nom d'utilisateur"})
+    )
+    password = forms.CharField(
+        required=False,
+        label="Mot de passe",
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Laisser vide pour ne pas modifier'}),
+        help_text="Laisser vide pour ne pas modifier le mot de passe."
+    )
+
     class Meta:
         model = Personnel
         fields = [
@@ -507,19 +524,109 @@ class PersonnelForm(forms.ModelForm):
             'role', 'universite', 'date_embauche', 'actif', 'photo'
         ]
         widgets = {
-            'matricule': forms.TextInput(attrs={'class': 'form-control'}),
-            'nom': forms.TextInput(attrs={'class': 'form-control'}),
-            'prenom': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'telephone': forms.TextInput(attrs={'class': 'form-control'}),
-            'role': forms.Select(attrs={'class': 'form-control'}),
-            'universite': forms.Select(attrs={'class': 'form-control'}),
-            'date_embauche': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'actif': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'photo': forms.FileInput(attrs={'class': 'form-control'}),
+            'matricule':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ex: MAT-001'}),
+            'nom':          forms.TextInput(attrs={'class': 'form-control'}),
+            'prenom':       forms.TextInput(attrs={'class': 'form-control'}),
+            'email':        forms.EmailInput(attrs={'class': 'form-control'}),
+            'telephone':    forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+243 ...'}),
+            'role':         forms.Select(attrs={'class': 'form-select'}),
+            'universite':   forms.Select(attrs={'class': 'form-select'}),
+            'date_embauche':forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'actif':        forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'photo':        forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
+        labels = {
+            'matricule':     'Matricule',
+            'nom':           'Nom',
+            'prenom':        'Prénom',
+            'email':         'Adresse email',
+            'telephone':     'Téléphone',
+            'role':          'Rôle',
+            'universite':    'Université',
+            'date_embauche': "Date d'embauche",
+            'actif':         'Compte actif',
+            'photo':         'Photo de profil',
         }
 
+    def __init__(self, *args, **kwargs):
+        # On récupère l'instance Personnel si elle existe (mode modification)
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            # Pré-remplir le champ username avec celui de l'utilisateur lié
+            self.fields['username'].initial = self.instance.user.username
+            self.fields['password'].required = False
 
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Vérifier l'unicité en excluant l'utilisateur actuel (mode modification)
+        qs = User.objects.filter(username=username)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.user.pk)
+        if qs.exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà pris.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        qs = Personnel.objects.filter(email=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Cette adresse email est déjà utilisée.")
+        return email
+
+    def save(self, commit=True):
+        personnel = super().save(commit=False)
+        username = self.cleaned_data['username']
+        password = self.cleaned_data.get('password')
+
+        if personnel.pk:
+            # Modification : mettre à jour l'utilisateur existant
+            user = personnel.user
+            user.username = username
+            if password:
+                user.set_password(password)
+            if commit:
+                user.save()
+        else:
+            # Création : créer un nouvel utilisateur
+            user = User.objects.create_user(
+                username=username,
+                email=self.cleaned_data['email'],
+                password=password or User.objects.make_random_password()
+            )
+            personnel.user = user
+
+        if commit:
+            personnel.save()
+        return personnel
+
+
+class PersonnelSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        label='Rechercher',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Nom, prénom, matricule...'
+        })
+    )
+    role = forms.ChoiceField(
+        required=False,
+        label='Rôle',
+        choices=[('', 'Tous les rôles')] + Personnel.ROLES,
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    actif = forms.ChoiceField(
+        required=False,
+        label='Statut',
+        choices=[('', 'Tous'), ('1', 'Actif'), ('0', 'Inactif')],
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
+    
+    
+    
 class EtudiantForm(forms.ModelForm):
     """Formulaire pour les étudiants"""
     class Meta:
@@ -1643,3 +1750,201 @@ class InscriptionEtudiantForm(forms.ModelForm):
             etudiant.save()
         
         return etudiant
+    
+
+# ─────────────────────────────────────────────────────────────
+# TypeAbonnement Form
+# ─────────────────────────────────────────────────────────────
+class TypeAbonnementForm(forms.ModelForm):
+    class Meta:
+        model = TypeAbonnement
+        fields = [
+            'nom', 'categorie', 'description',
+            'duree_jours', 'nb_emprunts_max', 'duree_emprunt_jours',
+            'acces_numerique', 'acces_salle_lecture', 'reservation_possible',
+            'tarif_annuel', 'gratuit', 'actif',
+        ]
+        widgets = {
+            'nom':                  forms.TextInput(attrs={'class': 'field-input'}),
+            'categorie':            forms.Select(attrs={'class': 'field-input'}),
+            'description':          forms.Textarea(attrs={'class': 'field-input', 'rows': 3}),
+            'duree_jours':          forms.NumberInput(attrs={'class': 'field-input'}),
+            'nb_emprunts_max':      forms.NumberInput(attrs={'class': 'field-input'}),
+            'duree_emprunt_jours':  forms.NumberInput(attrs={'class': 'field-input'}),
+            'tarif_annuel':         forms.NumberInput(attrs={'class': 'field-input', 'step': '0.01'}),
+            'acces_numerique':      forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            'acces_salle_lecture':  forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            'reservation_possible': forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            'gratuit':              forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            'actif':                forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+        }
+
+
+# ─────────────────────────────────────────────────────────────
+# Abonne Form
+# ─────────────────────────────────────────────────────────────
+class AbonneForm(forms.ModelForm):
+    # Champs compte utilisateur
+    username = forms.CharField(
+        max_length=150, label="Nom d'utilisateur",
+        widget=forms.TextInput(attrs={'class': 'field-input', 'placeholder': "nom.prenom"})
+    )
+    password = forms.CharField(
+        required=False, label="Mot de passe",
+        widget=forms.PasswordInput(attrs={'class': 'field-input',
+                                          'placeholder': 'Laisser vide pour ne pas modifier'}),
+        help_text="Laisser vide pour conserver le mot de passe actuel."
+    )
+
+    class Meta:
+        model = Abonne
+        fields = [
+            # Identité
+            'numero_abonne', 'nom', 'prenom', 'sexe',
+            'date_naissance', 'lieu_naissance', 'nationalite', 'photo',
+            # Contact
+            'email', 'telephone', 'telephone_alt', 'adresse', 'ville', 'pays',
+            # Affiliation
+            'universite', 'faculte', 'niveau_etude', 'numero_etudiant', 'profession',
+            # Pièce d'identité
+            'type_piece', 'numero_piece', 'piece_jointe',
+            # Abonnement
+            'type_abonnement', 'statut', 'date_inscription',
+            'date_debut', 'date_expiration', 'renouvellement_auto',
+            # Paiement
+            'montant_paye', 'date_paiement', 'reference_paiement',
+            'exonere', 'motif_exoneration',
+            # Notes
+            'notes',
+        ]
+        widgets = {
+            # Identité
+            'numero_abonne':   forms.TextInput(attrs={'class': 'field-input', 'placeholder': 'AB-0001'}),
+            'nom':             forms.TextInput(attrs={'class': 'field-input'}),
+            'prenom':          forms.TextInput(attrs={'class': 'field-input'}),
+            'sexe':            forms.Select(attrs={'class': 'field-input'}),
+            'date_naissance':  forms.DateInput(attrs={'class': 'field-input', 'type': 'date'}),
+            'lieu_naissance':  forms.TextInput(attrs={'class': 'field-input'}),
+            'nationalite':     forms.TextInput(attrs={'class': 'field-input'}),
+            'photo':           forms.ClearableFileInput(attrs={'class': 'field-input'}),
+            # Contact
+            'email':           forms.EmailInput(attrs={'class': 'field-input'}),
+            'telephone':       forms.TextInput(attrs={'class': 'field-input', 'placeholder': '+257 ...'}),
+            'telephone_alt':   forms.TextInput(attrs={'class': 'field-input'}),
+            'adresse':         forms.Textarea(attrs={'class': 'field-input', 'rows': 2}),
+            'ville':           forms.TextInput(attrs={'class': 'field-input'}),
+            'pays':            forms.TextInput(attrs={'class': 'field-input'}),
+            # Affiliation
+            'universite':      forms.Select(attrs={'class': 'field-input'}),
+            'faculte':         forms.TextInput(attrs={'class': 'field-input'}),
+            'niveau_etude':    forms.Select(attrs={'class': 'field-input'}),
+            'numero_etudiant': forms.TextInput(attrs={'class': 'field-input'}),
+            'profession':      forms.TextInput(attrs={'class': 'field-input'}),
+            # Pièce
+            'type_piece':      forms.Select(attrs={'class': 'field-input'}),
+            'numero_piece':    forms.TextInput(attrs={'class': 'field-input'}),
+            'piece_jointe':    forms.ClearableFileInput(attrs={'class': 'field-input'}),
+            # Abonnement
+            'type_abonnement':    forms.Select(attrs={'class': 'field-input'}),
+            'statut':             forms.Select(attrs={'class': 'field-input'}),
+            'date_inscription':   forms.DateInput(attrs={'class': 'field-input', 'type': 'date'}),
+            'date_debut':         forms.DateInput(attrs={'class': 'field-input', 'type': 'date'}),
+            'date_expiration':    forms.DateInput(attrs={'class': 'field-input', 'type': 'date'}),
+            'renouvellement_auto':forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            # Paiement
+            'montant_paye':        forms.NumberInput(attrs={'class': 'field-input', 'step': '0.01'}),
+            'date_paiement':       forms.DateInput(attrs={'class': 'field-input', 'type': 'date'}),
+            'reference_paiement':  forms.TextInput(attrs={'class': 'field-input'}),
+            'exonere':             forms.CheckboxInput(attrs={'class': 'field-check-input'}),
+            'motif_exoneration':   forms.TextInput(attrs={'class': 'field-input'}),
+            # Notes
+            'notes': forms.Textarea(attrs={'class': 'field-input', 'rows': 3}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['username'].initial = self.instance.user.username
+            self.fields['password'].required = False
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        qs = User.objects.filter(username=username)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.user.pk)
+        if qs.exists():
+            raise forms.ValidationError("Ce nom d'utilisateur est déjà pris.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        qs = Abonne.objects.filter(email=email)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Cette adresse email est déjà utilisée.")
+        return email
+
+    def clean_numero_abonne(self):
+        numero = self.cleaned_data.get('numero_abonne')
+        qs = Abonne.objects.filter(numero_abonne=numero)
+        if self.instance and self.instance.pk:
+            qs = qs.exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError("Ce numéro d'abonné est déjà utilisé.")
+        return numero
+
+    def save(self, commit=True):
+        abonne = super().save(commit=False)
+        username = self.cleaned_data['username']
+        password = self.cleaned_data.get('password')
+
+        if abonne.pk:
+            user = abonne.user
+            user.username = username
+            user.email = self.cleaned_data['email']
+            user.is_active = (abonne.statut == 'ACTIF')
+            if password:
+                user.set_password(password)
+            if commit:
+                user.save()
+        else:
+            user = User.objects.create_user(
+                username=username,
+                email=self.cleaned_data['email'],
+                password=password or User.objects.make_random_password(),
+                is_active=(self.cleaned_data.get('statut') == 'ACTIF'),
+            )
+            abonne.user = user
+
+        if commit:
+            abonne.save()
+        return abonne
+
+
+# ─────────────────────────────────────────────────────────────
+# Search / Filter Form
+# ─────────────────────────────────────────────────────────────
+class AbonneSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False, label='Rechercher',
+        widget=forms.TextInput(attrs={
+            'class': 'field-input',
+            'placeholder': 'Nom, prénom, numéro, email…'
+        })
+    )
+    type_abonnement = forms.ModelChoiceField(
+        required=False, label="Type d'abonnement",
+        queryset=TypeAbonnement.objects.filter(actif=True),
+        empty_label="Tous les types",
+        widget=forms.Select(attrs={'class': 'field-input'})
+    )
+    statut = forms.ChoiceField(
+        required=False, label='Statut',
+        choices=[('', 'Tous les statuts')] + Abonne.STATUT_CHOICES,
+        widget=forms.Select(attrs={'class': 'field-input'})
+    )
+    expire_bientot = forms.BooleanField(
+        required=False, label='Expire dans 30 jours',
+        widget=forms.CheckboxInput(attrs={'class': 'field-check-input'})
+    )

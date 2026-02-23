@@ -1,11 +1,17 @@
 # bibliotheque/views.py
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import  permission_required
 
+
+
+from .models import Personnel
+from .forms import PersonnelForm, PersonnelSearchForm, AbonneForm, AbonneSearchForm, TypeAbonnementForm
 import csv
 from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+
 from django.contrib.auth import login, logout, authenticate
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
+
 from django.db.models import Q, Count
 from django.utils import timezone
 from django.core.paginator import Paginator
@@ -13,10 +19,9 @@ from datetime import timedelta
 from django.contrib.auth.hashers import make_password
 import json
 from django.db.models import Count, Sum, Q
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
+
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.db.models import Q
+
 from .models import (
     ParametreBibliotheque, CategorieEmprunteur, JourFerie,
     MessageSysteme, RegleMetier, ConfigurationEmail, HistoriqueParametres
@@ -43,7 +48,7 @@ from .forms import EtudiantForm, AbonnementForm, UniversiteForm, AuteurForm
 
 from .models import (
     Universite, Auteur, Etagere, Compartiment, EmplacementLivre,
-    Livre, Personnel, Etudiant, Abonnement, Emprunt, Reservation, Notification
+    Livre, Personnel, Etudiant, Abonnement, Emprunt, Reservation, Notification, Abonne, TypeAbonnement
 )
 from .forms import (
     CustomUserCreationForm, CustomAuthenticationForm, CustomPasswordChangeForm,
@@ -3714,3 +3719,331 @@ def get_classes_by_departement(request, departement_id):
     """Retourne les classes d'un département"""
     classes = Classe.objects.filter(departement_id=departement_id).values('id', 'nom')
     return JsonResponse(list(classes), safe=False)
+
+
+
+
+
+
+
+# ─────────────────────────────────────────────
+# LISTE PERSONNEL
+# ─────────────────────────────────────────────
+@login_required
+def personnel_list(request):
+    """Liste paginée avec recherche et filtres."""
+    form = PersonnelSearchForm(request.GET)
+    queryset = Personnel.objects.select_related('user', 'universite').all()
+
+    if form.is_valid():
+        q = form.cleaned_data.get('q')
+        role = form.cleaned_data.get('role')
+        actif = form.cleaned_data.get('actif')
+
+        if q:
+            queryset = queryset.filter(
+                Q(nom__icontains=q) |
+                Q(prenom__icontains=q) |
+                Q(matricule__icontains=q) |
+                Q(email__icontains=q)
+            )
+        if role:
+            queryset = queryset.filter(role=role)
+        if actif != '':
+            queryset = queryset.filter(actif=bool(int(actif)))
+
+    paginator = Paginator(queryset, 10)
+    page_obj = paginator.get_page(request.GET.get('page'))
+
+    context = {
+        'page_obj': page_obj,
+        'search_form': form,
+        'total': queryset.count(),
+    }
+    return render(request, 'bibliotheque/personnels/Personnel_list.html', context)
+
+
+# ─────────────────────────────────────────────
+# DÉTAIL
+# ─────────────────────────────────────────────
+@login_required
+def personnel_detail(request, pk):
+    """Fiche détaillée d'un membre du personnel."""
+    personnel = get_object_or_404(Personnel, pk=pk)
+    return render(request, 'bibliotheque/personnels/Personnel_detail.html', {'personnel': personnel})
+
+
+# ─────────────────────────────────────────────
+# CRÉATION
+# ─────────────────────────────────────────────
+@login_required
+@permission_required('app.add_personnel', raise_exception=True)
+def personnel_create(request):
+    """Créer un nouveau membre du personnel."""
+    if request.method == 'POST':
+        form = PersonnelForm(request.POST, request.FILES)
+        if form.is_valid():
+            personnel = form.save()
+            messages.success(
+                request,
+                f"Le personnel {personnel.nom} {personnel.prenom} a été créé avec succès."
+            )
+            return redirect('personnel_detail', pk=personnel.pk)
+    else:
+        form = PersonnelForm()
+
+    return render(request, 'bibliotheque/personnels/Personnel_form.html', {
+        'form': form,
+        'title': 'Ajouter un membre du personnel',
+        'btn_label': 'Enregistrer',
+    })
+
+
+# ─────────────────────────────────────────────
+# MODIFICATION
+# ─────────────────────────────────────────────
+@login_required
+@permission_required('app.change_personnel', raise_exception=True)
+def personnel_update(request, pk):
+    """Modifier un membre du personnel existant."""
+    personnel = get_object_or_404(Personnel, pk=pk)
+
+    if request.method == 'POST':
+        form = PersonnelForm(request.POST, request.FILES, instance=personnel)
+        if form.is_valid():
+            personnel = form.save()
+            messages.success(
+                request,
+                f"Les informations de {personnel.nom} {personnel.prenom} ont été mises à jour."
+            )
+            return redirect('personnel_detail', pk=personnel.pk)
+    else:
+        form = PersonnelForm(instance=personnel)
+
+    return render(request, 'bibliotheque/personnels/Personnel_form.html', {
+        'form': form,
+        'personnel': personnel,
+        'title': f'Modifier — {personnel}',
+        'btn_label': 'Mettre à jour',
+    })
+
+
+# ─────────────────────────────────────────────
+# SUPPRESSION
+# ─────────────────────────────────────────────
+@login_required
+@permission_required('app.delete_personnel', raise_exception=True)
+def personnel_delete(request, pk):
+    """Supprimer un membre du personnel (confirmation requise)."""
+    personnel = get_object_or_404(Personnel, pk=pk)
+
+    if request.method == 'POST':
+        nom_complet = str(personnel)
+        # Supprimer aussi l'utilisateur Django associé
+        user = personnel.user
+        personnel.delete()
+        user.delete()
+        messages.success(request, f"{nom_complet} a été supprimé(e) avec succès.")
+        return redirect('personnel_list')
+
+    return render(request, 'bibliotheque/personnels/Personnel_confirm_delete.html', {'personnel': personnel})
+
+
+
+
+# ══════════════════════════════════════════════════════════════════
+#  ABONNÉS
+# ══════════════════════════════════════════════════════════════════
+
+@login_required
+def abonne_list(request):
+    form = AbonneSearchForm(request.GET)
+    qs = Abonne.objects.select_related('user', 'universite', 'type_abonnement').all()
+
+    if form.is_valid():
+        q               = form.cleaned_data.get('q')
+        type_abo        = form.cleaned_data.get('type_abonnement')
+        statut          = form.cleaned_data.get('statut')
+        expire_bientot  = form.cleaned_data.get('expire_bientot')
+
+        if q:
+            qs = qs.filter(
+                Q(nom__icontains=q) | Q(prenom__icontains=q) |
+                Q(numero_abonne__icontains=q) | Q(email__icontains=q)
+            )
+        if type_abo:
+            qs = qs.filter(type_abonnement=type_abo)
+        if statut:
+            qs = qs.filter(statut=statut)
+        if expire_bientot:
+            limite = timezone.now().date() + timedelta(days=30)
+            qs = qs.filter(date_expiration__lte=limite, statut='ACTIF')
+
+    # Statistiques rapides pour le dashboard
+    today = timezone.now().date()
+    stats = {
+        'total':     Abonne.objects.count(),
+        'actifs':    Abonne.objects.filter(statut='ACTIF').count(),
+        'expires':   Abonne.objects.filter(date_expiration__lt=today).count(),
+        'en_attente':Abonne.objects.filter(statut='EN_ATTENTE').count(),
+    }
+
+    paginator = Paginator(qs, 12)
+    page_obj  = paginator.get_page(request.GET.get('page'))
+
+    return render(request, 'bibliotheque/abonnes/abonne_list.html', {
+        'page_obj':    page_obj,
+        'search_form': form,
+        'total':       qs.count(),
+        'stats':       stats,
+    })
+
+
+@login_required
+def abonne_detail(request, pk):
+    abonne = get_object_or_404(
+        Abonne.objects.select_related('user', 'universite', 'type_abonnement', 'valide_par'),
+        pk=pk
+    )
+    return render(request, 'bibliotheque/abonnes/abonne_detail.html', {'abonne': abonne})
+
+
+@login_required
+@permission_required('app.add_abonne', raise_exception=True)
+def abonne_create(request):
+    if request.method == 'POST':
+        form = AbonneForm(request.POST, request.FILES)
+        if form.is_valid():
+            abonne = form.save()
+            messages.success(request, f"L'abonné(e) {abonne.nom_complet} a été créé(e) avec succès.")
+            return redirect('abonne_detail', pk=abonne.pk)
+    else:
+        form = AbonneForm()
+    return render(request, 'bibliotheque/abonnes/abonne_form.html', {
+        'form': form,
+        'title': 'Inscrire un(e) nouvel(le) abonné(e)',
+        'btn_label': 'Enregistrer',
+    })
+
+
+@login_required
+@permission_required('app.change_abonne', raise_exception=True)
+def abonne_update(request, pk):
+    abonne = get_object_or_404(Abonne, pk=pk)
+    if request.method == 'POST':
+        form = AbonneForm(request.POST, request.FILES, instance=abonne)
+        if form.is_valid():
+            abonne = form.save()
+            messages.success(request, f"Le profil de {abonne.nom_complet} a été mis à jour.")
+            return redirect('abonne_detail', pk=abonne.pk)
+    else:
+        form = AbonneForm(instance=abonne)
+    return render(request, 'bibliotheque/abonnes/abonne_form.html', {
+        'form': form,
+        'abonne': abonne,
+        'title': f'Modifier — {abonne.nom_complet}',
+        'btn_label': 'Mettre à jour',
+    })
+
+
+@login_required
+@permission_required('app.delete_abonne', raise_exception=True)
+def abonne_delete(request, pk):
+    abonne = get_object_or_404(Abonne, pk=pk)
+    if request.method == 'POST':
+        nom = abonne.nom_complet
+        user = abonne.user
+        abonne.delete()
+        user.delete()
+        messages.success(request, f"L'abonné(e) {nom} a été supprimé(e).")
+        return redirect('abonne_list')
+    return render(request, 'bibliotheque/abonnes/abonne_confirm_delete.html', {'abonne': abonne})
+
+
+# ── Actions rapides ───────────────────────────────────────────────
+
+@login_required
+@permission_required('app.change_abonne', raise_exception=True)
+def abonne_activer(request, pk):
+    abonne = get_object_or_404(Abonne, pk=pk)
+    abonne.activer(validateur=request.user)
+    messages.success(request, f"Abonnement de {abonne.nom_complet} activé jusqu'au {abonne.date_expiration}.")
+    return redirect('abonne_detail', pk=pk)
+
+
+@login_required
+@permission_required('app.change_abonne', raise_exception=True)
+def abonne_suspendre(request, pk):
+    abonne = get_object_or_404(Abonne, pk=pk)
+    abonne.suspendre()
+    messages.warning(request, f"L'abonnement de {abonne.nom_complet} a été suspendu.")
+    return redirect('abonne_detail', pk=pk)
+
+
+@login_required
+@permission_required('app.change_abonne', raise_exception=True)
+def abonne_renouveler(request, pk):
+    abonne = get_object_or_404(Abonne, pk=pk)
+    abonne.renouveler()
+    messages.success(request, f"Abonnement de {abonne.nom_complet} renouvelé jusqu'au {abonne.date_expiration}.")
+    return redirect('abonne_detail', pk=pk)
+
+
+# ══════════════════════════════════════════════════════════════════
+#  TYPES D'ABONNEMENT
+# ══════════════════════════════════════════════════════════════════
+
+@login_required
+def type_abonnement_list(request):
+    types = TypeAbonnement.objects.annotate(nb_abonnes=Count('abonnes')).order_by('categorie', 'nom')
+    return render(request, 'bibliotheque/abonnes/type_abonnement_list.html', {'types': types})
+
+
+@login_required
+@permission_required('app.add_typeabonnement', raise_exception=True)
+def type_abonnement_create(request):
+    if request.method == 'POST':
+        form = TypeAbonnementForm(request.POST)
+        if form.is_valid():
+            t = form.save()
+            messages.success(request, f"Le type « {t.nom} » a été créé.")
+            return redirect('type_abonnement_list')
+    else:
+        form = TypeAbonnementForm()
+    return render(request, 'bibliotheque/abonnes/type_abonnement_form.html', {
+        'form': form,
+        'title': 'Nouveau type d\'abonnement',
+        'btn_label': 'Créer',
+    })
+
+
+@login_required
+@permission_required('app.change_typeabonnement', raise_exception=True)
+def type_abonnement_update(request, pk):
+    t = get_object_or_404(TypeAbonnement, pk=pk)
+    if request.method == 'POST':
+        form = TypeAbonnementForm(request.POST, instance=t)
+        if form.is_valid():
+            t = form.save()
+            messages.success(request, f"Le type « {t.nom} » a été mis à jour.")
+            return redirect('type_abonnement_list')
+    else:
+        form = TypeAbonnementForm(instance=t)
+    return render(request, 'bibliotheque/abonnes/type_abonnement_form.html', {
+        'form': form,
+        'type_abo': t,
+        'title': f'Modifier — {t.nom}',
+        'btn_label': 'Mettre à jour',
+    })
+
+
+@login_required
+@permission_required('app.delete_typeabonnement', raise_exception=True)
+def type_abonnement_delete(request, pk):
+    t = get_object_or_404(TypeAbonnement, pk=pk)
+    if request.method == 'POST':
+        nom = t.nom
+        t.delete()
+        messages.success(request, f"Le type « {nom} » a été supprimé.")
+        return redirect('type_abonnement_list')
+    return render(request, 'bibliotheque/abonnes/type_abonnement_confirm_delete.html', {'type_abo': t})

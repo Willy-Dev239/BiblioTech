@@ -1,0 +1,231 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}{{ abonne.nom }} {{ abonne.prenom }} | Abonné(e){% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <a href="{% url 'abonne_list' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">{{ abonne.nom }} {{ abonne.prenom }}</span>
+  </div>
+
+  <!-- Header -->
+  <div class="ph">
+    <div>
+      <div class="ph-eye">Fiche abonné(e)</div>
+      <h1 class="ph-title">{{ abonne.nom }} <em>{{ abonne.prenom }}</em></h1>
+    </div>
+    <div class="ph-acts">
+      {% if abonne.statut == 'EN_ATTENTE' or abonne.statut == 'EXPIRE' %}
+        <a href="{% url 'abonne_activer' abonne.pk %}" class="btn-success">
+          <i class="bi bi-check-circle-fill"></i>Activer
+        </a>
+      {% endif %}
+      {% if abonne.statut == 'ACTIF' %}
+        <a href="{% url 'abonne_renouveler' abonne.pk %}" class="btn-outline" style="border-color:var(--teal);color:var(--teal);">
+          <i class="bi bi-arrow-repeat"></i>Renouveler
+        </a>
+        <a href="{% url 'abonne_suspendre' abonne.pk %}" class="btn-warn">
+          <i class="bi bi-pause-circle"></i>Suspendre
+        </a>
+      {% endif %}
+      <a href="{% url 'abonne_update' abonne.pk %}" class="btn-primary">
+        <i class="bi bi-pencil-fill"></i>Modifier
+      </a>
+      <a href="{% url 'abonne_delete' abonne.pk %}" class="btn-danger">
+        <i class="bi bi-trash"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Layout -->
+  <div style="display:grid;grid-template-columns:260px 1fr;gap:1.5rem;padding:0 2.5rem 3rem;max-width:1100px;">
+
+    <!-- Profil -->
+    <div class="card" style="padding:2rem 1.5rem;text-align:center;height:fit-content;position:sticky;top:1.5rem;">
+      {% if abonne.photo %}
+        <img src="{{ abonne.photo.url }}" class="av-lg" alt="{{ abonne.nom }}">
+      {% else %}
+        <div class="av-lg-i" style="background:{% if abonne.type_abonnement.categorie == 'ETUDIANT' %}#2a5fc8{% elif abonne.type_abonnement.categorie == 'ENSEIGNANT' %}#1e8a6e{% elif abonne.type_abonnement.categorie == 'VIP' %}#c87a2a{% else %}#6b5e40{% endif %}">
+          {{ abonne.nom|first|upper }}{{ abonne.prenom|first|upper }}
+        </div>
+      {% endif %}
+
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:.5rem;">
+        {{ abonne.nom }}<br>{{ abonne.prenom }}
+      </div>
+
+      <div style="margin-bottom:.6rem;">
+        <span class="tb tc-{{ abonne.type_abonnement.categorie }}">
+          {{ abonne.type_abonnement.nom }}
+        </span>
+      </div>
+
+      <span class="sb sb-{{ abonne.statut }}">{{ abonne.get_statut_display }}</span>
+
+      <!-- Expiration meter -->
+      {% if abonne.date_expiration %}
+      <div style="margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border);">
+        <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.4rem;">
+          Expiration
+        </div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;
+          color:{% if abonne.est_expire %}var(--red){% elif abonne.jours_restants <= 30 %}var(--amber){% else %}var(--ink){% endif %}">
+          {{ abonne.date_expiration|date:"d/m/Y" }}
+        </div>
+        {% if not abonne.est_expire %}
+        <div style="font-size:.78rem;color:var(--muted);margin-top:.2rem;">
+          {% if abonne.jours_restants is not None %}
+            {{ abonne.jours_restants }} jour{% if abonne.jours_restants != 1 %}s{% endif %} restant{% if abonne.jours_restants != 1 %}s{% endif %}
+          {% endif %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <!-- Numéro abonné -->
+      <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
+        <div style="font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:.3rem;">
+          N° Abonné
+        </div>
+        <span class="mat" style="font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;">
+          {{ abonne.numero_abonne }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Infos -->
+    <div style="display:flex;flex-direction:column;gap:1.25rem;">
+
+      <!-- Contact -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-ico" style="background:var(--accent);"><i class="bi bi-person-lines-fill"></i></div>
+          <span class="sec-lbl">Coordonnées</span>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilbl">Email</div>
+            <div class="ival"><a href="mailto:{{ abonne.email }}">{{ abonne.email }}</a></div></div>
+          <div class="iitem"><div class="ilbl">Téléphone</div>
+            <div class="ival">{{ abonne.telephone|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Tél. alternatif</div>
+            <div class="ival">{{ abonne.telephone_alt|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Ville / Pays</div>
+            <div class="ival">{{ abonne.ville|default:"—" }}{% if abonne.pays %}, {{ abonne.pays }}{% endif %}</div></div>
+          {% if abonne.adresse %}
+          <div class="iitem" style="grid-column:1/-1;border-bottom:none;">
+            <div class="ilbl">Adresse</div>
+            <div class="ival">{{ abonne.adresse }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Identité -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-ico" style="background:var(--teal);"><i class="bi bi-person-badge-fill"></i></div>
+          <span class="sec-lbl">Identité</span>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilbl">Sexe</div>
+            <div class="ival">{{ abonne.get_sexe_display }}</div></div>
+          <div class="iitem"><div class="ilbl">Date de naissance</div>
+            <div class="ival">{{ abonne.date_naissance|date:"d/m/Y"|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Lieu de naissance</div>
+            <div class="ival">{{ abonne.lieu_naissance|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Nationalité</div>
+            <div class="ival">{{ abonne.nationalite|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Pièce d'identité</div>
+            <div class="ival">{{ abonne.get_type_piece_display|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Numéro pièce</div>
+            <div class="ival">{{ abonne.numero_piece|default:"—" }}</div></div>
+        </div>
+      </div>
+
+      <!-- Affiliation -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-ico" style="background:var(--amber);"><i class="bi bi-mortarboard-fill"></i></div>
+          <span class="sec-lbl">Affiliation académique</span>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilbl">Université</div>
+            <div class="ival">{{ abonne.universite|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Faculté</div>
+            <div class="ival">{{ abonne.faculte|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Niveau d'étude</div>
+            <div class="ival">{{ abonne.get_niveau_etude_display }}</div></div>
+          <div class="iitem"><div class="ilbl">N° Étudiant</div>
+            <div class="ival">{{ abonne.numero_etudiant|default:"—" }}</div></div>
+          <div class="iitem" style="border-bottom:none;"><div class="ilbl">Profession</div>
+            <div class="ival">{{ abonne.profession|default:"—" }}</div></div>
+        </div>
+      </div>
+
+      <!-- Abonnement & Paiement -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-ico" style="background:#6b3d8f;"><i class="bi bi-credit-card-fill"></i></div>
+          <span class="sec-lbl">Abonnement &amp; Paiement</span>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilbl">Type</div>
+            <div class="ival">
+              <span class="tb tc-{{ abonne.type_abonnement.categorie }}">{{ abonne.type_abonnement.nom }}</span>
+            </div></div>
+          <div class="iitem"><div class="ilbl">Date d'inscription</div>
+            <div class="ival">{{ abonne.date_inscription|date:"d/m/Y" }}</div></div>
+          <div class="iitem"><div class="ilbl">Début</div>
+            <div class="ival">{{ abonne.date_debut|date:"d/m/Y"|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Expiration</div>
+            <div class="ival">{{ abonne.date_expiration|date:"d/m/Y"|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Montant payé</div>
+            <div class="ival">
+              {% if abonne.exonere %}
+                <span style="color:var(--teal);font-weight:500;">Exonéré(e)</span>
+              {% else %}
+                {{ abonne.montant_paye }} FC
+              {% endif %}
+            </div></div>
+          <div class="iitem"><div class="ilbl">Référence paiement</div>
+            <div class="ival">{{ abonne.reference_paiement|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Emprunts max</div>
+            <div class="ival">{{ abonne.type_abonnement.nb_emprunts_max }}</div></div>
+          <div class="iitem" style="border-bottom:none;"><div class="ilbl">Renouvellement auto</div>
+            <div class="ival">{% if abonne.renouvellement_auto %}✓ Oui{% else %}Non{% endif %}</div></div>
+        </div>
+      </div>
+
+      <!-- Compte & Méta -->
+      <div class="card">
+        <div class="sec-head">
+          <div class="sec-ico" style="background:var(--muted);"><i class="bi bi-shield-lock-fill"></i></div>
+          <span class="sec-lbl">Compte &amp; Suivi</span>
+        </div>
+        <div class="igrid">
+          <div class="iitem"><div class="ilbl">Nom d'utilisateur</div>
+            <div class="ival">{{ abonne.user.username }}</div></div>
+          <div class="iitem"><div class="ilbl">Validé par</div>
+            <div class="ival">{{ abonne.valide_par|default:"—" }}</div></div>
+          <div class="iitem"><div class="ilbl">Créé le</div>
+            <div class="ival">{{ abonne.created_at|date:"d/m/Y — H:i" }}</div></div>
+          <div class="iitem" style="border-bottom:none;"><div class="ilbl">Modifié le</div>
+            <div class="ival">{{ abonne.updated_at|date:"d/m/Y — H:i" }}</div></div>
+          {% if abonne.notes %}
+          <div class="iitem" style="grid-column:1/-1;border-bottom:none;">
+            <div class="ilbl">Notes</div>
+            <div class="ival" style="white-space:pre-line;">{{ abonne.notes }}</div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

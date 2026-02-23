@@ -1,0 +1,295 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+  :root {
+    --ink:#0d0f14; --paper:#f7f5f0; --cream:#edeae2;
+    --accent:#c8522a; --blue:#3d6b8f; --green:#2e7d52;
+    --muted:#7a7570; --border:#d8d4cc; --r:4px;
+    --err:#b94040;
+  }
+  .fw { font-family:'DM Sans',sans-serif; background:var(--paper); color:var(--ink); }
+
+  /* breadcrumb */
+  .bc { padding:2rem 2.5rem 0; display:flex; align-items:center; gap:.4rem;
+        font-size:.75rem; color:var(--muted); flex-wrap:wrap; }
+  .bc a { color:var(--muted); text-decoration:none; transition:color .14s; }
+  .bc a:hover { color:var(--accent); }
+  .bc-sep { color:var(--border); }
+  .bc-cur { color:var(--ink); font-weight:500; }
+
+  /* header */
+  .fh {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    padding:1.25rem 2.5rem 1.25rem;
+    border-bottom:2px solid var(--ink); margin-bottom:2.5rem;
+  }
+  .fh-eye { font-size:.67rem; letter-spacing:.2em; text-transform:uppercase; color:var(--muted); margin-bottom:.2rem; }
+  .fh-title {
+    font-family:'Syne',sans-serif; font-size:2rem; font-weight:800;
+    line-height:1; letter-spacing:-.02em; margin:0;
+  }
+  .fh-title em { color:var(--accent); font-style:normal; }
+
+  /* form wrap */
+  .fw-card {
+    margin:0 2.5rem 3rem;
+    background:#fff; border:1.5px solid var(--border); border-radius:var(--r);
+    overflow:hidden; max-width:900px;
+    animation:fadeUp .3s ease both;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+
+  /* section headers */
+  .sec-head {
+    display:flex; align-items:center; gap:.65rem;
+    padding:.85rem 1.5rem;
+    background:var(--cream); border-bottom:1px solid var(--border);
+  }
+  .sec-icon {
+    width:30px; height:30px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-size:.85rem; color:#fff; flex-shrink:0;
+  }
+  .sec-icon.ic-lock  { background:var(--blue); }
+  .sec-icon.ic-user  { background:var(--green); }
+  .sec-icon.ic-post  { background:var(--accent); }
+  .sec-label {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.78rem;
+    letter-spacing:.14em; text-transform:uppercase; color:var(--ink);
+  }
+
+  /* fields grid */
+  .fgrid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:1.25rem; padding:1.5rem; }
+  .fgrid-full { grid-column:1/-1; }
+
+  .field { display:flex; flex-direction:column; gap:.3rem; }
+  .field label {
+    font-size:.68rem; font-weight:500; letter-spacing:.12em;
+    text-transform:uppercase; color:var(--muted);
+  }
+  .field input, .field select {
+    font-family:'DM Sans',sans-serif; font-size:.9rem;
+    border:1.5px solid var(--border); padding:.55rem .9rem;
+    background:var(--paper); color:var(--ink); outline:none;
+    border-radius:var(--r); transition:border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field select:focus {
+    border-color:var(--ink); box-shadow:0 0 0 3px rgba(13,15,20,.07);
+  }
+  .field input.has-error, .field select.has-error { border-color:var(--err); }
+  .ferr { font-size:.75rem; color:var(--err); margin-top:.15rem; }
+  .fhelp { font-size:.73rem; color:var(--muted); margin-top:.15rem; font-style:italic; }
+
+  /* checkbox field */
+  .field-check {
+    display:flex; align-items:center; gap:.6rem;
+    padding:.55rem .9rem; background:var(--paper);
+    border:1.5px solid var(--border); border-radius:var(--r); cursor:pointer;
+    transition:border-color .15s;
+  }
+  .field-check:hover { border-color:var(--ink); }
+  .field-check input[type=checkbox] {
+    width:16px; height:16px; border:none;
+    padding:0; margin:0; background:none; cursor:pointer;
+    accent-color:var(--green);
+  }
+  .field-check-label {
+    font-size:.88rem; font-weight:500; color:var(--ink); cursor:pointer;
+    font-family:'DM Sans',sans-serif;
+  }
+
+  /* non-field errors */
+  .nfe {
+    margin:0 1.5rem 1rem;
+    border-left:3px solid var(--err);
+    padding:.65rem 1rem;
+    background:#fff5f5; font-size:.85rem; color:var(--err);
+    border-radius:0 var(--r) var(--r) 0;
+  }
+
+  /* divider */
+  .sec-divider { height:1px; background:var(--border); }
+
+  /* actions */
+  .form-actions {
+    display:flex; align-items:center; gap:.75rem;
+    padding:1.25rem 1.5rem;
+    background:var(--cream); border-top:1.5px solid var(--border);
+  }
+  .btn-save {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.78rem;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:.7rem 1.75rem; border:2px solid var(--ink);
+    background:var(--ink); color:#fff; cursor:pointer;
+    display:inline-flex; align-items:center; gap:.4rem;
+    border-radius:var(--r); transition:background .15s, border-color .15s;
+  }
+  .btn-save:hover { background:var(--accent); border-color:var(--accent); }
+  .btn-cancel {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.75rem;
+    letter-spacing:.08em; text-transform:uppercase;
+    padding:.65rem 1.25rem; border:1.5px solid var(--border);
+    background:transparent; color:var(--muted); text-decoration:none;
+    border-radius:var(--r); transition:border-color .14s, color .14s;
+    display:inline-flex; align-items:center; gap:.35rem;
+  }
+  .btn-cancel:hover { border-color:var(--ink); color:var(--ink); }
+
+  /* file input override */
+  .field input[type=file] {
+    padding:.4rem .7rem; font-size:.82rem; cursor:pointer;
+  }
+
+  @media(max-width:640px){
+    .fh,.bc,.fw-card { margin-left:1rem; margin-right:1rem; }
+    .fh { padding-left:0; padding-right:0; }
+    .fgrid { grid-template-columns:1fr; }
+  }
+</style>
+
+<div class="fw">
+
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <a href="{% url 'personnel_list' %}">Personnel</a>
+    <span class="bc-sep">›</span>
+    {% if personnel %}
+      <a href="{% url 'personnel_detail' personnel.pk %}">{{ personnel.nom }} {{ personnel.prenom }}</a>
+      <span class="bc-sep">›</span>
+    {% endif %}
+    <span class="bc-cur">{{ title }}</span>
+  </div>
+
+  <!-- Header -->
+  <div class="fh">
+    <div>
+      <div class="fh-eye">{% if personnel %}Modification{% else %}Nouveau membre{% endif %}</div>
+      <h1 class="fh-title">
+        {% if personnel %}<em>Modifier</em> le profil{% else %}Ajouter un <em>membre</em>{% endif %}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="fw-card">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="nfe">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <!-- ── Compte utilisateur ── -->
+      <div class="sec-head">
+        <div class="sec-icon ic-lock"><i class="bi bi-shield-lock-fill"></i></div>
+        <span class="sec-label">Compte utilisateur</span>
+      </div>
+      <div class="fgrid">
+        <div class="field">
+          <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+          {{ form.username }}
+          {% if form.username.errors %}<div class="ferr">{{ form.username.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+          {{ form.password }}
+          {% if form.password.help_text %}<div class="fhelp">{{ form.password.help_text }}</div>{% endif %}
+          {% if form.password.errors %}<div class="ferr">{{ form.password.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="sec-divider"></div>
+
+      <!-- ── Identité ── -->
+      <div class="sec-head">
+        <div class="sec-icon ic-user"><i class="bi bi-person-fill"></i></div>
+        <span class="sec-label">Identité</span>
+      </div>
+      <div class="fgrid">
+        <div class="field">
+          <label for="{{ form.matricule.id_for_label }}">{{ form.matricule.label }}</label>
+          {{ form.matricule }}
+          {% if form.matricule.errors %}<div class="ferr">{{ form.matricule.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+          {{ form.nom }}
+          {% if form.nom.errors %}<div class="ferr">{{ form.nom.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.prenom.id_for_label }}">{{ form.prenom.label }}</label>
+          {{ form.prenom }}
+          {% if form.prenom.errors %}<div class="ferr">{{ form.prenom.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+          {{ form.email }}
+          {% if form.email.errors %}<div class="ferr">{{ form.email.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.telephone.id_for_label }}">{{ form.telephone.label }}</label>
+          {{ form.telephone }}
+          {% if form.telephone.errors %}<div class="ferr">{{ form.telephone.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.photo.id_for_label }}">{{ form.photo.label }}</label>
+          {{ form.photo }}
+          {% if form.photo.errors %}<div class="ferr">{{ form.photo.errors }}</div>{% endif %}
+        </div>
+      </div>
+
+      <div class="sec-divider"></div>
+
+      <!-- ── Poste ── -->
+      <div class="sec-head">
+        <div class="sec-icon ic-post"><i class="bi bi-briefcase-fill"></i></div>
+        <span class="sec-label">Poste &amp; Affectation</span>
+      </div>
+      <div class="fgrid">
+        <div class="field">
+          <label for="{{ form.role.id_for_label }}">{{ form.role.label }}</label>
+          {{ form.role }}
+          {% if form.role.errors %}<div class="ferr">{{ form.role.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.universite.id_for_label }}">{{ form.universite.label }}</label>
+          {{ form.universite }}
+          {% if form.universite.errors %}<div class="ferr">{{ form.universite.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label for="{{ form.date_embauche.id_for_label }}">{{ form.date_embauche.label }}</label>
+          {{ form.date_embauche }}
+          {% if form.date_embauche.errors %}<div class="ferr">{{ form.date_embauche.errors }}</div>{% endif %}
+        </div>
+        <div class="field">
+          <label style="margin-bottom:.4rem;">Statut du compte</label>
+          <label class="field-check" for="{{ form.actif.id_for_label }}">
+            {{ form.actif }}
+            <span class="field-check-label">{{ form.actif.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn-save">
+          <i class="bi bi-check-lg"></i>{{ btn_label }}
+        </button>
+        {% if personnel %}
+          <a href="{% url 'personnel_detail' personnel.pk %}" class="btn-cancel">
+            <i class="bi bi-x-lg"></i>Annuler
+          </a>
+        {% else %}
+          <a href="{% url 'personnel_list' %}" class="btn-cancel">
+            <i class="bi bi-x-lg"></i>Annuler
+          </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

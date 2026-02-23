@@ -286,5 +286,52 @@ urlpatterns = [
     path('api/classes/<int:departement_id>/', views.get_classes_by_departement, name='get_classes'),
 
 
+# PERSONNEL
 
+  path('personnel/',views.personnel_list,   name='personnel_list'),
+    path('personnel/nouveau/',views.personnel_create, name='personnel_create'),
+    path('personnel/<int:pk>/',views.personnel_detail, name='personnel_detail'),
+    path('personnel/<int:pk>/modifier/',views.personnel_update, name='personnel_update'),
+    path('personnel/<int:pk>/supprimer/',views.personnel_delete,name='personnel_delete'),
+
+
+
+ # ── Abonnés ──────────────────────────────────────────────────
+    path('abonnees/',
+         views.abonne_list,   name='abonne_lists'),
+
+    path('abonnees/nouveau/',
+         views.abonne_create, name='abonne_create'),
+
+    path('abonnees/<int:pk>/',
+         views.abonne_detail, name='abonne_detail'),
+
+    path('abonnees/<int:pk>/modifier/',
+         views.abonne_update, name='abonne_update'),
+
+    path('abonnees/<int:pk>/supprimer/',
+         views.abonne_delete, name='abonne_delete'),
+
+    # Actions rapides
+    path('abonnees/<int:pk>/activer/',
+         views.abonne_activer,    name='abonne_activer'),
+
+    path('abonnees/<int:pk>/suspendre/',
+         views.abonne_suspendre,  name='abonne_suspendre'),
+
+    path('abonnees/<int:pk>/renouveler/',
+         views.abonne_renouveler, name='abonne_renouveler'),
+
+    # ── Types d'abonnement ────────────────────────────────────────
+    path('abonnements/types/',
+         views.type_abonnement_list,   name='type_abonnement_list'),
+
+    path('abonnements/types/nouveau/',
+         views.type_abonnement_create, name='type_abonnement_create'),
+
+    path('abonnements/types/<int:pk>/modifier/',
+         views.type_abonnement_update, name='type_abonnement_update'),
+
+    path('abonnements/types/<int:pk>/supprimer/',
+         views.type_abonnement_delete, name='type_abonnement_delete'),
 ]

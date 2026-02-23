@@ -1,0 +1,88 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}Supprimer — {{ type_abo.nom }}{% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <div class="bc">
+    <a href="{% url 'abonne_list' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    <a href="{% url 'type_abonnement_list' %}">Types d'abonnement</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">Supprimer</span>
+  </div>
+
+  <div class="ph" style="border-bottom-color:var(--red);">
+    <div>
+      <div class="ph-eye" style="color:var(--red);"><i class="bi bi-exclamation-triangle-fill me-1"></i>Zone de danger</div>
+      <h1 class="ph-title" style="color:var(--red);">Supprimer <span style="color:var(--ink);">ce type</span></h1>
+    </div>
+  </div>
+
+  <div style="padding:0 2.5rem 3rem;max-width:520px;">
+    <div class="card">
+
+      <div style="padding:1.5rem;background:var(--cream);border-bottom:1.5px solid var(--border);
+                  display:flex;align-items:center;gap:1rem;">
+        <div style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                    font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;
+                    background:#6b3d8f;flex-shrink:0;">
+          {{ type_abo.nom|first|upper }}
+        </div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">{{ type_abo.nom }}</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-top:.2rem;">
+            <span class="tb tc-{{ type_abo.categorie }}">{{ type_abo.get_categorie_display }}</span>
+            &nbsp;·&nbsp; {{ type_abo.nb_abonnes }} abonné{% if type_abo.nb_abonnes != 1 %}s{% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:1.5rem;">
+
+        {% if type_abo.nb_abonnes > 0 %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;background:#fdf0e2;
+                    border:1px solid #f5d0a0;border-left:3px solid var(--amber);
+                    padding:.85rem 1rem;border-radius:var(--r);margin-bottom:1.25rem;">
+          <i class="bi bi-exclamation-circle-fill" style="color:var(--amber);flex-shrink:0;"></i>
+          <p style="margin:0;font-size:.82rem;color:#7a4820;line-height:1.5;">
+            <strong>{{ type_abo.nb_abonnes }} abonné{% if type_abo.nb_abonnes != 1 %}s{% endif %}</strong>
+            sont rattaché{% if type_abo.nb_abonnes != 1 %}s{% endif %} à ce type.
+            La suppression est bloquée par Django (protection PROTECT) sauf si vous les réaffectez d'abord.
+          </p>
+        </div>
+        {% endif %}
+
+        <div style="display:flex;gap:.75rem;align-items:flex-start;background:#fce8e2;
+                    border:1px solid #f5c4b3;border-left:3px solid var(--red);
+                    padding:.85rem 1rem;border-radius:var(--r);margin-bottom:1.75rem;">
+          <i class="bi bi-exclamation-triangle-fill" style="color:var(--red);flex-shrink:0;"></i>
+          <p style="margin:0;font-size:.82rem;color:#7a2020;line-height:1.5;">
+            Cette action est <strong>irréversible</strong>.
+            Le type d'abonnement <strong>«&nbsp;{{ type_abo.nom }}&nbsp;»</strong> sera définitivement supprimé.
+          </p>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div style="display:flex;gap:.65rem;align-items:center;">
+            <button type="submit" style="font-family:'Syne',sans-serif;font-weight:700;font-size:.77rem;
+                    letter-spacing:.08em;text-transform:uppercase;padding:.7rem 1.5rem;
+                    border:2px solid var(--red);background:var(--red);color:#fff;cursor:pointer;
+                    display:inline-flex;align-items:center;gap:.4rem;border-radius:var(--r);">
+              <i class="bi bi-trash-fill"></i>Confirmer la suppression
+            </button>
+            <a href="{% url 'type_abonnement_list' %}" class="btn-outline">
+              <i class="bi bi-arrow-left"></i>Annuler
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,337 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}Personnel | BiblioTech{% endblock %}
+
+{% block content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap');
+
+  :root {
+    --ink:    #0d0f14;
+    --paper:  #f7f5f0;
+    --cream:  #edeae2;
+    --accent: #c8522a;
+    --blue:   #3d6b8f;
+    --green:  #2e7d52;
+    --muted:  #7a7570;
+    --border: #d8d4cc;
+    --r:      4px;
+  }
+
+  .pw { font-family: 'DM Sans', sans-serif; background: var(--paper); color: var(--ink); }
+
+  /* ── Header ── */
+  .ph {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 2.5rem 2.5rem 1.25rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 2rem;
+  }
+  .ph-eyebrow {
+    font-size: .68rem; font-weight: 500; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .25rem;
+  }
+  .ph-title {
+    font-family: 'Syne', sans-serif; font-size: 2.6rem; font-weight: 800;
+    line-height: 1; margin: 0; letter-spacing: -.03em; color: var(--ink);
+  }
+  .ph-title em { color: var(--accent); font-style: normal; }
+
+  .btn-add {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .78rem;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: .7rem 1.5rem; border: 2px solid var(--ink);
+    background: var(--ink); color: #fff; text-decoration: none;
+    display: inline-flex; align-items: center; gap: .45rem;
+    transition: background .15s, border-color .15s;
+  }
+  .btn-add:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ── Search ── */
+  .sb { padding: 0 2.5rem; margin-bottom: 1.5rem; }
+  .sb form {
+    display: flex; flex-wrap: wrap; gap: .6rem; align-items: flex-end;
+    background: #fff; border: 1.5px solid var(--border);
+    padding: 1rem 1.25rem; border-radius: var(--r);
+  }
+  .sb .f { display: flex; flex-direction: column; gap: .25rem; }
+  .sb label {
+    font-size: .65rem; font-weight: 500; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--muted);
+  }
+  .sb input, .sb select {
+    font-family: 'DM Sans', sans-serif; font-size: .87rem;
+    border: 1.5px solid var(--border); padding: .48rem .8rem;
+    outline: none; background: var(--paper); color: var(--ink);
+    border-radius: var(--r); transition: border-color .15s; min-width: 0;
+  }
+  .sb input:focus, .sb select:focus { border-color: var(--ink); }
+  .f-q { flex: 1 1 200px; }
+  .f-r { flex: 0 1 170px; }
+  .f-a { flex: 0 1 130px; }
+
+  .btn-f, .btn-rst {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: .73rem;
+    letter-spacing: .08em; text-transform: uppercase;
+    padding: .5rem 1rem; border: 1.5px solid var(--ink);
+    cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: .35rem;
+    border-radius: var(--r); white-space: nowrap; align-self: flex-end;
+    transition: background .14s, color .14s;
+  }
+  .btn-f { background: var(--ink); color: #fff; }
+  .btn-f:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-rst { background: transparent; color: var(--ink); }
+  .btn-rst:hover { background: var(--cream); }
+
+  /* ── Stats ── */
+  .ss { padding: 0 2.5rem; margin-bottom: 1rem; display: flex; align-items: baseline; gap: .6rem; }
+  .ss-n {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    line-height: 1; color: var(--ink);
+  }
+  .ss-l {
+    font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  }
+
+  /* ── Table ── */
+  .tw { padding: 0 2.5rem 3rem; }
+  .pt {
+    width: 100%; border-collapse: collapse;
+    border-top: 2px solid var(--ink);
+  }
+  .pt thead th {
+    font-family: 'Syne', sans-serif; font-size: .66rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--muted);
+    padding: .8rem 1rem; border-bottom: 1px solid var(--border);
+    text-align: left; white-space: nowrap; background: var(--paper);
+  }
+  .pt thead th:last-child { text-align: right; }
+  .pt tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background .1s;
+    animation: rowIn .22s ease both;
+  }
+  .pt tbody tr:hover { background: var(--cream); }
+  .pt tbody tr:last-child { border-bottom: 2px solid var(--ink); }
+  .pt td { padding: .85rem 1rem; vertical-align: middle; font-size: .88rem; }
+
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .pt tbody tr:nth-child(1)  { animation-delay: 0ms; }
+  .pt tbody tr:nth-child(2)  { animation-delay: 30ms; }
+  .pt tbody tr:nth-child(3)  { animation-delay: 60ms; }
+  .pt tbody tr:nth-child(4)  { animation-delay: 90ms; }
+  .pt tbody tr:nth-child(5)  { animation-delay: 120ms; }
+  .pt tbody tr:nth-child(6)  { animation-delay: 150ms; }
+  .pt tbody tr:nth-child(7)  { animation-delay: 180ms; }
+  .pt tbody tr:nth-child(8)  { animation-delay: 210ms; }
+  .pt tbody tr:nth-child(9)  { animation-delay: 240ms; }
+  .pt tbody tr:nth-child(10) { animation-delay: 270ms; }
+
+  /* Avatar */
+  .av { width:40px; height:40px; border-radius:50%; object-fit:cover; border:2px solid var(--border); }
+  .av-i {
+    width:40px; height:40px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.82rem; color:#fff;
+  }
+
+  /* Matricule */
+  .mat {
+    font-size:.73rem; font-weight:500; letter-spacing:.04em;
+    background:var(--cream); border:1px solid var(--border);
+    padding:.18rem .55rem; border-radius:2px;
+  }
+
+  /* Nom */
+  .nl {
+    font-family:'Syne',sans-serif; font-weight:600; font-size:.9rem;
+    color:var(--ink); text-decoration:none; transition:color .14s;
+  }
+  .nl:hover { color:var(--accent); }
+
+  /* Role */
+  .rb {
+    font-size:.68rem; font-weight:500; letter-spacing:.1em;
+    text-transform:uppercase; padding:.2rem .6rem; border-radius:2px; white-space:nowrap;
+  }
+  .r-DIRECTEUR     { background:#fce8e2; color:var(--accent);  border:1px solid #f5c4b3; }
+  .r-BIBLIOTHECAIRE{ background:#e2ecf4; color:var(--blue);    border:1px solid #b3ccdf; }
+  .r-ASSISTANT     { background:#e6f4ec; color:var(--green);   border:1px solid #aad5bc; }
+  .r-TECHNICIEN    { background:#f0ede6; color:#6b5e40;        border:1px solid #d4c9b0; }
+
+  /* Status */
+  .sd { display:inline-flex; align-items:center; gap:.38rem; font-size:.78rem; font-weight:500; }
+  .sd::before {
+    content:''; width:7px; height:7px; border-radius:50%; flex-shrink:0;
+  }
+  .sd-on  { color:var(--green); }
+  .sd-on::before  { background:var(--green); }
+  .sd-off { color:#b94040; }
+  .sd-off::before { background:#b94040; }
+
+  /* Actions */
+  .acts { display:flex; gap:.3rem; justify-content:flex-end; }
+  .ab {
+    width:32px; height:32px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--border); background:transparent;
+    color:var(--muted); border-radius:var(--r);
+    text-decoration:none; font-size:.87rem; transition:all .13s;
+  }
+  .ab.v:hover { border-color:var(--blue);   color:var(--blue);   background:#e2ecf4; }
+  .ab.e:hover { border-color:var(--ink);    color:var(--ink);    background:var(--cream); }
+  .ab.d:hover { border-color:var(--accent); color:var(--accent); background:#fce8e2; }
+
+  /* Empty */
+  .empty { text-align:center; padding:4rem 1rem; color:var(--muted); }
+  .empty i { font-size:2.2rem; opacity:.3; display:block; margin-bottom:.75rem; }
+  .empty p { font-size:.88rem; margin:0; }
+
+  /* Pagination */
+  .pgn { display:flex; justify-content:center; padding-top:1.75rem; gap:.3rem; }
+  .pb {
+    font-family:'Syne',sans-serif; font-weight:700; font-size:.77rem;
+    width:36px; height:36px;
+    display:inline-flex; align-items:center; justify-content:center;
+    border:1.5px solid var(--border); background:transparent;
+    color:var(--ink); text-decoration:none; border-radius:var(--r); transition:all .13s;
+  }
+  .pb:hover { border-color:var(--ink); background:var(--cream); }
+  .pb.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  @media(max-width:768px){
+    .ph,.sb,.ss,.tw { padding-left:1rem; padding-right:1rem; }
+    .ph-title { font-size:1.8rem; }
+    .pt thead th:nth-child(5),.pt td:nth-child(5),
+    .pt thead th:nth-child(6),.pt td:nth-child(6) { display:none; }
+  }
+</style>
+
+<div class="pw">
+
+  <!-- Header -->
+  <div class="ph">
+    <div>
+      <div class="ph-eyebrow">Gestion des ressources humaines</div>
+      <h1 class="ph-title">Person<em>nel</em></h1>
+    </div>
+    <a href="{% url 'personnel_create' %}" class="btn-add">
+      <i class="bi bi-plus-lg"></i>Ajouter un membre
+    </a>
+  </div>
+
+  <!-- Search -->
+  <div class="sb">
+    <form method="get">
+      <div class="f f-q">
+        {{ search_form.q.label_tag }}
+        {{ search_form.q }}
+      </div>
+      <div class="f f-r">
+        {{ search_form.role.label_tag }}
+        {{ search_form.role }}
+      </div>
+      <div class="f f-a">
+        {{ search_form.actif.label_tag }}
+        {{ search_form.actif }}
+      </div>
+      <button type="submit" class="btn-f"><i class="bi bi-funnel-fill"></i>Filtrer</button>
+      <a href="{% url 'personnel_list' %}" class="btn-rst"><i class="bi bi-x-lg"></i>Reset</a>
+    </form>
+  </div>
+
+  <!-- Count -->
+  <div class="ss">
+    <span class="ss-n">{{ total }}</span>
+    <span class="ss-l">membre{% if total != 1 %}s{% endif %} trouvé{% if total != 1 %}s{% endif %}</span>
+  </div>
+
+  <!-- Table -->
+  <div class="tw">
+    <table class="pt">
+      <thead>
+        <tr>
+          <th style="width:52px"></th>
+          <th>Matricule</th>
+          <th>Nom complet</th>
+          <th>Rôle</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in page_obj %}
+        <tr>
+          <td>
+            {% if p.photo %}
+              <img src="{{ p.photo.url }}" class="av" alt="{{ p.nom }}">
+            {% else %}
+              <div class="av-i" style="background:{% cycle '#c8522a' '#3d6b8f' '#2e7d52' '#7b5ea7' '#d4a843' '#4a7c8f' '#8f6b3d' '#3d8f6b' %}">
+                {{ p.nom|first|upper }}{{ p.prenom|first|upper }}
+              </div>
+            {% endif %}
+          </td>
+          <td><span class="mat">{{ p.matricule }}</span></td>
+          <td>
+            <a href="{% url 'personnel_detail' p.pk %}" class="nl">{{ p.nom }} {{ p.prenom }}</a>
+          </td>
+          <td>
+            <span class="rb r-{{ p.role }}">{{ p.get_role_display }}</span>
+          </td>
+          <td style="color:var(--muted);font-size:.83rem;">{{ p.email }}</td>
+          <td style="color:var(--muted);font-size:.83rem;white-space:nowrap;">{{ p.telephone }}</td>
+          <td>
+            {% if p.actif %}
+              <span class="sd sd-on">Actif</span>
+            {% else %}
+              <span class="sd sd-off">Inactif</span>
+            {% endif %}
+          </td>
+          <td>
+            <div class="acts">
+              <a href="{% url 'personnel_detail' p.pk %}" class="ab v" title="Voir"><i class="bi bi-eye"></i></a>
+              <a href="{% url 'personnel_update' p.pk %}" class="ab e" title="Modifier"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'personnel_delete' p.pk %}" class="ab d" title="Supprimer"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">
+            <div class="empty">
+              <i class="bi bi-people"></i>
+              <p>Aucun personnel trouvé.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pgn">
+      {% if page_obj.has_previous %}
+        <a class="pb" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <a class="pb {% if page_obj.number == num %}on{% endif %}" href="?page={{ num }}">{{ num }}</a>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a class="pb" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

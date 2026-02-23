@@ -1,0 +1,108 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}Types d'abonnement | BiblioTech{% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <div class="bc">
+    <a href="{% url 'abonne_lists' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">Types d'abonnement</span>
+  </div>
+
+  <div class="ph">
+    <div>
+      <div class="ph-eye">Catalogue</div>
+      <h1 class="ph-title">Types d'<em>abonnement</em></h1>
+    </div>
+    <a href="{% url 'type_abonnement_create' %}" class="btn-primary">
+      <i class="bi bi-plus-lg"></i>Nouveau type
+    </a>
+  </div>
+
+  <div class="tw">
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;">
+      {% for t in types %}
+      <div class="card" style="animation-delay:{{ forloop.counter0 }}0ms;">
+        <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);
+                    display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:.35rem;">
+              {{ t.nom }}
+            </div>
+            <span class="tb tc-{{ t.categorie }}">{{ t.get_categorie_display }}</span>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:.4rem;">
+            {% if t.actif %}
+              <span class="sb sb-ACTIF" style="font-size:.7rem;">Actif</span>
+            {% else %}
+              <span class="sb sb-SUSPENDU" style="font-size:.7rem;">Inactif</span>
+            {% endif %}
+            <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--muted);">
+              {{ t.nb_abonnes }} abonné{% if t.nb_abonnes != 1 %}s{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <!-- Détails -->
+        <div style="padding:1rem 1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:.6rem .8rem;font-size:.82rem;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem;">Durée</div>
+            <div style="font-weight:500;">{{ t.duree_jours }} jours</div>
+          </div>
+          <div>
+            <div style="font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem;">Emprunts max</div>
+            <div style="font-weight:500;">{{ t.nb_emprunts_max }} doc.</div>
+          </div>
+          <div>
+            <div style="font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem;">Durée emprunt</div>
+            <div style="font-weight:500;">{{ t.duree_emprunt_jours }} jours</div>
+          </div>
+          <div>
+            <div style="font-size:.63rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.15rem;">Tarif annuel</div>
+            <div style="font-weight:500;">
+              {% if t.gratuit %}
+                <span style="color:var(--teal);">Gratuit</span>
+              {% else %}
+                {{ t.tarif_annuel }} FC
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Accès -->
+        <div style="padding:.75rem 1.5rem;display:flex;gap:1rem;font-size:.75rem;border-bottom:1px solid var(--border);">
+          <span style="color:{% if t.acces_numerique %}var(--teal){% else %}var(--border){% endif %};">
+            <i class="bi bi-wifi{% if not t.acces_numerique %}-off{% endif %} me-1"></i>Numérique
+          </span>
+          <span style="color:{% if t.acces_salle_lecture %}var(--teal){% else %}var(--border){% endif %};">
+            <i class="bi bi-building me-1"></i>Salle
+          </span>
+          <span style="color:{% if t.reservation_possible %}var(--teal){% else %}var(--border){% endif %};">
+            <i class="bi bi-bookmark me-1"></i>Réservation
+          </span>
+        </div>
+
+        <!-- Actions -->
+        <div style="padding:.75rem 1.5rem;display:flex;justify-content:flex-end;gap:.4rem;">
+          <a href="{% url 'type_abonnement_update' t.pk %}" class="ab e" title="Modifier">
+            <i class="bi bi-pencil"></i>
+          </a>
+          <a href="{% url 'type_abonnement_delete' t.pk %}" class="ab d" title="Supprimer">
+            <i class="bi bi-trash"></i>
+          </a>
+        </div>
+      </div>
+      {% empty %}
+      <div style="grid-column:1/-1;text-align:center;padding:4rem;color:var(--muted);">
+        <i class="bi bi-bookmark-x" style="font-size:2.5rem;opacity:.3;display:block;margin-bottom:.75rem;"></i>
+        <p style="font-size:.88rem;margin:0;">Aucun type d'abonnement créé.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

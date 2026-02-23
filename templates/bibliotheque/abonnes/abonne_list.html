@@ -1,0 +1,495 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}Abonné(e)s | BiblioTech{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap');
+
+:root {
+  --ink:    #0d0f14;
+  --paper:  #f7f5f0;
+  --cream:  #edeae2;
+  --accent: #2a5fc8;
+  --teal:   #1e8a6e;
+  --amber:  #c87a2a;
+  --red:    #c8352a;
+  --muted:  #7a7570;
+  --border: #d8d4cc;
+  --r: 4px;
+}
+
+.aw {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+}
+
+/* ── Header ── */
+.ph {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 2.5rem 2.5rem 1.3rem;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 0;
+}
+.ph-eye {
+  font-size: .66rem;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: .25rem;
+}
+.ph-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.03em;
+  margin: 0;
+}
+.ph-title em { font-style: normal; color: var(--accent); }
+
+.ph-acts { display: flex; gap: .45rem; align-items: center; }
+
+/* ── Buttons ── */
+.btn-primary, .btn-outline {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: .74rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: .62rem 1.3rem;
+  border-radius: var(--r);
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all .15s;
+  cursor: pointer;
+}
+.btn-primary { background: var(--ink); border: 2px solid var(--ink); color: #fff; }
+.btn-primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-outline { background: transparent; border: 1.5px solid var(--border); color: var(--muted); }
+.btn-outline:hover { border-color: var(--ink); color: var(--ink); background: var(--cream); }
+
+/* ── Stats strip ── */
+.stats-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1.5px solid var(--border);
+}
+.stat-item {
+  padding: 1.4rem 2.5rem;
+  border-right: 1.5px solid var(--border);
+  animation: fadeIn .3s ease both;
+}
+.stat-item:last-child { border-right: none; }
+.stat-item:nth-child(1){animation-delay:0ms}
+.stat-item:nth-child(2){animation-delay:60ms}
+.stat-item:nth-child(3){animation-delay:120ms}
+.stat-item:nth-child(4){animation-delay:180ms}
+.stat-n {
+  font-family: 'Syne', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: .18rem;
+}
+.stat-l {
+  font-size: .67rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Search bar ── */
+.sb-wrap {
+  padding: 1.25rem 2.5rem;
+  background: var(--cream);
+  border-bottom: 1.5px solid var(--border);
+}
+.sb-wrap form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .55rem;
+  align-items: flex-end;
+}
+.sb-f { display: flex; flex-direction: column; gap: .22rem; }
+.sb-f > label {
+  font-size: .63rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.sb-fq { flex: 1 1 200px; }
+.sb-ft { flex: 0 1 195px; }
+.sb-fs { flex: 0 1 160px; }
+
+.fi {
+  font-family: 'DM Sans', sans-serif;
+  font-size: .87rem;
+  border: 1.5px solid var(--border);
+  padding: .5rem .82rem;
+  background: #fff;
+  color: var(--ink);
+  outline: none;
+  border-radius: var(--r);
+  transition: border-color .14s, box-shadow .14s;
+  width: 100%;
+  box-sizing: border-box;
+}
+.fi:focus { border-color: var(--ink); box-shadow: 0 0 0 3px rgba(13,15,20,.07); }
+
+.chk-wrap {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .48rem .82rem;
+  border: 1.5px solid var(--border);
+  border-radius: var(--r);
+  background: #fff;
+  cursor: pointer;
+  transition: border-color .13s;
+}
+.chk-wrap:hover { border-color: var(--ink); }
+.chk-wrap input { width: 14px; height: 14px; cursor: pointer; accent-color: var(--teal); margin: 0; }
+.chk-wrap span { font-size: .85rem; font-weight: 500; color: var(--ink); cursor: pointer; }
+
+/* ── Result count bar ── */
+.result-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: .9rem 2.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--paper);
+}
+.result-count {
+  font-size: .69rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Table ── */
+.tw { padding: 0 0 3rem; }
+
+.at {
+  width: 100%;
+  border-collapse: collapse;
+}
+.at thead th {
+  font-family: 'Syne', sans-serif;
+  font-size: .63rem;
+  font-weight: 700;
+  letter-spacing: .15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: .78rem 1.1rem;
+  border-bottom: 1.5px solid var(--border);
+  text-align: left;
+  white-space: nowrap;
+  background: var(--paper);
+}
+.at thead th:first-child { padding-left: 2.5rem; }
+.at thead th:last-child { text-align: right; padding-right: 2.5rem; }
+
+.at tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+  animation: rowIn .22s ease both;
+}
+.at tbody tr:hover { background: var(--cream); }
+.at tbody tr:last-child { border-bottom: 2px solid var(--ink); }
+
+.at td {
+  padding: .82rem 1.1rem;
+  vertical-align: middle;
+  font-size: .87rem;
+}
+.at td:first-child { padding-left: 2.5rem; }
+.at td:last-child  { padding-right: 2.5rem; }
+
+@keyframes rowIn  { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.at tbody tr:nth-child(1){animation-delay:0ms}
+.at tbody tr:nth-child(2){animation-delay:35ms}
+.at tbody tr:nth-child(3){animation-delay:70ms}
+.at tbody tr:nth-child(4){animation-delay:105ms}
+.at tbody tr:nth-child(5){animation-delay:140ms}
+.at tbody tr:nth-child(6){animation-delay:175ms}
+.at tbody tr:nth-child(7){animation-delay:210ms}
+.at tbody tr:nth-child(8){animation-delay:245ms}
+
+/* ── Avatars ── */
+.av   { width:38px;height:38px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0; }
+.av-i { width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.8rem;color:#fff;flex-shrink:0; }
+
+/* ── Matricule tag ── */
+.mat {
+  font-size:.71rem;font-weight:500;
+  background:var(--cream);border:1px solid var(--border);
+  padding:.17rem .52rem;border-radius:2px;letter-spacing:.03em;
+  white-space:nowrap;
+}
+
+/* ── Nom link ── */
+.nl {
+  font-family:'Syne',sans-serif;font-weight:600;font-size:.9rem;
+  color:var(--ink);text-decoration:none;transition:color .14s;
+}
+.nl:hover { color:var(--accent); }
+
+/* ── Type badges ── */
+.tb {
+  font-size:.65rem;font-weight:500;letter-spacing:.1em;
+  text-transform:uppercase;padding:.19rem .58rem;border-radius:2px;white-space:nowrap;display:inline-block;
+}
+.tc-ETUDIANT   { background:#e2ecf4;color:var(--accent);  border:1px solid #b3ccdf; }
+.tc-ENSEIGNANT { background:#e6f4ec;color:var(--teal);    border:1px solid #aad5bc; }
+.tc-PERSONNEL  { background:#f0ede6;color:#6b5e40;        border:1px solid #d4c9b0; }
+.tc-EXTERNE    { background:#f4e6f4;color:#6b3d8f;        border:1px solid #d4b0d4; }
+.tc-VIP        { background:#fdf0e2;color:var(--amber);   border:1px solid #f5d0a0; }
+
+/* ── Statut dots ── */
+.sdot { display:inline-flex;align-items:center;gap:.38rem;font-size:.75rem;font-weight:500; }
+.sdot::before { content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.sdot-ACTIF::before      { background:var(--teal); }  .sdot-ACTIF      { color:var(--teal);  }
+.sdot-SUSPENDU::before   { background:var(--amber);} .sdot-SUSPENDU   { color:var(--amber); }
+.sdot-EXPIRE::before     { background:var(--red);  }  .sdot-EXPIRE     { color:var(--red);   }
+.sdot-RESILIE::before    { background:var(--muted);} .sdot-RESILIE    { color:var(--muted); }
+.sdot-EN_ATTENTE::before { background:var(--accent);}  .sdot-EN_ATTENTE { color:var(--accent);}
+
+/* ── Expiry ── */
+.exp-warn { display:inline-flex;align-items:center;gap:.35rem;font-size:.78rem;color:var(--red);font-weight:500; }
+
+/* ── Action icons ── */
+.acts { display:flex;gap:.28rem;justify-content:flex-end; }
+.ab {
+  width:30px;height:30px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1.5px solid var(--border);background:transparent;
+  color:var(--muted);border-radius:var(--r);
+  text-decoration:none;font-size:.85rem;transition:all .13s;
+}
+.ab.v:hover { border-color:var(--accent);color:var(--accent);background:#e2ecf4; }
+.ab.e:hover { border-color:var(--ink);   color:var(--ink);   background:var(--cream); }
+.ab.d:hover { border-color:var(--red);   color:var(--red);   background:#fce8e2; }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align:center;padding:5rem 1rem;color:var(--muted);
+}
+.empty-state i { font-size:2.5rem;opacity:.22;display:block;margin-bottom:.85rem; }
+.empty-state p { font-size:.87rem;margin:0; }
+
+/* ── Pagination ── */
+.pgn-wrap {
+  padding: 1.5rem 2.5rem 0;
+  display: flex;
+  justify-content: center;
+  gap: .28rem;
+}
+.pb {
+  font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;
+  width:34px;height:34px;
+  display:inline-flex;align-items:center;justify-content:center;
+  border:1.5px solid var(--border);background:transparent;color:var(--ink);
+  text-decoration:none;border-radius:var(--r);transition:all .13s;
+}
+.pb:hover { border-color:var(--ink);background:var(--cream); }
+.pb.on { background:var(--ink);color:#fff;border-color:var(--ink); }
+
+/* ── Responsive ── */
+@media(max-width:900px) {
+  .stats-strip { grid-template-columns:repeat(2,1fr); }
+  .stat-item:nth-child(2){ border-right:none; }
+}
+@media(max-width:700px) {
+  .ph { padding:1.5rem 1rem 1rem; }
+  .ph-title { font-size:1.7rem; }
+  .sb-wrap, .result-bar, .pgn-wrap { padding-left:1rem; padding-right:1rem; }
+  .at thead th:first-child, .at td:first-child { padding-left:1rem; }
+  .at thead th:last-child,  .at td:last-child  { padding-right:1rem; }
+  .at thead th:nth-child(5),.at td:nth-child(5),
+  .at thead th:nth-child(6),.at td:nth-child(6) { display:none; }
+  .stats-strip { grid-template-columns:repeat(2,1fr); }
+  .stat-item { padding:1rem; }
+}
+</style>
+
+<div class="aw">
+
+  <!-- ── Header ── -->
+  <div class="ph">
+    <div>
+      <div class="ph-eye">Gestion des abonnements</div>
+      <h1 class="ph-title">Abonné<em>(e)s</em></h1>
+    </div>
+    <div class="ph-acts">
+      <a href="{% url 'type_abonnement_list' %}" class="btn-outline">
+        <i class="bi bi-card-list"></i>Types
+      </a>
+      <a href="{% url 'abonne_create' %}" class="btn-primary">
+        <i class="bi bi-plus-lg"></i>Nouvel abonné
+      </a>
+    </div>
+  </div>
+
+  <!-- ── Stats strip ── -->
+  <div class="stats-strip">
+    <div class="stat-item">
+      <div class="stat-n">{{ stats.total }}</div>
+      <div class="stat-l">Total abonnés</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" style="color:var(--teal);">{{ stats.actifs }}</div>
+      <div class="stat-l">Actifs</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" style="color:var(--red);">{{ stats.expires }}</div>
+      <div class="stat-l">Expirés</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-n" style="color:var(--accent);">{{ stats.en_attente }}</div>
+      <div class="stat-l">En attente</div>
+    </div>
+  </div>
+
+  <!-- ── Search ── -->
+  <div class="sb-wrap">
+    <form method="get">
+      <div class="sb-f sb-fq">
+        <label>{{ search_form.q.label }}</label>
+        {{ search_form.q }}
+      </div>
+      <div class="sb-f sb-ft">
+        <label>{{ search_form.type_abonnement.label }}</label>
+        {{ search_form.type_abonnement }}
+      </div>
+      <div class="sb-f sb-fs">
+        <label>{{ search_form.statut.label }}</label>
+        {{ search_form.statut }}
+      </div>
+      <div class="sb-f" style="flex:0 0 auto; align-self:flex-end;">
+        <label>Expire bientôt</label>
+        <label class="chk-wrap">
+          {{ search_form.expire_bientot }}
+          <span>30 jours</span>
+        </label>
+      </div>
+      <button type="submit" class="btn-primary" style="align-self:flex-end;">
+        <i class="bi bi-funnel-fill"></i>Filtrer
+      </button>
+      <a href="{% url 'abonne_lists' %}" class="btn-outline" style="align-self:flex-end;" title="Réinitialiser">
+        <i class="bi bi-x-lg"></i>
+      </a>
+    </form>
+  </div>
+
+  <!-- ── Result count ── -->
+  <div class="result-bar">
+    <span class="result-count">
+      {{ total }} résultat{% if total != 1 %}s{% endif %}
+    </span>
+  </div>
+
+  <!-- ── Table ── -->
+  <div class="tw">
+    <table class="at">
+      <thead>
+        <tr>
+          <th style="width:48px;"></th>
+          <th>N° Abonné</th>
+          <th>Nom complet</th>
+          <th>Type d'abonnement</th>
+          <th>Email</th>
+          <th>Expiration</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for a in page_obj %}
+        <tr>
+          <td>
+            {% if a.photo %}
+              <img src="{{ a.photo.url }}" class="av" alt="{{ a.nom }}">
+            {% else %}
+              <div class="av-i" style="background:{% cycle '#2a5fc8' '#1e8a6e' '#c87a2a' '#8f3d6b' '#6b5e40' '#3d7a8f' %};">
+                {{ a.nom|first|upper }}{{ a.prenom|first|upper }}
+              </div>
+            {% endif %}
+          </td>
+          <td><span class="mat">{{ a.numero_abonne }}</span></td>
+          <td>
+            <a href="{% url 'abonne_detail' a.pk %}" class="nl">{{ a.nom }} {{ a.prenom }}</a>
+          </td>
+          <td>
+            <span class="tb tc-{{ a.type_abonnement.categorie }}">{{ a.type_abonnement.nom }}</span>
+          </td>
+          <td style="color:var(--muted);font-size:.82rem;">{{ a.email }}</td>
+          <td>
+            {% if a.date_expiration %}
+              {% if a.est_expire %}
+                <span class="exp-warn"><i class="bi bi-exclamation-triangle-fill"></i>{{ a.date_expiration|date:"d/m/Y" }}</span>
+              {% elif a.jours_restants <= 30 %}
+                <span style="color:var(--amber);font-size:.82rem;font-weight:500;">
+                  <i class="bi bi-clock me-1"></i>{{ a.date_expiration|date:"d/m/Y" }}
+                </span>
+              {% else %}
+                <span style="font-size:.82rem;color:var(--muted);">{{ a.date_expiration|date:"d/m/Y" }}</span>
+              {% endif %}
+            {% else %}
+              <span style="color:var(--border);font-size:.8rem;">—</span>
+            {% endif %}
+          </td>
+          <td><span class="sdot sdot-{{ a.statut }}">{{ a.get_statut_display }}</span></td>
+          <td>
+            <div class="acts">
+              <a href="{% url 'abonne_detail' a.pk %}" class="ab v" title="Voir"><i class="bi bi-eye"></i></a>
+              <a href="{% url 'abonne_update' a.pk %}" class="ab e" title="Modifier"><i class="bi bi-pencil"></i></a>
+              <a href="{% url 'abonne_delete' a.pk %}" class="ab d" title="Supprimer"><i class="bi bi-trash"></i></a>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="8">
+            <div class="empty-state">
+              <i class="bi bi-people"></i>
+              <p>Aucun abonné trouvé.</p>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pgn-wrap">
+      {% if page_obj.has_previous %}
+        <a class="pb" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        <a class="pb {% if page_obj.number == num %}on{% endif %}" href="?page={{ num }}">{{ num }}</a>
+      {% endfor %}
+      {% if page_obj.has_next %}
+        <a class="pb" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

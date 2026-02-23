@@ -1,0 +1,140 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <div class="bc">
+    <a href="{% url 'abonne_lists' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    <a href="{% url 'type_abonnement_list' %}">Types d'abonnement</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">{{ title }}</span>
+  </div>
+
+  <div class="ph">
+    <div>
+      <div class="ph-eye">{% if type_abo %}Modification{% else %}Création{% endif %}</div>
+      <h1 class="ph-title">
+        {% if type_abo %}Modifier <em>{{ type_abo.nom }}</em>{% else %}Nouveau <em>type</em>{% endif %}
+      </h1>
+    </div>
+  </div>
+
+  <div style="padding:0 2.5rem 3rem;max-width:720px;">
+    <div class="card">
+      <form method="post" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div style="margin:1rem 1.5rem 0;border-left:3px solid var(--red);padding:.65rem 1rem;
+                      background:#fff5f5;font-size:.85rem;color:var(--red);">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <!-- Infos générales -->
+        <div class="sec-head">
+          <div class="sec-ico" style="background:#6b3d8f;"><i class="bi bi-bookmark-star-fill"></i></div>
+          <span class="sec-lbl">Informations générales</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.nom.label }}</label>
+            {{ form.nom }}
+            {% if form.nom.errors %}<div class="ferr">{{ form.nom.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.categorie.label }}</label>
+            {{ form.categorie }}
+          </div>
+          <div class="field fgrid-full">
+            <label>{{ form.description.label }}</label>
+            {{ form.description }}
+          </div>
+        </div>
+
+        <!-- Droits & limites -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--accent);"><i class="bi bi-sliders"></i></div>
+          <span class="sec-lbl">Droits &amp; Limites</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.duree_jours.label }}</label>
+            {{ form.duree_jours }}
+          </div>
+          <div class="field">
+            <label>{{ form.nb_emprunts_max.label }}</label>
+            {{ form.nb_emprunts_max }}
+          </div>
+          <div class="field">
+            <label>{{ form.duree_emprunt_jours.label }}</label>
+            {{ form.duree_emprunt_jours }}
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Accès numérique</label>
+            <label class="field-check-wrap">
+              {{ form.acces_numerique }}
+              <span class="field-check-label">Ressources numériques</span>
+            </label>
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Salle de lecture</label>
+            <label class="field-check-wrap">
+              {{ form.acces_salle_lecture }}
+              <span class="field-check-label">Accès autorisé</span>
+            </label>
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Réservation</label>
+            <label class="field-check-wrap">
+              {{ form.reservation_possible }}
+              <span class="field-check-label">Réservation possible</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Tarification -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--teal);"><i class="bi bi-cash-stack"></i></div>
+          <span class="sec-lbl">Tarification</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.tarif_annuel.label }}</label>
+            {{ form.tarif_annuel }}
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Gratuité</label>
+            <label class="field-check-wrap">
+              {{ form.gratuit }}
+              <span class="field-check-label">Abonnement gratuit</span>
+            </label>
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Statut</label>
+            <label class="field-check-wrap">
+              {{ form.actif }}
+              <span class="field-check-label">Type actif</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-acts">
+          <button type="submit" class="btn-primary">
+            <i class="bi bi-check-lg"></i>{{ btn_label }}
+          </button>
+          <a href="{% url 'type_abonnement_list' %}" class="btn-outline">
+            <i class="bi bi-x-lg"></i>Annuler
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

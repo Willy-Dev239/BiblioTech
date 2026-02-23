@@ -1,0 +1,288 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <!-- Breadcrumb -->
+  <div class="bc">
+    <a href="{% url 'abonne_lists' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    {% if abonne %}
+      <a href="{% url 'abonne_detail' abonne.pk %}">{{ abonne.nom }} {{ abonne.prenom }}</a>
+      <span class="bc-sep">›</span>
+    {% endif %}
+    <span class="bc-cur">{{ title }}</span>
+  </div>
+
+  <!-- Header -->
+  <div class="ph">
+    <div>
+      <div class="ph-eye">{% if abonne %}Modification{% else %}Nouvelle inscription{% endif %}</div>
+      <h1 class="ph-title">
+        {% if abonne %}Modifier <em>le profil</em>{% else %}Inscrire un <em>abonné</em>{% endif %}
+      </h1>
+    </div>
+  </div>
+
+  <!-- Form -->
+  <div style="padding:0 2.5rem 3rem;max-width:960px;">
+    <div class="card">
+      <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+          <div style="margin:1rem 1.5rem 0;border-left:3px solid var(--red);padding:.65rem 1rem;
+                      background:#fff5f5;font-size:.85rem;color:var(--red);border-radius:0 var(--r) var(--r) 0;">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        <!-- ── Compte utilisateur ── -->
+        <div class="sec-head">
+          <div class="sec-ico" style="background:var(--muted);"><i class="bi bi-shield-lock-fill"></i></div>
+          <span class="sec-lbl">Compte utilisateur</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.username.label }}</label>
+            {{ form.username }}
+            {% if form.username.errors %}<div class="ferr">{{ form.username.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.password.label }}</label>
+            {{ form.password }}
+            {% if form.password.help_text %}<div class="fhelp">{{ form.password.help_text }}</div>{% endif %}
+            {% if form.password.errors %}<div class="ferr">{{ form.password.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <!-- ── Identité ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--teal);"><i class="bi bi-person-fill"></i></div>
+          <span class="sec-lbl">Identité</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.numero_abonne.label }}</label>
+            {{ form.numero_abonne }}
+            {% if form.numero_abonne.errors %}<div class="ferr">{{ form.numero_abonne.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.nom.label }}</label>
+            {{ form.nom }}
+            {% if form.nom.errors %}<div class="ferr">{{ form.nom.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.prenom.label }}</label>
+            {{ form.prenom }}
+            {% if form.prenom.errors %}<div class="ferr">{{ form.prenom.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.sexe.label }}</label>
+            {{ form.sexe }}
+          </div>
+          <div class="field">
+            <label>{{ form.date_naissance.label }}</label>
+            {{ form.date_naissance }}
+          </div>
+          <div class="field">
+            <label>{{ form.lieu_naissance.label }}</label>
+            {{ form.lieu_naissance }}
+          </div>
+          <div class="field">
+            <label>{{ form.nationalite.label }}</label>
+            {{ form.nationalite }}
+          </div>
+          <div class="field">
+            <label>{{ form.photo.label }}</label>
+            {{ form.photo }}
+            {% if form.photo.errors %}<div class="ferr">{{ form.photo.errors }}</div>{% endif %}
+          </div>
+        </div>
+
+        <!-- ── Contact ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--accent);"><i class="bi bi-envelope-fill"></i></div>
+          <span class="sec-lbl">Coordonnées</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.email.label }}</label>
+            {{ form.email }}
+            {% if form.email.errors %}<div class="ferr">{{ form.email.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.telephone.label }}</label>
+            {{ form.telephone }}
+            {% if form.telephone.errors %}<div class="ferr">{{ form.telephone.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.telephone_alt.label }}</label>
+            {{ form.telephone_alt }}
+          </div>
+          <div class="field">
+            <label>{{ form.ville.label }}</label>
+            {{ form.ville }}
+          </div>
+          <div class="field">
+            <label>{{ form.pays.label }}</label>
+            {{ form.pays }}
+          </div>
+          <div class="field fgrid-full">
+            <label>{{ form.adresse.label }}</label>
+            {{ form.adresse }}
+          </div>
+        </div>
+
+        <!-- ── Affiliation ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--amber);"><i class="bi bi-mortarboard-fill"></i></div>
+          <span class="sec-lbl">Affiliation académique</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.universite.label }}</label>
+            {{ form.universite }}
+          </div>
+          <div class="field">
+            <label>{{ form.faculte.label }}</label>
+            {{ form.faculte }}
+          </div>
+          <div class="field">
+            <label>{{ form.niveau_etude.label }}</label>
+            {{ form.niveau_etude }}
+          </div>
+          <div class="field">
+            <label>{{ form.numero_etudiant.label }}</label>
+            {{ form.numero_etudiant }}
+          </div>
+          <div class="field">
+            <label>{{ form.profession.label }}</label>
+            {{ form.profession }}
+          </div>
+        </div>
+
+        <!-- ── Pièce d'identité ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:#6b5e40;"><i class="bi bi-card-text"></i></div>
+          <span class="sec-lbl">Pièce d'identité</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.type_piece.label }}</label>
+            {{ form.type_piece }}
+          </div>
+          <div class="field">
+            <label>{{ form.numero_piece.label }}</label>
+            {{ form.numero_piece }}
+          </div>
+          <div class="field">
+            <label>{{ form.piece_jointe.label }}</label>
+            {{ form.piece_jointe }}
+          </div>
+        </div>
+
+        <!-- ── Abonnement ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:#6b3d8f;"><i class="bi bi-bookmark-star-fill"></i></div>
+          <span class="sec-lbl">Abonnement</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.type_abonnement.label }}</label>
+            {{ form.type_abonnement }}
+            {% if form.type_abonnement.errors %}<div class="ferr">{{ form.type_abonnement.errors }}</div>{% endif %}
+          </div>
+          <div class="field">
+            <label>{{ form.statut.label }}</label>
+            {{ form.statut }}
+          </div>
+          <div class="field">
+            <label>{{ form.date_inscription.label }}</label>
+            {{ form.date_inscription }}
+          </div>
+          <div class="field">
+            <label>{{ form.date_debut.label }}</label>
+            {{ form.date_debut }}
+          </div>
+          <div class="field">
+            <label>{{ form.date_expiration.label }}</label>
+            {{ form.date_expiration }}
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">{{ form.renouvellement_auto.label }}</label>
+            <label class="field-check-wrap">
+              {{ form.renouvellement_auto }}
+              <span class="field-check-label">Activer le renouvellement auto</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- ── Paiement ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--teal);"><i class="bi bi-credit-card-fill"></i></div>
+          <span class="sec-lbl">Paiement</span>
+        </div>
+        <div class="fgrid">
+          <div class="field">
+            <label>{{ form.montant_paye.label }}</label>
+            {{ form.montant_paye }}
+          </div>
+          <div class="field">
+            <label>{{ form.date_paiement.label }}</label>
+            {{ form.date_paiement }}
+          </div>
+          <div class="field">
+            <label>{{ form.reference_paiement.label }}</label>
+            {{ form.reference_paiement }}
+          </div>
+          <div class="field">
+            <label style="margin-bottom:.4rem;">Exonération</label>
+            <label class="field-check-wrap">
+              {{ form.exonere }}
+              <span class="field-check-label">Exonéré(e) de cotisation</span>
+            </label>
+          </div>
+          <div class="field">
+            <label>{{ form.motif_exoneration.label }}</label>
+            {{ form.motif_exoneration }}
+          </div>
+        </div>
+
+        <!-- ── Notes ── -->
+        <div class="sec-head" style="border-top:1.5px solid var(--border);">
+          <div class="sec-ico" style="background:var(--muted);"><i class="bi bi-journal-text"></i></div>
+          <span class="sec-lbl">Notes internes</span>
+        </div>
+        <div class="fgrid">
+          <div class="field fgrid-full">
+            <label>{{ form.notes.label }}</label>
+            {{ form.notes }}
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="form-acts">
+          <button type="submit" class="btn-primary">
+            <i class="bi bi-check-lg"></i>{{ btn_label }}
+          </button>
+          {% if abonne %}
+            <a href="{% url 'abonne_detail' abonne.pk %}" class="btn-outline">
+              <i class="bi bi-x-lg"></i>Annuler
+            </a>
+          {% else %}
+            <a href="{% url 'abonne_lists' %}" class="btn-outline">
+              <i class="bi bi-x-lg"></i>Annuler
+            </a>
+          {% endif %}
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

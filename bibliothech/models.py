@@ -9,6 +9,12 @@ import requests
 from django.conf import settings
 
 
+from django.core.validators import RegexValidator
+
+
+
+
+
 from django.core.validators import MinValueValidator, MaxValueValidator
 
 class ParametreBibliotheque(models.Model):
@@ -1182,3 +1188,300 @@ class Etudiant1(models.Model):
     def peut_emprunter(self):
         """Vérifie si l'étudiant peut emprunter des livres"""
         return self.statut == 'actif'
+    
+    
+    
+    
+    
+    
+    
+######ABONNEMENT##############
+
+class TypeAbonnement(models.Model):
+    """
+    Catalogue des types d'abonnements proposés par la bibliothèque.
+    Ex : Etudiant, Enseignant, Chercheur, Grand public, VIP...
+    """
+    CATEGORIES = [
+        ('ETUDIANT',    'Étudiant'),
+        ('ENSEIGNANT',  'Enseignant / Chercheur'),
+        ('PERSONNEL',   'Personnel administratif'),
+        ('EXTERNE',     'Membre externe'),
+        ('VIP',         'VIP / Partenaire'),
+    ]
+
+    nom           = models.CharField(max_length=100, unique=True, verbose_name="Nom du type")
+    categorie     = models.CharField(max_length=20, choices=CATEGORIES, verbose_name="Catégorie")
+    description   = models.TextField(blank=True, verbose_name="Description")
+
+    # Droits et limites
+    duree_jours          = models.PositiveIntegerField(
+        default=365,
+        verbose_name="Durée (jours)",
+        help_text="Durée de validité de l'abonnement en jours"
+    )
+    nb_emprunts_max      = models.PositiveIntegerField(
+        default=3,
+        verbose_name="Nombre max d'emprunts simultanés"
+    )
+    duree_emprunt_jours  = models.PositiveIntegerField(
+        default=14,
+        verbose_name="Durée max par emprunt (jours)"
+    )
+    acces_numerique      = models.BooleanField(default=False, verbose_name="Accès aux ressources numériques")
+    acces_salle_lecture  = models.BooleanField(default=True,  verbose_name="Accès salle de lecture")
+    reservation_possible = models.BooleanField(default=True,  verbose_name="Réservation de documents autorisée")
+
+    # Tarification
+    tarif_annuel = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        validators=[MinValueValidator(0)],
+        verbose_name="Tarif annuel (FC ou devise locale)"
+    )
+    gratuit = models.BooleanField(default=False, verbose_name="Abonnement gratuit")
+
+    actif      = models.BooleanField(default=True, verbose_name="Type actif")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Type d'abonnement"
+        verbose_name_plural = "Types d'abonnement"
+        ordering = ['categorie', 'nom']
+
+    def __str__(self):
+        return f"{self.nom} ({self.get_categorie_display()})"
+
+
+class Abonne(models.Model):
+    """
+    Abonné(e) de la bibliothèque universitaire.
+    Un abonné possède un compte utilisateur Django et un type d'abonnement.
+    """
+
+    SEXE_CHOICES = [
+        ('M', 'Masculin'),
+        ('F', 'Féminin'),
+        ('A', 'Autre / Non précisé'),
+    ]
+
+    STATUT_CHOICES = [
+        ('ACTIF',    'Actif'),
+        ('SUSPENDU', 'Suspendu'),
+        ('EXPIRE',   'Expiré'),
+        ('RESILIE',  'Résilié'),
+        ('EN_ATTENTE', 'En attente de validation'),
+    ]
+
+    NIVEAU_ETUDE_CHOICES = [
+        ('L1', 'Licence 1'),
+        ('L2', 'Licence 2'),
+        ('L3', 'Licence 3'),
+        ('M1', 'Master 1'),
+        ('M2', 'Master 2'),
+        ('DOC', 'Doctorat'),
+        ('POST_DOC', 'Post-doctorat'),
+        ('AUTRE', 'Autre'),
+        ('NA', 'Non applicable'),
+    ]
+
+    # ── Compte utilisateur ──────────────────────────────────────────────────
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE,
+        related_name='abonne',
+        verbose_name="Compte utilisateur"
+    )
+
+    # ── Identité ─────────────────────────────────────────────────────────────
+    numero_abonne = models.CharField(
+        max_length=20, unique=True,
+        verbose_name="Numéro d'abonné",
+        help_text="Identifiant unique généré automatiquement ou saisi manuellement"
+    )
+    nom           = models.CharField(max_length=100, verbose_name="Nom")
+    prenom        = models.CharField(max_length=100, verbose_name="Prénom")
+    sexe          = models.CharField(max_length=1, choices=SEXE_CHOICES, default='A', verbose_name="Sexe")
+    date_naissance = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
+    lieu_naissance = models.CharField(max_length=150, blank=True, verbose_name="Lieu de naissance")
+    nationalite    = models.CharField(max_length=80, blank=True, verbose_name="Nationalité")
+    photo          = models.ImageField(
+        upload_to='abonnes/photos/', blank=True, null=True,
+        verbose_name="Photo de profil"
+    )
+
+    # ── Contact ───────────────────────────────────────────────────────────────
+    email     = models.EmailField(unique=True, verbose_name="Adresse email")
+    telephone = models.CharField(
+        max_length=20, blank=True,
+        validators=[RegexValidator(r'^\+?[\d\s\-]{7,20}$', 'Numéro de téléphone invalide.')],
+        verbose_name="Téléphone"
+    )
+    telephone_alt = models.CharField(max_length=20, blank=True, verbose_name="Téléphone alternatif")
+    adresse       = models.TextField(blank=True, verbose_name="Adresse postale")
+    ville         = models.CharField(max_length=100, blank=True, verbose_name="Ville")
+    pays          = models.CharField(max_length=80, blank=True, default='RDC', verbose_name="Pays")
+
+    # ── Affiliation académique ────────────────────────────────────────────────
+    universite    = models.ForeignKey(
+        Universite, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='abonnes',
+        verbose_name="Université / Institution"
+    )
+    faculte       = models.CharField(max_length=150, blank=True, verbose_name="Faculté / Département")
+    niveau_etude  = models.CharField(
+        max_length=10, choices=NIVEAU_ETUDE_CHOICES,
+        default='NA', verbose_name="Niveau d'étude"
+    )
+    numero_etudiant = models.CharField(
+        max_length=50, blank=True,
+        verbose_name="Numéro étudiant / matricule académique"
+    )
+    profession = models.CharField(max_length=150, blank=True, verbose_name="Profession / Fonction")
+
+    # ── Pièce d'identité ─────────────────────────────────────────────────────
+    TYPE_PIECE_CHOICES = [
+        ('CNI',      "Carte nationale d'identité"),
+        ('PASSEPORT','Passeport'),
+        ('PERMIS',   'Permis de conduire'),
+        ('CARTE_ETU','Carte étudiante'),
+        ('AUTRE',    'Autre'),
+    ]
+    type_piece     = models.CharField(
+        max_length=15, choices=TYPE_PIECE_CHOICES,
+        blank=True, verbose_name="Type de pièce d'identité"
+    )
+    numero_piece   = models.CharField(max_length=80, blank=True, verbose_name="Numéro de pièce")
+    piece_jointe   = models.FileField(
+        upload_to='abonnes/pieces/', blank=True, null=True,
+        verbose_name="Copie de la pièce (scan/photo)"
+    )
+
+    # ── Abonnement ────────────────────────────────────────────────────────────
+    type_abonnement = models.ForeignKey(
+        TypeAbonnement, on_delete=models.PROTECT,
+        related_name='abonnes',
+        verbose_name="Type d'abonnement"
+    )
+    statut           = models.CharField(
+        max_length=15, choices=STATUT_CHOICES,
+        default='EN_ATTENTE', verbose_name="Statut de l'abonnement"
+    )
+    date_inscription = models.DateField(
+        default=timezone.now,
+        verbose_name="Date d'inscription"
+    )
+    date_debut       = models.DateField(
+        null=True, blank=True,
+        verbose_name="Date de début de l'abonnement"
+    )
+    date_expiration  = models.DateField(
+        null=True, blank=True,
+        verbose_name="Date d'expiration"
+    )
+    renouvellement_auto = models.BooleanField(
+        default=False,
+        verbose_name="Renouvellement automatique"
+    )
+
+    # ── Paiement / cotisation ─────────────────────────────────────────────────
+    montant_paye     = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        validators=[MinValueValidator(0)],
+        verbose_name="Montant payé"
+    )
+    date_paiement    = models.DateField(null=True, blank=True, verbose_name="Date du dernier paiement")
+    reference_paiement = models.CharField(
+        max_length=100, blank=True,
+        verbose_name="Référence de paiement"
+    )
+    exonere          = models.BooleanField(
+        default=False,
+        verbose_name="Exonéré(e) de cotisation",
+        help_text="Cocher si l'abonné bénéficie d'une exemption de paiement"
+    )
+    motif_exoneration = models.CharField(
+        max_length=255, blank=True,
+        verbose_name="Motif de l'exonération"
+    )
+
+    # ── Notes & suivi ─────────────────────────────────────────────────────────
+    notes            = models.TextField(blank=True, verbose_name="Notes internes")
+    valide_par       = models.ForeignKey(
+        User, on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='abonnes_valides',
+        verbose_name="Validé par (personnel)"
+    )
+    date_validation  = models.DateTimeField(null=True, blank=True, verbose_name="Date de validation")
+
+    # ── Métadonnées ───────────────────────────────────────────────────────────
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Abonné(e)"
+        verbose_name_plural = "Abonné(e)s"
+        ordering = ['nom', 'prenom']
+        indexes = [
+            models.Index(fields=['numero_abonne']),
+            models.Index(fields=['statut']),
+            models.Index(fields=['date_expiration']),
+        ]
+
+    def __str__(self):
+        return f"{self.numero_abonne} — {self.nom} {self.prenom}"
+
+    # ── Propriétés utiles ─────────────────────────────────────────────────────
+    @property
+    def nom_complet(self):
+        return f"{self.nom} {self.prenom}"
+
+    @property
+    def est_actif(self):
+        """Retourne True si l'abonnement est actif et non expiré."""
+        if self.statut != 'ACTIF':
+            return False
+        if self.date_expiration and self.date_expiration < timezone.now().date():
+            return False
+        return True
+
+    @property
+    def jours_restants(self):
+        """Nombre de jours avant expiration. Retourne None si pas de date."""
+        if not self.date_expiration:
+            return None
+        delta = self.date_expiration - timezone.now().date()
+        return delta.days
+
+    @property
+    def est_expire(self):
+        if self.date_expiration:
+            return self.date_expiration < timezone.now().date()
+        return False
+
+    def activer(self, validateur=None):
+        """Active l'abonnement et calcule la date d'expiration."""
+        today = timezone.now().date()
+        self.statut = 'ACTIF'
+        self.date_debut = today
+        self.date_expiration = today + timedelta(days=self.type_abonnement.duree_jours)
+        self.date_validation = timezone.now()
+        if validateur:
+            self.valide_par = validateur
+        self.save()
+
+    def suspendre(self):
+        self.statut = 'SUSPENDU'
+        self.save()
+
+    def resilier(self):
+        self.statut = 'RESILIE'
+        self.save()
+
+    def renouveler(self):
+        """Renouvelle l'abonnement à partir d'aujourd'hui ou de la date d'expiration actuelle."""
+        base = max(self.date_expiration or timezone.now().date(), timezone.now().date())
+        self.date_expiration = base + timedelta(days=self.type_abonnement.duree_jours)
+        self.statut = 'ACTIF'
+        self.save()

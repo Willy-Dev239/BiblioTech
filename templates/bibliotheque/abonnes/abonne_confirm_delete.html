@@ -1,0 +1,88 @@
+{% extends "bibliotheque/base.html" %}
+{% block title %}Supprimer | {{ abonne.nom }} {{ abonne.prenom }}{% endblock %}
+
+{% block content %}
+
+
+<div class="aw">
+
+  <div class="bc">
+    <a href="{% url 'abonne_list' %}">Abonné(e)s</a>
+    <span class="bc-sep">›</span>
+    <a href="{% url 'abonne_detail' abonne.pk %}">{{ abonne.nom }} {{ abonne.prenom }}</a>
+    <span class="bc-sep">›</span>
+    <span class="bc-cur">Supprimer</span>
+  </div>
+
+  <div class="ph" style="border-bottom-color:var(--red);">
+    <div>
+      <div class="ph-eye" style="color:var(--red);"><i class="bi bi-exclamation-triangle-fill me-1"></i>Zone de danger</div>
+      <h1 class="ph-title" style="color:var(--red);">Supprimer <span style="color:var(--ink);">ce profil</span></h1>
+    </div>
+  </div>
+
+  <div style="padding:0 2.5rem 3rem;max-width:560px;">
+    <div class="card">
+
+      <!-- Qui -->
+      <div style="display:flex;align-items:center;gap:1rem;padding:1.5rem;background:var(--cream);border-bottom:1.5px solid var(--border);">
+        {% if abonne.photo %}
+          <img src="{{ abonne.photo.url }}" style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--border);flex-shrink:0;" alt="">
+        {% else %}
+          <div style="width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+                      font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;
+                      background:var(--red);flex-shrink:0;">
+            {{ abonne.nom|first|upper }}{{ abonne.prenom|first|upper }}
+          </div>
+        {% endif %}
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:.25rem;">
+            {{ abonne.nom }} {{ abonne.prenom }}
+          </div>
+          <div style="font-size:.8rem;color:var(--muted);line-height:1.5;">
+            <span class="tb tc-{{ abonne.type_abonnement.categorie }}">{{ abonne.type_abonnement.nom }}</span>
+            &nbsp;·&nbsp; {{ abonne.numero_abonne }}<br>
+            {{ abonne.email }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Corps -->
+      <div style="padding:1.5rem;">
+        <p style="font-size:.9rem;color:var(--ink);line-height:1.6;margin-bottom:1.25rem;">
+          Vous êtes sur le point de supprimer définitivement cet(te) abonné(e).<br>Confirmez-vous cette action ?
+        </p>
+
+        <!-- Alerte -->
+        <div style="display:flex;gap:.75rem;align-items:flex-start;background:#fce8e2;
+                    border:1px solid #f5c4b3;border-left:3px solid var(--red);
+                    padding:.85rem 1rem;border-radius:var(--r);margin-bottom:1.75rem;">
+          <i class="bi bi-exclamation-triangle-fill" style="color:var(--red);flex-shrink:0;margin-top:.05rem;"></i>
+          <p style="margin:0;font-size:.82rem;color:#7a2020;line-height:1.5;">
+            Cette action est <strong>irréversible</strong>.
+            Le compte utilisateur <strong>{{ abonne.user.username }}</strong> ainsi que toutes les données
+            liées à cet abonnement seront définitivement supprimés.
+          </p>
+        </div>
+
+        <form method="post">
+          {% csrf_token %}
+          <div style="display:flex;gap:.65rem;align-items:center;">
+            <button type="submit" style="font-family:'Syne',sans-serif;font-weight:700;font-size:.77rem;
+                    letter-spacing:.08em;text-transform:uppercase;padding:.7rem 1.5rem;
+                    border:2px solid var(--red);background:var(--red);color:#fff;cursor:pointer;
+                    display:inline-flex;align-items:center;gap:.4rem;border-radius:var(--r);transition:background .14s;">
+              <i class="bi bi-trash-fill"></i>Oui, supprimer définitivement
+            </button>
+            <a href="{% url 'abonne_detail' abonne.pk %}" class="btn-outline">
+              <i class="bi bi-arrow-left"></i>Annuler
+            </a>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
